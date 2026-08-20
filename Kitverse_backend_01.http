@@ -1,0 +1,6 @@
+@Kitverse_backend_01_HostAddress = http://localhost:5267
+
+GET {{Kitverse_backend_01_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
