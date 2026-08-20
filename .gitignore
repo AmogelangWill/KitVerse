@@ -1,9 +1,9 @@
-## .NET / Visual Studio
+## ===== Backend (.NET) =====
 
 # Build results
-bin/
-obj/
-out/
+backend/**/bin/
+backend/**/obj/
+backend/**/out/
 
 # Visual Studio cache/options
 .vs/
@@ -15,13 +15,6 @@ out/
 # Rider
 .idea/
 
-# VS Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
 # NuGet
 *.nupkg
 **/[Pp]ackages/*
@@ -29,37 +22,53 @@ out/
 *.nuget.props
 *.nuget.targets
 
-# Build artifacts
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Bb]in/
-[Oo]bj/
-
 # Test results
 [Tt]est[Rr]esult*/
 *.trx
 
-# User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
-
-# Others
-*.log
-*.tmp
-.DS_Store
-Thumbs.db
 
 # Environment / secrets (never commit real credentials)
 appsettings.Development.json
 appsettings.Local.json
-*.env
 secrets.json
 
+
+## ===== Frontend (Node / React / Vite) =====
+
+# Dependencies
+frontend/**/node_modules/
+
+# Build output
+frontend/**/dist/
+frontend/**/build/
+frontend/**/.next/
+frontend/**/.vite/
+
+# Environment files
+frontend/**/.env
+frontend/**/.env.local
+frontend/**/.env.*.local
+
+# Logs
+frontend/**/npm-debug.log*
+frontend/**/yarn-debug.log*
+frontend/**/yarn-error.log*
+frontend/**/pnpm-debug.log*
+
+
+## ===== VS Code (shared) =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+
+## ===== General =====
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+*.env
