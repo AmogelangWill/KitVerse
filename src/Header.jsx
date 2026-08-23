@@ -6,9 +6,8 @@ function Header(){
             
             <div className="Logo">
                 <h1 className="BrandName">
-                    <img className="BrandImg" src="./Logo.png" alt="ImgNotFound">
-                </img>
-            </h1>
+                    <img className="BrandImg" src="/logo.png" alt="KitVerse Logo" />
+                </h1>
             </div>
             
             <nav className="NavButtons">

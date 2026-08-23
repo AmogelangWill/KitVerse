@@ -15,9 +15,11 @@
     justify-self: start;
 }
 .BrandImg{
-    height: 60px;
+    height: 55px;
     width: auto;
-    margin-top:auto;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
 }
 .NavButtons{
     gap:12px;
