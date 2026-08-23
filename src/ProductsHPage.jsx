@@ -32,7 +32,7 @@ function ProductHPage() {
         <div className="BodyWrapper">
             <div className="Description">
                 <h2 className="DOutliner">
-                    WORLD CUP 26™ Series
+                    CAF 26/27 series
                 </h2>
                 <div className="FilterDiv">
                     <button className="BtnFilter">
