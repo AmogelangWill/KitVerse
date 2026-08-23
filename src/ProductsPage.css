@@ -1,0 +1,76 @@
+.Description{
+    height: 60px;
+    display: flex;
+    gap:auto
+}
+.DOutliner{
+    margin-right:auto ;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    font-size: large;
+    width: 150px;
+}
+.FilterDiv{
+    margin-left: auto;
+    height: 50px;
+    width: auto ;
+    
+}
+.BtnFilter{
+    height: 30px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: lighter;
+    border-radius: 8px;
+    background-color: black;
+    color: white;
+    border: 3px thin black;
+    padding-bottom: 6px;
+    margin-right: 50px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+.BtnFilter:active{
+   background-color:white;
+   color:black;
+}
+.LeftPointingArrrow{
+    height: 15px;
+    padding-top: 5px;
+}
+.ProductsContainer{
+    display: flex;
+    gap:20px;
+    align-items: baseline;
+    
+}
+.Product{
+    height: 300px;
+    width: 700px;
+}
+.ProductImg{
+    height: 250px;
+}
+.AdidasLogo{
+    height:20px;
+    margin-top: 4px;
+    background-color: transparent;
+}
+.BrandLogo{
+    height: 20px;
+    background-color: transparent;
+    margin-top: 4px;
+}
+.AddToCart{
+    height: 30px;
+    width: 160px;
+    color: White;
+    background-color: rgb(7, 11, 34);
+    border-radius: 9px;
+    margin: 24px;
+    margin-top: 5px;
+    font-family:Verdana, Geneva, Tahoma, sans-serif
+}
+.AddToCart:active{
+    background-color: white;
+    color: black;
+}
