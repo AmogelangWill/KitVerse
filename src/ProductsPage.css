@@ -13,10 +13,13 @@
 }
 
 .DOutliner {
-    font-family: 'Times New Roman', Times, serif;
-    font-weight: bolder;
-    font-size: 1.3rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
     margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: #000;
 }
 
 .FilterDiv {
@@ -26,132 +29,106 @@
 
 .BtnFilter {
     height: 36px;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 500;
-    border-radius: 8px;
-    background-color: black;
-    color: white;
-    border: 1px solid black;
-    padding: 0 14px;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+    border: 1px solid #e0e0e0;
+    padding: 0 16px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: border-color 0.2s ease;
 }
 
-.BtnFilter:hover,
-.BtnFilter:active {
-    background-color: white;
-    color: black;
+.BtnFilter:hover {
+    border-color: #000;
 }
 
-.LeftPointingArrrow {
-    height: 12px;
-    width: auto;
-    filter: invert(1);
-}
-
-.BtnFilter:hover .LeftPointingArrrow,
-.BtnFilter:active .LeftPointingArrrow {
-    filter: invert(0);
+.ChevronRight {
+    font-size: 1.1rem;
+    line-height: 1;
+    font-weight: 400;
 }
 
 .ProductsContainer {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
     align-items: stretch;
 }
 
 .Product {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.Product:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    align-items: flex-start;
+    text-align: left;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+    cursor: pointer;
 }
 
 .ProductImgWrapper {
     width: 100%;
-    height: 280px;
+    aspect-ratio: 4 / 5;
+    background-color: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     margin-bottom: 12px;
+    position: relative;
 }
 
 .ProductImg {
-    width: 100%;
-    height: 100%;
-    max-height: 280px;
+    width: 85%;
+    height: 85%;
     object-fit: contain;
     object-position: center;
     display: block;
 }
 
-.PDescription {
+.ShopNowOverlay {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: white;
+    padding: 8px 16px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: 1rem;
-    margin: 8px 0 4px 0;
-    color: #1a1a1a;
-}
-
-.PBrand {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 4px 0;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    color: #000;
 }
 
-.BrandLogo,
-.AdidasLogo {
-    height: 16px;
-    width: auto;
-    object-fit: contain;
-    vertical-align: middle;
+.Product:hover .ShopNowOverlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.PDescription {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 0.95rem;
+    margin: 4px 0;
+    color: #333;
 }
 
 .PPrice {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #0b0f29;
-    margin: 8px 0 12px 0;
-}
-
-.AddToCart {
-    height: 38px;
-    width: 100%;
-    max-width: 180px;
-    color: white;
-    background-color: rgb(7, 11, 34);
-    border: 2px solid rgb(7, 11, 34);
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    margin-top: auto;
-}
-
-.AddToCart:hover,
-.AddToCart:active {
-    background-color: white;
-    color: rgb(7, 11, 34);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000;
+    margin: 2px 0 0 0;
 }
