@@ -32,6 +32,8 @@
 }
 .Icons{
     justify-self: end;
+    display: flex;
+    align-items: center;
     gap:15px;
     
 }
@@ -57,19 +59,20 @@
     background-color: rgb(255,255,255);
     padding:0px;
     align-items:baseline;
-   margin: 22px;
+   margin: 0 10px;
 }
-.LoveIcon{
-    height:25px;
+.LoveIcon,
+.ShoppingBagIcon,
+.profileIcon {
+    height: 25px;
     width: auto;
-  
 }
 .LoveIcon:active{
     background-color: rgb(232, 7, 7);
     border-radius: 50%;
 }
 .SearchIcon{
-    height: 30px;
+    height: 28px;
     width: auto;
 }
 .SearchBarBtn:active{
