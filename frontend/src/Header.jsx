@@ -30,17 +30,17 @@ function Header(){
             <div className="Icons">
                      
                 <button className="FavouritesBtn"> 
-                    <img className="LoveIcon" src="https://cdn-icons-png.flaticon.com/128/130/130195.png"/>
+                    <img className="SearchIcon" src="./assets/images/loupe.png"/>
                 </button>
                 <button className="SearchBarBtn">
-                    <img className="SearchIcon" src="https://cdn-icons-png.flaticon.com/128/5636/5636698.png"/>
+                    <img className="LoveIcon" src="./assets/images/heart.png"/>
                 </button>
                 <button className="ShoppingCarBtn">
 
-                    <img className="SearchIcon" src="https://cdn-icons-png.flaticon.com/128/7640/7640571.png"/>
+                    <img className="ShoppingBagIcon" src="./assets/images/shopping-bag.png"/>
                 </button>
                 <button className="ProfileBtn">
-                     <img className="SearchIcon" src="https://cdn-icons-png.flaticon.com/128/1144/1144760.png"/>
+                     <img className="profileIcon" src="./assets/images/user.png"/>
                 </button>
                  
              </div>  
