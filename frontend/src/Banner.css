@@ -30,3 +30,10 @@
 .Indicator.active {
     background-color: black;
 }
+
+@media screen and (max-width: 768px) {
+    /* Hide the hero slider indicators/pills on mobile */
+    .Indicators {
+        display: none !important;
+    }
+}
