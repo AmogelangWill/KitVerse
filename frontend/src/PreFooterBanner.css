@@ -1,0 +1,130 @@
+.PreFooterContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.PreFooterHero {
+  width: 100%;
+  background-color: #f5f5f5;
+  background-image: url('https://images.unsplash.com/photo-1518605368461-1ee7c58cd731?q=80&w=2938&auto=format&fit=crop'); 
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.PreFooterHero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.PreFooterHero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.PreFooterTitle {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 2.5rem;
+  margin: 0 0 15px 0;
+  color: #151414;
+  letter-spacing: -1px;
+}
+
+.PreFooterDesc {
+  font-family: 'Archivo', sans-serif;
+  font-size: 1.1rem;
+  color: #413f3f;
+  margin: 0 0 30px 0;
+  line-height: 1.4;
+  max-width: 700px;
+}
+
+.PreFooterActions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.PreFooterBtn {
+  background-color: #151414;
+  color: #fff;
+  border: 2px solid #151414;
+  padding: 12px 24px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.PreFooterBtn:hover {
+  background-color: transparent;
+  color: #151414;
+}
+
+.PreFooterBtn.outline {
+  background-color: transparent;
+  color: #151414;
+}
+
+.PreFooterBtn.outline:hover {
+  background-color: #151414;
+  color: #fff;
+}
+
+.PreFooterFeatures {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background-color: #f8f8f8;
+  border-top: 1px solid #eaeaea;
+  padding: 30px 40px;
+  gap: 20px;
+}
+
+.FeatureItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.FeatureIcon {
+  width: 28px;
+  height: 28px;
+  color: #151414;
+}
+
+.FeatureText {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #151414;
+}
+
+@media (max-width: 900px) {
+  .PreFooterFeatures {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .PreFooterFeatures {
+    grid-template-columns: 1fr;
+  }
+}
