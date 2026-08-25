@@ -32,7 +32,20 @@ namespace Kitverse_backend_01.Controllers
             }
             return Ok(tshirt);
         }
+        //(Could be name of a team or the tshirt)
+        // Get : api/TShirt/name
+        [HttpGet("{teamName}")]
+        public async Task<IActionResult> GetByTeamName(string teamName)
+        {
+            var tshirt =await _tshirtService.GetByTeam(teamName);
 
+            if(tshirt == null)
+            {
+                return NotFound(new { message = "Shirt not found." });
+            }
+
+            return Ok(tshirt);
+        }   
 
      
     }

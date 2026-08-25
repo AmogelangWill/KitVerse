@@ -1,6 +1,7 @@
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<KitverseDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
+
+
 
 builder.Services.AddCors(options =>
 {
