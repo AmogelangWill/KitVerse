@@ -22,7 +22,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // GET: api/TShirt/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
             var tshirt = await _tshirtService.GetById(id);
@@ -34,7 +34,7 @@ namespace Kitverse_backend_01.Controllers
         }
         //(Could be name of a team or the tshirt)
         // Get : api/TShirt/name
-        [HttpGet("{teamName}")]
+        [HttpGet("team/{teamName}")]
         public async Task<IActionResult> GetByTeamName(string teamName)
         {
             var tshirt =await _tshirtService.GetByTeam(teamName);

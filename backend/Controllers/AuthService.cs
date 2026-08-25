@@ -83,6 +83,7 @@ namespace Kitverse_backend_01.Controllers
             //returns the user by their email
             return await _context.Users.FirstOrDefaultAsync(u => u.UserEmail == email);
         }
+
         private async Task<bool> VerifyPassword(string email, string password) {
 
             var user = await GetByEmail(email);
