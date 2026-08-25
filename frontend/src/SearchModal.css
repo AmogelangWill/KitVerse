@@ -115,3 +115,38 @@
   color: #fff;
   border-color: #111;
 }
+
+/* -------------------------------------
+   MOBILE RESPONSIVENESS
+-------------------------------------- */
+@media screen and (max-width: 768px) {
+  .SearchModalContainer {
+    padding: 25px 20px;
+    box-sizing: border-box;
+    gap: 25px;
+  }
+
+  .SearchIcon {
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+  }
+
+  .SearchInput {
+    font-size: 1.25rem;
+  }
+
+  .SearchCloseBtn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .SuggestionsTitle {
+    font-size: 0.85rem;
+  }
+
+  .SuggestionPill {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}
