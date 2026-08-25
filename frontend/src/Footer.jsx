@@ -1,5 +1,5 @@
 import "./Footer.css";
-import { VisaIcon, MastercardIcon, AmexIcon, ApplePayIcon, PayPalIcon } from "./PaymentIcons.jsx";
+import { VisaIcon, MastercardIcon, ApplePayIcon, PayPalIcon } from "./PaymentIcons.jsx";
 
 function Footer() {
   return (
@@ -63,7 +63,6 @@ function Footer() {
           <div className="PaymentMethods">
             <VisaIcon />
             <MastercardIcon />
-            <AmexIcon />
             <ApplePayIcon />
             <PayPalIcon />
           </div>
