@@ -53,7 +53,7 @@ function ProductHPage() {
                                 loading="lazy"
                             />
                             <div className="ShopNowOverlay">
-                                Shop Now <span className="ChevronRight">&gt;</span>
+                                Add To Cart <span className="ChevronRight">&gt;</span>
                             </div>
                         </div>
                         <p className="PDescription">{product.name}</p>
