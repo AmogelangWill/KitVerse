@@ -3,8 +3,10 @@ import "./AuthModal.css";
 
 function AuthModal({ isOpen, onClose }) {
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   
-  // Form states so backend guys can easily use them
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,15 +18,76 @@ function AuthModal({ isOpen, onClose }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Backend team can handle the API call here
-    console.log("Form submitted:", formData, "isLogin:", isLogin);
+    setLoading(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const url = isLogin 
+      ? "https://kitverse-production.up.railway.app/api/Auth/login"
+      : "https://kitverse-production.up.railway.app/api/Auth/register";
+
+    const payload = isLogin
+      ? { 
+          email: formData.email, 
+          password: formData.password,
+          username: formData.email // Backend DTO has this
+        }
+      : { 
+          userName: formData.firstName, 
+          userSurname: formData.lastName,
+          userEmail: formData.email, 
+          password: formData.password 
+        };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong!");
+      }
+
+      setSuccessMsg(isLogin ? "Login successful!" : "Account created successfully! You can now sign in.");
+      
+      if (isLogin) {
+        // Optional: Close modal after a short delay on successful login
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      } else {
+        // Switch to login view after successful registration
+        setTimeout(() => {
+          setIsLogin(true);
+          setSuccessMsg("");
+        }, 2000);
+      }
+      
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleAuth = () => {
     // Backend team can trigger Google OAuth here
     console.log("Google auth clicked");
+  };
+
+  // Reset states when switching between login/register
+  const toggleMode = (loginMode) => {
+    setIsLogin(loginMode);
+    setErrorMsg("");
+    setSuccessMsg("");
   };
 
   if (!isOpen) return null;
@@ -47,6 +110,9 @@ function AuthModal({ isOpen, onClose }) {
               : "Create an account to track orders and save your wishlist."}
           </p>
         </div>
+
+        {errorMsg && <div className="AuthError">{errorMsg}</div>}
+        {successMsg && <div className="AuthSuccess">{successMsg}</div>}
 
         <button className="GoogleBtn" type="button" onClick={handleGoogleAuth}>
           <svg className="GoogleIcon" viewBox="0 0 24 24">
@@ -116,16 +182,16 @@ function AuthModal({ isOpen, onClose }) {
             </div>
           )}
 
-          <button type="submit" className="AuthSubmitBtn">
-            {isLogin ? "Sign In" : "Sign Up"}
+          <button type="submit" className="AuthSubmitBtn" disabled={loading}>
+            {loading ? "Processing..." : (isLogin ? "Sign In" : "Sign Up")}
           </button>
         </form>
 
         <div className="AuthFooter">
           {isLogin ? (
-            <p>New here? <button onClick={() => setIsLogin(false)} className="ToggleAuthBtn">Create an account</button></p>
+            <p>New here? <button onClick={() => toggleMode(false)} className="ToggleAuthBtn">Create an account</button></p>
           ) : (
-            <p>Already have an account? <button onClick={() => setIsLogin(true)} className="ToggleAuthBtn">Sign in</button></p>
+            <p>Already have an account? <button onClick={() => toggleMode(true)} className="ToggleAuthBtn">Sign in</button></p>
           )}
         </div>
       </div>
