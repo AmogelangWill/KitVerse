@@ -149,9 +149,9 @@
   }
 }
 
-@media (max-width: 768px) {
-    /* Hide the 4 feature pills on mobile as requested */
-    .PreFooterFeatures {
-        display: none !important;
-    }
+
+/* Fix Box-Sizing to prevent horizontal overflow */
+.PreFooterContainer, .PreFooterHero, .PreFooterActions, .PreFooterBtn {
+    box-sizing: border-box;
 }
+
