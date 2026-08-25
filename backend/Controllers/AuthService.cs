@@ -21,6 +21,7 @@ namespace Kitverse_backend_01.Controllers
         {
             if (string.IsNullOrWhiteSpace(user.UserName) || 
                 string.IsNullOrWhiteSpace(user.UserEmail) ||
+                string.IsNullOrWhiteSpace(user.UserSurname) ||
                 string.IsNullOrWhiteSpace(user.PasswordHash)) // checking if username, email and password are not null or empty
             {
                 throw new ArgumentException("Username, email and password are required.");
@@ -34,7 +35,8 @@ namespace Kitverse_backend_01.Controllers
                     throw new InvalidOperationException("User with this email already exists.");
                 }
                 else
-                {
+                {   
+                    
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
                  // Save the user to the database here (this part is not implemented yet).
                  _context.Users.Add(user);//adding user to the database...
