@@ -56,11 +56,11 @@ function SearchModal({ isOpen, onClose }) {
         <div className="SearchSuggestions">
           <h4 className="SuggestionsTitle">Popular Searches</h4>
           <div className="SuggestionsList">
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Real Madrid")}>Real Madrid</button>
+            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Real Madrid")}>Mamelodi Sundowns</button>
             <button className="SuggestionPill" onClick={() => handleSuggestionClick("Retro Kits")}>Retro Kits</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("World Cup 2026")}>World Cup 2026</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Arsenal")}>Arsenal</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Messi")}>Messi</button>
+            <button className="SuggestionPill" onClick={() => handleSuggestionClick("World Cup 2026")}>Orlando Pirates</button>
+            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Arsenal")}>Kaizer Chiefs</button>
+            
           </div>
         </div>
 
