@@ -55,7 +55,7 @@ function ProductHPage() {
                 </h2>
                 <div className="FilterDiv">
                     <button className="BtnFilter">
-                        All Collections
+                        <span className="FilterText">All Collections</span>
                         <span className="ChevronRight">&gt;</span>
                     </button>
                 </div>
@@ -88,11 +88,12 @@ function ProductHPage() {
             {/* BETWAY PREMIERSHIP SERIES SECTION */}
             <div className="Description" style={{ marginTop: "60px" }}>
                 <h2 className="DOutliner">
-                    BETWAY PREMIERSHIP SERIES
+                    <span className="DesktopTitle">BETWAY PREMIERSHIP SERIES</span>
+                    <span className="MobileTitle">PSL 26/27 SERIES</span>
                 </h2>
                 <div className="FilterDiv">
                     <button className="BtnFilter">
-                        All Collections
+                        <span className="FilterText">All Collections</span>
                         <span className="ChevronRight">&gt;</span>
                     </button>
                 </div>
