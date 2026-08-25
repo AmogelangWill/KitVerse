@@ -132,3 +132,62 @@
     color: #000;
     margin: 2px 0 0 0;
 }
+
+/* -------------------------------------
+   MOBILE RESPONSIVENESS
+-------------------------------------- */
+@media screen and (max-width: 768px) {
+    .BodyWrapper {
+        padding: 15px 10px;
+    }
+
+    /* Stack the section title and the "All Collections" button */
+    .Description {
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .DOutliner {
+        font-size: 1.4rem; /* Slightly smaller for mobile */
+        line-height: 1.2;
+    }
+
+    .FilterDiv {
+        width: 100%;
+    }
+
+    .BtnFilter {
+        width: 100%; /* Make button full width on mobile */
+        justify-content: center;
+    }
+
+    /* Show 2 products side-by-side on mobile screens */
+    .ProductsContainer {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .ProductImgWrapper {
+        margin-bottom: 8px;
+    }
+
+    .PDescription {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .PPrice {
+        font-size: 0.95rem;
+    }
+
+    /* Keep the 'Add To Cart' overlay visible or change styling for touch */
+    .ShopNowOverlay {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        bottom: 8px;
+        left: 8px;
+    }
+}

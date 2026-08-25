@@ -6,18 +6,34 @@ import SearchModal from "./SearchModal.jsx";
 function Header(){
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return(
       <>    
        <div className="HeaderContainer">
             
+            <button className="HamburgerBtn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Menu">
+                {isMobileMenuOpen ? (
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                ) : (
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                )}
+            </button>
+
             <div className="Logo">
                 <h1 className="BrandName">
                     <img className="BrandImg" src="/logo.png" alt="KitVerse Logo" />
                 </h1>
             </div>
             
-            <nav className="NavButtons">
+            <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
                 <button className="NavBtn">
                     Jerseys
                 </button>
@@ -36,14 +52,25 @@ function Header(){
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
+
+                {/* On mobile, we can also show the secondary links (Account, Wishlist) inside the menu */}
+                <div className="MobileSecondaryLinks">
+                    <button className="NavBtn" onClick={() => { setIsAuthOpen(true); setIsMobileMenuOpen(false); }}>
+                        Sign In / Register
+                    </button>
+                    <button className="NavBtn">
+                        Wishlist
+                    </button>
+                </div>
             </nav>
+
             <div className="Icons">
                 <button className="IconBtn" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="22" height="22">
                         <path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" fill="currentColor"/>
                     </svg>
                 </button>
-                <button className="IconBtn" aria-label="Wishlist">
+                <button className="IconBtn HideOnMobile" aria-label="Wishlist">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -55,7 +82,7 @@ function Header(){
                         <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="IconBtn" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
+                <button className="IconBtn HideOnMobile" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
