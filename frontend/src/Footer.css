@@ -1,0 +1,155 @@
+.FooterContainer {
+  background-color: #0b0a0a;
+  color: white;
+  font-family: 'Archivo', sans-serif;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.FooterTop {
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 60px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.NewsletterSection {
+  max-width: 400px;
+}
+
+.NewsletterTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.NewsletterDesc {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #ccc;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.NewsletterForm {
+  display: flex;
+  gap: 10px;
+}
+
+.NewsletterInput {
+  flex: 1;
+  padding: 10px 14px;
+  background-color: transparent;
+  border: 1px solid #333;
+  color: white;
+  font-family: 'Archivo', sans-serif;
+  border-radius: 4px;
+}
+
+.NewsletterInput::placeholder {
+  color: #888;
+}
+
+.NewsletterBtn {
+  background-color: white;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-family: 'Archivo', sans-serif;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.NewsletterBtn:hover {
+  opacity: 0.8;
+}
+
+.FooterMain {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.FooterColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.ColumnTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+}
+
+.FooterLink {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-bottom: 12px;
+  transition: color 0.2s ease;
+}
+
+.FooterLink:hover {
+  color: white;
+}
+
+.SocialIcons {
+  display: flex;
+  gap: 15px;
+}
+
+.SocialIcons a {
+  color: white;
+  transition: opacity 0.2s ease;
+}
+
+.SocialIcons a:hover {
+  opacity: 0.7;
+}
+
+.PaymentMethods {
+  display: flex;
+  align-items: center;
+}
+
+.PaymentText {
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.FooterBottom {
+  width: 100%;
+  max-width: 1200px;
+  border-top: 1px solid #222;
+  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.FooterLogo {
+  height: 40px;
+  width: auto;
+  filter: brightness(0) invert(1); /* Makes the logo white */
+}
+
+.CopyrightText {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
