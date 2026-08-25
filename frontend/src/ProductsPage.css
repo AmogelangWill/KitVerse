@@ -233,3 +233,8 @@ html, body {
         margin: 0 !important;
     }
 }
+
+/* Fix Box-Sizing for BodyWrapper */
+.BodyWrapper {
+    box-sizing: border-box;
+}

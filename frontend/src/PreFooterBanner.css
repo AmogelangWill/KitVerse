@@ -155,3 +155,8 @@
         display: none !important;
     }
 }
+
+/* Fix Box-Sizing to prevent horizontal overflow */
+.PreFooterContainer, .PreFooterHero, .PreFooterActions, .PreFooterBtn {
+    box-sizing: border-box;
+}
