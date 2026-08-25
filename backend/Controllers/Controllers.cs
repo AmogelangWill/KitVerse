@@ -24,7 +24,7 @@ namespace Kitverse_backend_01.Controllers
                 var user = new User
                 {
                     UserName = register.UserName,
-                    UserSurname = register.UserSurname, // FIXED: Added missing mapping
+                    UserSurname = register.UserSurname,
                     UserEmail = register.UserEmail,
                     PasswordHash = register.Password, // AuthService hashes this internally before saving
                     Role = "Customer"
