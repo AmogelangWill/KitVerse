@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.DTOs;
 
@@ -24,6 +24,7 @@ namespace Kitverse_backend_01.Controllers
                 var user = new User
                 {
                     UserName = register.UserName,
+                    UserSurname = register.UserSurname, // FIXED: Added missing mapping
                     UserEmail = register.UserEmail,
                     PasswordHash = register.Password, // AuthService hashes this internally before saving
                     Role = "Customer"
