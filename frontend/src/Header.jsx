@@ -1,6 +1,10 @@
+import { useState } from "react";
 import "./Header.css";
+import AuthModal from "./AuthModal.jsx";
 
 function Header(){
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
+
     return(
       <>    
        <div className="HeaderContainer">
@@ -49,7 +53,7 @@ function Header(){
                         <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="IconBtn" aria-label="Account">
+                <button className="IconBtn" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -57,7 +61,8 @@ function Header(){
                 </button>
              </div>  
        </div>
+       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
      </>
     );
 }
-export default Header
+export default Header;
