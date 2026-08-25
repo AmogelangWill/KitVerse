@@ -1,39 +1,50 @@
+import { useState, useEffect } from "react";
 import "./ProductsPage.css";
 
 function ProductHPage() {
-    const products = [
-        {
-            id: 1,
-            name: "Kaizer Chiefs 26/27 Home Jersey",
-            price: "R1299.00",
-            image: "/products/Chiefs_Home.png",
-        },
-        {
-            id: 2,
-            name: "Orlando Pirates 26/27 Home Jersey",
-            price: "R1299.00",
-            image: "/products/Pirates_Home.png",
-        },
-        {
-            id: 3,
-            name: "Mamelodi Sundowns 26/27 Home Jersey",
-            price: "R1299.00",
-            image: "/products/Sundowns_Home.png",
-        },
-        {
-            id: 4,
-            name: "Mamelodi Sundowns 26/27 Away Jersey",
-            price: "R1299.00",
-            image: "/products/Sundowns_Away.png",
-        },
-    ];
+    const [cafProducts, setCafProducts] = useState([]);
+    const [betwayProducts, setBetwayProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const betwayProducts = Array.from({ length: 8 }, (_, index) => ({
-        id: `betway-${index + 1}`,
-        name: "Betway Premiership Jersey Placeholder",
-        price: "R0.00",
-        image: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?q=80&w=600&auto=format&fit=crop", 
-    }));
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
+                if (!response.ok) throw new Error("Failed to fetch products");
+                const data = await response.json();
+
+                // 1. Identify specific CAF shirts
+                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home", "Sundowns_Away"];
+                
+                // Keep the exact order of the cafNames array
+                const caf = cafNames
+                    .map(name => data.find(item => item.shirtName === name))
+                    .filter(item => item !== undefined); 
+
+                // 2. Pick 8 random shirts for the Betway Premiership section
+                // First, exclude the ones already in the CAF section to avoid duplication
+                const remaining = data.filter(item => !cafNames.includes(item.shirtName));
+                
+                // Shuffle and pick 8
+                const shuffled = remaining.sort(() => 0.5 - Math.random());
+                const betway = shuffled.slice(0, 8);
+
+                setCafProducts(caf);
+                setBetwayProducts(betway);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    // Format the database price
+    const formatPrice = (price) => {
+        return `R${price.toFixed(2)}`;
+    };
 
     return (
         <div className="BodyWrapper">
@@ -51,23 +62,27 @@ function ProductHPage() {
             </div>
 
             <div className="ProductsContainer">
-                {products.map((product) => (
-                    <div className="Product" key={product.id}>
-                        <div className="ProductImgWrapper">
-                            <img
-                                className="ProductImg"
-                                src={product.image}
-                                alt={product.name}
-                                loading="lazy"
-                            />
-                            <div className="ShopNowOverlay">
-                                Add To Cart <span className="ChevronRight">&gt;</span>
+                {loading ? (
+                    <p>Loading CAF series...</p>
+                ) : (
+                    cafProducts.map((product) => (
+                        <div className="Product" key={product.tShirtId}>
+                            <div className="ProductImgWrapper">
+                                <img
+                                    className="ProductImg"
+                                    src={`/products/${product.shirtName}.png`}
+                                    alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
+                                    loading="lazy"
+                                />
+                                <div className="ShopNowOverlay">
+                                    Add To Cart <span className="ChevronRight">&gt;</span>
+                                </div>
                             </div>
+                            <p className="PDescription">{`${product.team.teamName} ${product.shirtSeason} Jersey`}</p>
+                            <p className="PPrice">{formatPrice(product.shirtPrice)}</p>
                         </div>
-                        <p className="PDescription">{product.name}</p>
-                        <p className="PPrice">{product.price}</p>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
             {/* BETWAY PREMIERSHIP SERIES SECTION */}
@@ -84,24 +99,27 @@ function ProductHPage() {
             </div>
 
             <div className="ProductsContainer">
-                {betwayProducts.map((product) => (
-                    <div className="Product" key={product.id}>
-                        <div className="ProductImgWrapper">
-                            <img
-                                className="ProductImg"
-                                src={product.image}
-                                alt={product.name}
-                                loading="lazy"
-                                style={{ opacity: 0.5 }} // Makes it look more like a placeholder
-                            />
-                            <div className="ShopNowOverlay">
-                                Shop Now <span className="ChevronRight">&gt;</span>
+                {loading ? (
+                    <p>Loading Betway Premiership series...</p>
+                ) : (
+                    betwayProducts.map((product) => (
+                        <div className="Product" key={product.tShirtId}>
+                            <div className="ProductImgWrapper">
+                                <img
+                                    className="ProductImg"
+                                    src={`/products/${product.shirtName}.png`}
+                                    alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
+                                    loading="lazy"
+                                />
+                                <div className="ShopNowOverlay">
+                                    Add To Cart <span className="ChevronRight">&gt;</span>
+                                </div>
                             </div>
+                            <p className="PDescription">{`${product.team.teamName} ${product.shirtSeason} Jersey`}</p>
+                            <p className="PPrice">{formatPrice(product.shirtPrice)}</p>
                         </div>
-                        <p className="PDescription" style={{ color: "#888" }}>{product.name}</p>
-                        <p className="PPrice" style={{ color: "#888" }}>{product.price}</p>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
