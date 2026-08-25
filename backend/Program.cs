@@ -17,6 +17,18 @@ builder.Services.AddDbContext<KitverseDbContext>(options =>
 // Register AuthService so controllers can request IAuthService and get a working AuthService automatically
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<ITShirtService, TShirtService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") //Vite's default dev port
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +37,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();

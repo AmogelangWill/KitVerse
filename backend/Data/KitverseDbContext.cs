@@ -31,6 +31,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(u => u.UserId).HasColumnName("user_id");
                 entity.Property(u => u.UserName).HasColumnName("user_name");
                 entity.Property(u => u.UserEmail).HasColumnName("user_email");
+                entity.Property(u => u.UserSurname).HasColumnName("user_surname");
                 entity.Property(u => u.PasswordHash).HasColumnName("password_hash");
                 entity.Property(u => u.Role).HasColumnName("role");
             });

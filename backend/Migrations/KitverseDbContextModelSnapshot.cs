@@ -292,6 +292,11 @@ namespace Kitverse_backend_01.Migrations
                         .HasColumnType("text")
                         .HasColumnName("user_name");
 
+                    b.Property<string>("UserSurname")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_surname");
+
                     b.HasKey("UserId");
 
                     b.ToTable("system_users", (string)null);
