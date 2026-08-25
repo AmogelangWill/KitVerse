@@ -1,9 +1,11 @@
 import { useState } from "react";
 import "./Header.css";
 import AuthModal from "./AuthModal.jsx";
+import SearchModal from "./SearchModal.jsx";
 
 function Header(){
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     return(
       <>    
@@ -36,7 +38,7 @@ function Header(){
                 </button>
             </nav>
             <div className="Icons">
-                <button className="IconBtn" aria-label="Search">
+                <button className="IconBtn" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="22" height="22">
                         <path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" fill="currentColor"/>
                     </svg>
@@ -61,7 +63,9 @@ function Header(){
                 </button>
              </div>  
        </div>
+       
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
      </>
     );
 }
