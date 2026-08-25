@@ -156,3 +156,55 @@
 .PaymentMethods svg {
   margin-right: 10px;
 }
+
+/* Additional Mobile Styling for Footer */
+@media (max-width: 768px) {
+  .FooterContainer {
+    padding: 40px 20px 20px 20px;
+  }
+
+  .FooterTop {
+    margin-bottom: 40px;
+  }
+
+  .NewsletterSection {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .NewsletterForm {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .NewsletterInput,
+  .NewsletterBtn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .FooterMain {
+    flex-direction: column;
+    gap: 35px;
+    margin-bottom: 40px;
+  }
+
+  .FooterColumn {
+    min-width: 100%;
+  }
+
+  .ColumnTitle {
+    margin-bottom: 12px;
+  }
+
+  .FooterBottom {
+    padding-top: 25px;
+    gap: 20px;
+  }
+
+  .PaymentMethods {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+}
