@@ -24,6 +24,7 @@ namespace Kitverse_backend_01.Controllers
                 var user = new User
                 {
                     UserName = register.UserName,
+                    UserSurname = register.UserSurname,  //YOU FORGOT TO ADD THIS BOI , IT WAS GIVING AN ERROR
                     UserEmail = register.UserEmail,
                     PasswordHash = register.Password, // AuthService hashes this internally before saving
                     Role = "Customer"
