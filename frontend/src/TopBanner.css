@@ -1,0 +1,81 @@
+.TopBannerContainer {
+  width: 100%;
+  background-color: #f5f5f5; /* Light grey, or could be a background image */
+  background-image: url('https://images.unsplash.com/photo-1518605368461-1ee7c58cd731?q=80&w=2938&auto=format&fit=crop'); /* Placeholder stadium/pitch bg */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+/* Optional overlay to make text readable */
+.TopBannerContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.TopBannerContent {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.TopBannerTitle {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 2.5rem;
+  margin: 0 0 15px 0;
+  color: #151414;
+  letter-spacing: -1px;
+}
+
+.TopBannerDesc {
+  font-family: 'Archivo', sans-serif;
+  font-size: 1.1rem;
+  color: #413f3f;
+  margin: 0 0 30px 0;
+  line-height: 1.4;
+}
+
+.TopBannerActions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.TopBannerBtn {
+  background-color: #151414;
+  color: #fff;
+  border: 2px solid #151414;
+  padding: 12px 24px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.TopBannerBtn:hover {
+  background-color: transparent;
+  color: #151414;
+}
+
+.TopBannerBtn.outline {
+  background-color: transparent;
+  color: #151414;
+}
+
+.TopBannerBtn.outline:hover {
+  background-color: #151414;
+  color: #fff;
+}
