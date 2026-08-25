@@ -191,3 +191,45 @@
         left: 8px;
     }
 }
+
+.MobileTitle { display: none; }
+
+/* Global fix for horizontal overflow on mobile */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+    /* Title switching */
+    .DesktopTitle { display: none; }
+    .MobileTitle { display: inline; }
+    
+    /* Revert stacking to keep them side by side */
+    .Description {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    /* Make the button a circle with just the arrow */
+    .FilterText { display: none; }
+    
+    .FilterDiv { width: auto !important; }
+
+    .BtnFilter {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .BtnFilter .ChevronRight {
+        margin: 0 !important;
+    }
+}
