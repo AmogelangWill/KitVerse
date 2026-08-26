@@ -70,7 +70,7 @@ function ProductHPage() {
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
-                                    src={`/products/${product.shirtName}.png`}
+                                    src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
                                     alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />
@@ -108,7 +108,7 @@ function ProductHPage() {
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
-                                    src={`/products/${product.shirtName}.png`}
+                                   src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
                                     alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />

@@ -6,5 +6,10 @@ namespace Kitverse_backend_01.Controllers
     {
         Task<List<TShirt>> GetAll();
         Task<TShirt?> GetById(int id);
+
+
+        Task<List<TShirt>> GetByTeam(String Name);
+
+
     }
 }

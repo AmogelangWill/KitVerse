@@ -23,6 +23,17 @@ namespace Kitverse_backend_01.Controllers
                 .ToListAsync();
         }
 
+        public async Task<List<TShirt>>GetByTeam(String Name)
+        {
+            //this method is used to get tshirst By teams or by shirt name could be used for Filtering
+
+
+            return await _context.TShirts.Include(t=> t.Team)
+                                         .Include(t=> t.ShirtLinks)
+                                         .Where(t=> t.Team.TeamName==Name || t.ShirtName==Name)
+                                         .ToListAsync();
+        }
+
         public async Task<TShirt?> GetById(int id)
         {
             return await _context.TShirts
