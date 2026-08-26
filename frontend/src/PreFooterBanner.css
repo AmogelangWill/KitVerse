@@ -115,3 +115,43 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Additional Mobile Styling for PreFooterBanner */
+@media (max-width: 768px) {
+  .PreFooterHero {
+    padding: 50px 15px;
+  }
+
+  .PreFooterTitle {
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+  }
+
+  .PreFooterDesc {
+    font-size: 1rem;
+    margin-bottom: 25px;
+  }
+
+  .PreFooterActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .PreFooterBtn {
+    width: 100%;
+    text-align: center;
+    padding: 14px 24px;
+  }
+
+  .PreFooterFeatures {
+    padding: 20px;
+  }
+}
+
+
+/* Fix Box-Sizing to prevent horizontal overflow */
+.PreFooterContainer, .PreFooterHero, .PreFooterActions, .PreFooterBtn {
+    box-sizing: border-box;
+}
+

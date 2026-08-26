@@ -7,13 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Register the database connection - reads the connection string from User Secrets
+// Register the database connection - reads the connection string from raw environment variables
 builder.Services.AddDbContext<KitverseDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("SupabaseConnection")));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL")));
 
 // Register AuthService so controllers can request IAuthService and get a working AuthService automatically
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -26,7 +29,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") //Vite's default dev port
+        policy.WithOrigins("http://localhost:5173", "https://kitverse.pages.dev") // Localhost and Cloudflare
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
