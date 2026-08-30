@@ -45,8 +45,44 @@ namespace Kitverse_backend_01.Controllers
             }
 
             return Ok(tshirt);
-        }   
+        }
 
-     
+        // Get : api/TShirt/name
+        [HttpGet("team/{Name}")]
+        public async Task<IActionResult> SortByAscendingPrice(string Name)
+        {
+            var tshirt = await _tshirtService.GetByPriceAsc(Name);
+
+            if(tshirt == null)
+            {
+                return NotFound(new { message = "Shirt Not Found" });
+            }
+
+            return Ok(tshirt);
+        }
+
+        // Get : api/TShirt/name
+        [HttpGet("team/{Name}")]
+        public async Task<IActionResult> SortByDescendingPrice(string Name)
+        {
+            var tshirt = await _tshirtService.GetByPriceDesc(Name);
+
+            if(tshirt == null)
+            {
+                return NotFound( new { message="Shirt Not Found"});
+            }
+
+            return Ok(tshirt);
+        }
+
+        // GET: api/TShirt
+        [HttpGet]
+        public async Task<IActionResult> GetNewArrivals()
+        {
+            var tshirts = await _tshirtService.GetNewArrivals();
+            return Ok(tshirts);
+        }
+
+
     }
 }

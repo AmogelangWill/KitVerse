@@ -14,6 +14,8 @@ namespace Kitverse_backend_01.Models
         public string ShirtStatus { get; set; } = string.Empty;
         public string ShirtName { get; set; } = string.Empty;
         public int TeamId { get; set; }
+        public DateTime? DateAdded { get; set; }
+
 
         public Team Team { get; set; } = null!;
         public List<ShirtLink> ShirtLinks { get; set; } = new();

@@ -138,6 +138,12 @@ namespace Kitverse_backend_01.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LinkId"));
 
+                    b.Property<DateTime?>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
+
                     b.Property<string>("ShirtLinkUrl")
                         .IsRequired()
                         .HasColumnType("text")
@@ -194,6 +200,12 @@ namespace Kitverse_backend_01.Migrations
                     b.Property<int?>("AmountAvailable")
                         .HasColumnType("integer")
                         .HasColumnName("amount_avaliable");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("ShirtAffiliate")
                         .HasColumnType("text")
@@ -272,6 +284,12 @@ namespace Kitverse_backend_01.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
 
+                    b.Property<DateTime?>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text")
@@ -313,8 +331,10 @@ namespace Kitverse_backend_01.Migrations
                         .HasColumnName("t_shirt_id");
 
                     b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_added");
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
 
                     b.HasKey("UserId", "TShirtId");
 
