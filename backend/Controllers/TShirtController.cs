@@ -48,7 +48,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // Get : api/TShirt/name
-        [HttpGet("team/{Name}")]
+        [HttpGet("team/{Name}/asc")]
         public async Task<IActionResult> SortByAscendingPrice(string Name)
         {
             var tshirt = await _tshirtService.GetByPriceAsc(Name);
@@ -62,7 +62,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // Get : api/TShirt/name
-        [HttpGet("team/{Name}")]
+        [HttpGet("team/{Name}/desc")]
         public async Task<IActionResult> SortByDescendingPrice(string Name)
         {
             var tshirt = await _tshirtService.GetByPriceDesc(Name);
@@ -76,7 +76,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // GET: api/TShirt
-        [HttpGet]
+        [HttpGet("new")]
         public async Task<IActionResult> GetNewArrivals()
         {
             var tshirts = await _tshirtService.GetNewArrivals();

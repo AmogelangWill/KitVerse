@@ -14,7 +14,7 @@ function ProductHPage() {
                 const data = await response.json();
 
                 // 1. Identify specific CAF shirts
-                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home", "Sundowns_Away"];
+                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home","Sundowns_Away"];
                 
                 // Keep the exact order of the cafNames array
                 const caf = cafNames
