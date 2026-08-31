@@ -19,7 +19,7 @@ namespace Kitverse_backend_01.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<ItemList> ItemLists { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
-
+        public DbSet<Inventory> Inventory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,15 +80,14 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.TShirtId).HasColumnName("t_shirt_id");
                 entity.Property(t => t.ShirtSeason).HasColumnName("shirt_season");
                 entity.Property(t => t.ShirtPrice).HasColumnName("shirt_price");
-                entity.Property(t => t.ShirtAffiliate).HasColumnName("shirt_affiliate");
-                entity.Property(t => t.AmountAvailable).HasColumnName("amount_avaliable"); // matches your SQL's spelling
-                entity.Property(t => t.ShirtSize).HasColumnName("shirt_size");
+                entity.Property(t => t.ShirtAffiliate).HasColumnName("shirt_affiliate");                
                 entity.Property(t => t.ShirtGender).HasColumnName("shirt_gender");
                 entity.Property(t => t.ShirtDescription).HasColumnName("shirt_description");
                 entity.Property(t => t.ShirtStatus).HasColumnName("shirt_status");
                 entity.Property(t => t.ShirtName).HasColumnName("shirt_name");
                 entity.Property(t => t.TeamId).HasColumnName("team_id");
                 entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
+                entity.Property(t => t.IsMain).HasColumnName("is_main");
                 entity.HasOne(t => t.Team).WithMany(team => team.TShirts).HasForeignKey(t => t.TeamId);
             });
 
@@ -148,6 +147,18 @@ namespace Kitverse_backend_01.Data
                 entity.Property(w => w.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(w => w.Customer).WithMany().HasForeignKey(w => w.UserId);
                 entity.HasOne(w => w.TShirt).WithMany().HasForeignKey(w => w.TShirtId);
+            });
+
+            modelBuilder.Entity<Inventory>(entity =>
+            {
+                entity.ToTable("inventory");
+                entity.HasKey(i => new { i.TshirtID, i.ShirtSize });
+                entity.Property(i => i.TshirtID).HasColumnName("t_shirt_id");
+                entity.Property(i => i.ShirtSize).HasColumnName("t_shirt_size");
+                entity.Property(i => i.AmountAvailable).HasColumnName("amount_available");
+
+                entity.HasOne(i=>i.shirt).WithMany().HasForeignKey(i => i.TshirtID);
+
             });
         }
     }
