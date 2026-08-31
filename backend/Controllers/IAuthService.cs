@@ -6,7 +6,7 @@ namespace Kitverse_backend_01.Controllers
     {
         public Task<User> Register (User user); // this method is used to register a new user
         
-        public  Task<int> Login(string username, string password); // this method is used to login a user
+        public  Task<User> Login(string username, string password); // this method is used to login a user
 
       
        

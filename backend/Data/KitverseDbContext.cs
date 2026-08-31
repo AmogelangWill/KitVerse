@@ -33,6 +33,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(u => u.UserEmail).HasColumnName("user_email");
                 entity.Property(u => u.UserSurname).HasColumnName("user_surname");
                 entity.Property(u => u.PasswordHash).HasColumnName("password_hash");
+                entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.Property(u => u.Role).HasColumnName("role");
             });
 
@@ -87,6 +88,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.ShirtStatus).HasColumnName("shirt_status");
                 entity.Property(t => t.ShirtName).HasColumnName("shirt_name");
                 entity.Property(t => t.TeamId).HasColumnName("team_id");
+                entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(t => t.Team).WithMany(team => team.TShirts).HasForeignKey(t => t.TeamId);
             });
 
@@ -97,6 +99,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(s => s.LinkId).HasColumnName("link_id");
                 entity.Property(s => s.ShirtLinkUrl).HasColumnName("shirt_link");
                 entity.Property(s => s.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(s => s.TShirt).WithMany(t => t.ShirtLinks).HasForeignKey(s => s.TShirtId);
             });
 
@@ -142,7 +145,7 @@ namespace Kitverse_backend_01.Data
                 entity.HasKey(w => new { w.UserId, w.TShirtId }); // composite primary key
                 entity.Property(w => w.UserId).HasColumnName("user_id");
                 entity.Property(w => w.TShirtId).HasColumnName("t_shirt_id");
-                entity.Property(w => w.DateAdded).HasColumnName("date_added");
+                entity.Property(w => w.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(w => w.Customer).WithMany().HasForeignKey(w => w.UserId);
                 entity.HasOne(w => w.TShirt).WithMany().HasForeignKey(w => w.TShirtId);
             });
