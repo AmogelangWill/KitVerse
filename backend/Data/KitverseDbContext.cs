@@ -87,7 +87,6 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.ShirtName).HasColumnName("shirt_name");
                 entity.Property(t => t.TeamId).HasColumnName("team_id");
                 entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
-                entity.Property(t => t.IsMain).HasColumnName("is_main");
                 entity.HasOne(t => t.Team).WithMany(team => team.TShirts).HasForeignKey(t => t.TeamId);
             });
 
@@ -98,6 +97,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(s => s.LinkId).HasColumnName("link_id");
                 entity.Property(s => s.ShirtLinkUrl).HasColumnName("shirt_link");
                 entity.Property(s => s.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(t => t.IsMain).HasColumnName("is_main");
                 entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(s => s.TShirt).WithMany(t => t.ShirtLinks).HasForeignKey(s => s.TShirtId);
             });
