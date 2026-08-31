@@ -52,6 +52,25 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Inventory", b =>
+                {
+                    b.Property<int>("TshirtID")
+                        .HasColumnType("integer")
+                        .HasColumnName("t_shirt_id");
+
+                    b.Property<string>("ShirtSize")
+                        .HasColumnType("text")
+                        .HasColumnName("t_shirt_size");
+
+                    b.Property<int>("AmountAvailable")
+                        .HasColumnType("integer")
+                        .HasColumnName("amount_available");
+
+                    b.HasKey("TshirtID", "ShirtSize");
+
+                    b.ToTable("inventory", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ItemList", b =>
                 {
                     b.Property<int>("CartId")
@@ -197,15 +216,15 @@ namespace Kitverse_backend_01.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TShirtId"));
 
-                    b.Property<int?>("AmountAvailable")
-                        .HasColumnType("integer")
-                        .HasColumnName("amount_avaliable");
-
                     b.Property<DateTime?>("DateAdded")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_added")
                         .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_main");
 
                     b.Property<string>("ShirtAffiliate")
                         .HasColumnType("text")
@@ -234,11 +253,6 @@ namespace Kitverse_backend_01.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("shirt_season");
-
-                    b.Property<string>("ShirtSize")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("shirt_size");
 
                     b.Property<string>("ShirtStatus")
                         .IsRequired()
@@ -363,6 +377,17 @@ namespace Kitverse_backend_01.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Kitverse_backend_01.Models.Inventory", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.TShirt", "shirt")
+                        .WithMany()
+                        .HasForeignKey("TshirtID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("shirt");
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.ItemList", b =>

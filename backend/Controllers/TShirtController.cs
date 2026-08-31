@@ -47,7 +47,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
-        // Get : api/TShirt/name
+        // Get : api/TShirt/name/ascending
         [HttpGet("team/{Name}/asc")]
         public async Task<IActionResult> SortByAscendingPrice(string Name)
         {
@@ -61,7 +61,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
-        // Get : api/TShirt/name
+        // Get : api/TShirt/name/descending
         [HttpGet("team/{Name}/desc")]
         public async Task<IActionResult> SortByDescendingPrice(string Name)
         {
