@@ -1,0 +1,211 @@
+.PDP-Container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 50px;
+    font-family: 'Archivo', sans-serif;
+}
+
+/* LEFT SIDE: GALLERY */
+.PDP-Gallery {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.PDP-MainImageContainer {
+    width: 100%;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.PDP-MainImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.PDP-Thumbnails {
+    display: flex;
+    gap: 10px;
+}
+
+.PDP-Thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.PDP-Thumbnail.active {
+    border-color: #111;
+}
+
+/* RIGHT SIDE: INFO */
+.PDP-Info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+.PDP-Brand {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.PDP-Title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #111;
+    line-height: 1.1;
+    margin: 0 0 15px 0;
+    letter-spacing: -0.5px;
+}
+
+.PDP-Price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 30px 0;
+}
+
+/* SIZE SELECTOR */
+.PDP-SizeSection {
+    margin-bottom: 30px;
+}
+
+.PDP-SizeHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.PDP-SizeLabel {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #111;
+}
+
+.PDP-SizeGuide {
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.PDP-SizeGrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.PDP-SizeBtn {
+    padding: 12px 0;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.PDP-SizeBtn:hover {
+    border-color: #111;
+}
+
+.PDP-SizeBtn.selected {
+    background-color: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/* ADD TO CART */
+.PDP-AddToCartBtn {
+    width: 100%;
+    padding: 18px;
+    background-color: #111;
+    color: #fff;
+    font-family: 'Archivo', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 40px;
+}
+
+.PDP-AddToCartBtn:hover {
+    background-color: #333;
+}
+
+.PDP-AddToCartBtn:disabled {
+    background-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* DESCRIPTION */
+.PDP-DescriptionSection {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 25px;
+}
+
+.PDP-DescriptionText {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+.PDP-CareText, .PDP-MaterialText {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 900px) {
+    .PDP-Container {
+        flex-direction: column;
+        gap: 30px;
+        margin: 20px auto;
+    }
+    
+    .PDP-Info {
+        padding-top: 0;
+    }
+    
+    .PDP-Title {
+        font-size: 1.8rem;
+    }
+    
+    .PDP-SizeGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.PDP-Loading, .PDP-Error {
+    text-align: center;
+    padding: 100px 20px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+}

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import "./ProductsPage.css";
+import { useNavigate } from "react-router-dom";
 
 function ProductHPage() {
     const [cafProducts, setCafProducts] = useState([]);
     const [betwayProducts, setBetwayProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -66,7 +68,7 @@ function ProductHPage() {
                     <p>Loading CAF series...</p>
                 ) : (
                     cafProducts.map((product) => (
-                        <div className="Product" key={product.tShirtId}>
+                        <div className="Product" key={product.tShirtId} onClick={() => navigate(`/product/${product.tShirtId}`)} style={{ cursor: "pointer" }}>
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
@@ -104,7 +106,7 @@ function ProductHPage() {
                     <p>Loading Betway Premiership series...</p>
                 ) : (
                     betwayProducts.map((product) => (
-                        <div className="Product" key={product.tShirtId}>
+                        <div className="Product" key={product.tShirtId} onClick={() => navigate(`/product/${product.tShirtId}`)} style={{ cursor: "pointer" }}>
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
