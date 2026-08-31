@@ -1,18 +1,19 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Header.jsx";
-import Banner from "./Banner.jsx";
-import ProductHPage from "./ProductsHPage.jsx";
-import PreFooterBanner from "./PreFooterBanner.jsx";
 import Footer from "./Footer.jsx";
+import HomePage from "./HomePage.jsx";
+import ProductDetails from "./ProductDetails.jsx";
 
 function App(){
    return(
-    <>
+    <Router>
        <Header/>
-       <Banner/>
-       <ProductHPage/>
-       <PreFooterBanner/>
+       <Routes>
+           <Route path="/" element={<HomePage />} />
+           <Route path="/product/:id" element={<ProductDetails />} />
+       </Routes>
        <Footer/>
-    </>
+    </Router>
    )
 }
-export default App
+export default App;

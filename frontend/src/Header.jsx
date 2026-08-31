@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Header.css";
+import { Link } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
 
@@ -28,9 +29,11 @@ function Header(){
             </button>
 
             <div className="Logo">
-                <h1 className="BrandName">
-                    <img className="BrandImg" src="/logo.png" alt="KitVerse Logo" />
-                </h1>
+                <Link to="/" style={{ textDecoration: 'none' }}>
+                    <h1 className="BrandName">
+                        <img className="BrandImg" src="/logo.png" alt="KitVerse Logo" />
+                    </h1>
+                </Link>
             </div>
             
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
