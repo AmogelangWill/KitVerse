@@ -107,6 +107,11 @@
     color: #6b7280;
     text-decoration: underline;
     cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.PDP-SizeGuide:hover {
+    color: #111;
 }
 
 .PDP-SizeGrid {
@@ -136,9 +141,15 @@
     border-color: #111;
 }
 
-/* ADD TO CART */
+/* ACTIONS */
+.PDP-Actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
 .PDP-AddToCartBtn {
-    width: 100%;
+    flex: 1;
     padding: 18px;
     background-color: #111;
     color: #fff;
@@ -149,10 +160,9 @@
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    margin-bottom: 40px;
 }
 
-.PDP-AddToCartBtn:hover {
+.PDP-AddToCartBtn:hover:not(:disabled) {
     background-color: #333;
 }
 
@@ -162,23 +172,65 @@
     cursor: not-allowed;
 }
 
-/* DESCRIPTION */
-.PDP-DescriptionSection {
+.PDP-WishlistBtn {
+    width: 60px;
+    background-color: #ffffff;
+    border: 2px solid #e5e7eb;
+    color: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.PDP-WishlistBtn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.PDP-WishlistBtn:hover {
+    border-color: #111;
+    background-color: #f9f9f9;
+}
+
+/* PRODUCT INFORMATION TABLE */
+.PDP-ProductInformation {
     border-top: 1px solid #e5e7eb;
     padding-top: 25px;
 }
 
-.PDP-DescriptionText {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: #374151;
-    margin-bottom: 20px;
+.PDP-InfoTitle {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 20px 0;
 }
 
-.PDP-CareText, .PDP-MaterialText {
+.PDP-InfoTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.PDP-InfoRow {
+    display: flex;
+    padding: 15px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.PDP-InfoKey {
+    width: 140px;
+    font-weight: 700;
     font-size: 0.95rem;
+    color: #374151;
+    flex-shrink: 0;
+}
+
+.PDP-InfoValue {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: #6b7280;
-    margin-bottom: 10px;
 }
 
 /* RESPONSIVE MOBILE */
@@ -199,6 +251,15 @@
     
     .PDP-SizeGrid {
         grid-template-columns: repeat(3, 1fr);
+    }
+
+    .PDP-InfoRow {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .PDP-InfoKey {
+        width: 100%;
     }
 }
 
