@@ -7,7 +7,7 @@ function ProductDetails() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [mainImage, setMainImage] = useState("/placeholder.png");
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
@@ -22,8 +22,8 @@ function ProductDetails() {
                 setProduct(data);
                 
                 if (data.shirtLinks && data.shirtLinks.length > 0) {
-                    const mainLink = data.shirtLinks.find(link => link.isMain) || data.shirtLinks[0];
-                    setMainImage(mainLink.shirtLinkUrl);
+                    const mainIndex = data.shirtLinks.findIndex(link => link.isMain);
+                    setCurrentIndex(mainIndex !== -1 ? mainIndex : 0);
                 }
             } catch (error) {
                 console.error("Error fetching product details:", error);
@@ -44,24 +44,45 @@ function ProductDetails() {
         return <div className="PDP-Error">Product not found.</div>;
     }
 
+    const hasMultipleImages = product.shirtLinks && product.shirtLinks.length > 1;
+    const currentImageUrl = product.shirtLinks && product.shirtLinks.length > 0 
+        ? product.shirtLinks[currentIndex].shirtLinkUrl 
+        : "/placeholder.png";
+
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev - 1 + product.shirtLinks.length) % product.shirtLinks.length);
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev + 1) % product.shirtLinks.length);
+    };
+
     return (
         <>
             <div className="PDP-Container">
                 {/* LEFT SIDE: Image Gallery */}
                 <div className="PDP-Gallery">
-                    <div className="PDP-MainImageContainer">
-                        <img src={mainImage} alt={product.shirtName} className="PDP-MainImage" />
+                    <div className="PDP-MainImageContainer" style={{ position: 'relative' }}>
+                        {hasMultipleImages && (
+                            <button className="PDP-ArrowBtn left" onClick={handlePrev} aria-label="Previous image">❮</button>
+                        )}
+                        
+                        <img src={currentImageUrl} alt={product.shirtName} className="PDP-MainImage" />
+                        
+                        {hasMultipleImages && (
+                            <button className="PDP-ArrowBtn right" onClick={handleNext} aria-label="Next image">❯</button>
+                        )}
                     </div>
                     
-                    {product.shirtLinks && product.shirtLinks.length > 1 && (
+                    {hasMultipleImages && (
                         <div className="PDP-Thumbnails">
-                            {product.shirtLinks.map((link) => (
+                            {product.shirtLinks.map((link, index) => (
                                 <img 
                                     key={link.linkId}
                                     src={link.shirtLinkUrl} 
                                     alt={`${product.shirtName} thumbnail`}
-                                    className={`PDP-Thumbnail ${mainImage === link.shirtLinkUrl ? 'active' : ''}`}
-                                    onClick={() => setMainImage(link.shirtLinkUrl)}
+                                    className={`PDP-Thumbnail ${currentIndex === index ? 'active' : ''}`}
+                                    onClick={() => setCurrentIndex(index)}
                                 />
                             ))}
                         </div>
@@ -106,7 +127,7 @@ function ProductDetails() {
                         </button>
                     </div>
 
-                    {/* PRODUCT INFORMATION TABLE/ACCORDION */}
+                    {/* PRODUCT INFORMATION TABLE */}
                     <div className="PDP-ProductInformation">
                         <h3 className="PDP-InfoTitle">Product Information</h3>
                         <div className="PDP-InfoTable">
