@@ -57,16 +57,20 @@ namespace Kitverse_backend_01.Controllers
 
         //changed login requirements from using a username to using a user email     
         //users will login with email instead of their usernames
-        public async Task<int> Login(string email, string password)
+        public async Task<User> Login(string email, string password)
         {
             try
             {
-                var isLoggedIn = await VerifyPassword(email, password); // connected to the databse
-                if(isLoggedIn)
+                var user = await GetByEmail(email);
+                if (user != null && user.UserEmail == email && user.PasswordHash == HashPassword(password))
                 {
-                    return 1; // user signed in successfully
-                } 
-                return 0; // user failed to sign in
+                    return user;
+                }
+                else
+                {
+                    return null;
+
+                }
 
 
             }
@@ -83,6 +87,7 @@ namespace Kitverse_backend_01.Controllers
             //returns the user by their email
             return await _context.Users.FirstOrDefaultAsync(u => u.UserEmail == email);
         }
+
         private async Task<bool> VerifyPassword(string email, string password) {
 
             var user = await GetByEmail(email);

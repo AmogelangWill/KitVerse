@@ -14,7 +14,7 @@ function ProductHPage() {
                 const data = await response.json();
 
                 // 1. Identify specific CAF shirts
-                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home", "Sundowns_Away"];
+                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home","Sundowns_Away"];
                 
                 // Keep the exact order of the cafNames array
                 const caf = cafNames
@@ -70,7 +70,7 @@ function ProductHPage() {
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
-                                    src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : `/products/${product.shirtName}.png`}
+                                    src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
                                     alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />
@@ -108,7 +108,7 @@ function ProductHPage() {
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
-                                    src={`/products/${product.shirtName}.png`}
+                                   src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
                                     alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />

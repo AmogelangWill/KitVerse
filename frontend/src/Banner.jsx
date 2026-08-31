@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 function Banner(){
     const banners = [
        
-        "https://i.ibb.co/Pzv7yFnJ/banner2.png",
+        "https://i.ibb.co/RkbYRsDJ/sundownsbanner.png",
          "https://i.ibb.co/whpBRHQq/banner3.png",
         "https://i.ibb.co/HfLx1vsk/banner1.png"
         //"https://i0.wp.com/sundayworld-prod-s3-bucket.s3.eu-west-1.amazonaws.com/wp-content/uploads/2026/08/06103254/downs-away-kit-scaled.jpg?fit=2560%2C1708&ssl=1"

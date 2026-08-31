@@ -22,7 +22,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // GET: api/TShirt/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
             var tshirt = await _tshirtService.GetById(id);
@@ -32,8 +32,57 @@ namespace Kitverse_backend_01.Controllers
             }
             return Ok(tshirt);
         }
+        //(Could be name of a team or the tshirt)
+        // Get : api/TShirt/name
+        [HttpGet("team/{teamName}")]
+        public async Task<IActionResult> GetByTeamName(string teamName)
+        {
+            var tshirt =await _tshirtService.GetByTeam(teamName);
+
+            if(tshirt == null)
+            {
+                return NotFound(new { message = "Shirt not found." });
+            }
+
+            return Ok(tshirt);
+        }
+
+        // Get : api/TShirt/name
+        [HttpGet("team/{Name}/asc")]
+        public async Task<IActionResult> SortByAscendingPrice(string Name)
+        {
+            var tshirt = await _tshirtService.GetByPriceAsc(Name);
+
+            if(tshirt == null)
+            {
+                return NotFound(new { message = "Shirt Not Found" });
+            }
+
+            return Ok(tshirt);
+        }
+
+        // Get : api/TShirt/name
+        [HttpGet("team/{Name}/desc")]
+        public async Task<IActionResult> SortByDescendingPrice(string Name)
+        {
+            var tshirt = await _tshirtService.GetByPriceDesc(Name);
+
+            if(tshirt == null)
+            {
+                return NotFound( new { message="Shirt Not Found"});
+            }
+
+            return Ok(tshirt);
+        }
+
+        // GET: api/TShirt
+        [HttpGet("new")]
+        public async Task<IActionResult> GetNewArrivals()
+        {
+            var tshirts = await _tshirtService.GetNewArrivals();
+            return Ok(tshirts);
+        }
 
 
-     
     }
 }
