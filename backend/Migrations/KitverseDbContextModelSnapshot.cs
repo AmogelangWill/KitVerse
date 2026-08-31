@@ -163,6 +163,10 @@ namespace Kitverse_backend_01.Migrations
                         .HasColumnName("date_added")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_main");
+
                     b.Property<string>("ShirtLinkUrl")
                         .IsRequired()
                         .HasColumnType("text")
@@ -223,8 +227,7 @@ namespace Kitverse_backend_01.Migrations
                         .HasDefaultValueSql("now()");
 
                     b.Property<bool>("IsMain")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_main");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ShirtAffiliate")
                         .HasColumnType("text")

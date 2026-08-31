@@ -13,7 +13,7 @@
         public string ShirtStatus { get; set; } = "Available";
         public int TeamId { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
-        public bool IsAdmin { get; set; } = true;
+       
 
         public List<string> ImageUrls { get; set; } = new(); // URLs already uploaded to Supabase Storage
     }
