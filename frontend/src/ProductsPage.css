@@ -48,7 +48,7 @@
     border-color: #000;
 }
 
-.ChevronRight {
+.ChevronRightSVG {
     font-size: 1.1rem;
     line-height: 1;
     font-weight: 400;
@@ -229,7 +229,7 @@ html, body {
         justify-content: center !important;
     }
 
-    .BtnFilter .ChevronRight {
+    .BtnFilter .ChevronRightSVG {
         margin: 0 !important;
     }
 }
