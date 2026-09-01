@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://kitverse.pages.dev", "https://*.kitverse.pages.dev")
+        policy.WithOrigins("http://localhost:5175", "https://kitverse.pages.dev", "https://*.kitverse.pages.dev")
               .SetIsOriginAllowedToAllowWildcardSubdomains() // Localhost and Cloudflare
               .AllowAnyHeader()
               .AllowAnyMethod();
