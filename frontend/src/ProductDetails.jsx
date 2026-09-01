@@ -10,12 +10,17 @@ function ProductDetails() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+    
+    // New state for Inventory
+    const [inventoryInfo, setInventoryInfo] = useState({});
+    const [inventoryLoading, setInventoryLoading] = useState(true);
 
     const availableSizes = ["S", "M", "L", "XL", "XXL"];
 
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchProductAndInventory = async () => {
             try {
+                // 1. Fetch main product details
                 const response = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/${id}`);
                 if (!response.ok) throw new Error("Product not found");
                 const data = await response.json();
@@ -25,14 +30,38 @@ function ProductDetails() {
                     const mainIndex = data.shirtLinks.findIndex(link => link.isMain);
                     setCurrentIndex(mainIndex !== -1 ? mainIndex : 0);
                 }
+
+                // 2. Fetch inventory for each size simultaneously
+                const inventoryData = {};
+                await Promise.all(
+                    availableSizes.map(async (size) => {
+                        try {
+                            // Note: Using the exact space in "Inventory " as coded in the backend route
+                            const invRes = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/Inventory%20/${size}/${id}/AmountPerSize`);
+                            if (invRes.ok) {
+                                const amountArray = await invRes.json();
+                                // API returns an array (e.g. [15] or [0] or [])
+                                inventoryData[size] = amountArray.length > 0 ? amountArray[0] : 0;
+                            } else {
+                                inventoryData[size] = 0;
+                            }
+                        } catch (err) {
+                            inventoryData[size] = 0;
+                        }
+                    })
+                );
+                
+                setInventoryInfo(inventoryData);
+
             } catch (error) {
                 console.error("Error fetching product details:", error);
             } finally {
                 setLoading(false);
+                setInventoryLoading(false);
             }
         };
 
-        fetchProduct();
+        fetchProductAndInventory();
         window.scrollTo(0, 0);
     }, [id]);
 
@@ -103,15 +132,20 @@ function ProductDetails() {
                             <span className="PDP-SizeGuide" onClick={() => setIsSizeGuideOpen(true)}>Size guide</span>
                         </div>
                         <div className="PDP-SizeGrid">
-                            {availableSizes.map((size) => (
-                                <button 
-                                    key={size}
-                                    className={`PDP-SizeBtn ${selectedSize === size ? 'selected' : ''}`}
-                                    onClick={() => setSelectedSize(size)}
-                                >
-                                    {size}
-                                </button>
-                            ))}
+                            {availableSizes.map((size) => {
+                                const isOutOfStock = !inventoryLoading && (!inventoryInfo[size] || inventoryInfo[size] <= 0);
+                                return (
+                                    <button 
+                                        key={size}
+                                        className={`PDP-SizeBtn ${selectedSize === size ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
+                                        onClick={() => !isOutOfStock && setSelectedSize(size)}
+                                        disabled={isOutOfStock || inventoryLoading}
+                                        title={isOutOfStock ? 'Out of stock' : `${inventoryInfo[size]} available`}
+                                    >
+                                        {size}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

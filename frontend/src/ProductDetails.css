@@ -305,3 +305,29 @@
 .PDP-ArrowBtn.right {
     right: 20px;
 }
+
+/* OUT OF STOCK SIZES */
+.PDP-SizeBtn.out-of-stock {
+    color: #d1d5db;
+    border-color: #f3f4f6;
+    background-color: #f9fafb;
+    cursor: not-allowed;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Add the diagonal scratch line */
+.PDP-SizeBtn.out-of-stock::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 1px;
+    background-color: #d1d5db;
+    transform: translateY(-50%) rotate(-35deg);
+}
+
+.PDP-SizeBtn.out-of-stock:hover {
+    border-color: #f3f4f6;
+}
