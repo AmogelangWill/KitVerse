@@ -13,7 +13,7 @@ namespace Kitverse_backend_01.Controllers
 
         Task<List<TShirt>> GetByPriceDesc(String Name);
 
-
+        Task<List<int>> GetCountPerSzie(String ShirtSize, int ShirtId);
 
         Task<List<TShirt>> GetByTeam(String Name);
 

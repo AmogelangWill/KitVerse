@@ -74,6 +74,11 @@ namespace Kitverse_backend_01.Controllers
                 .ToListAsync();
         }
 
-
+        public async Task<List<int>> GetCountPerSzie(string ShirtSize, int ShirtId)
+        {   //gets the amount of tshirts avaiilable per size
+            return await _context.Inventory.Where(t=>t.TshirtID == ShirtId && t.ShirtSize== ShirtSize )
+                                            .Select(t => t.AmountAvailable)
+                                            .ToListAsync();
+        }
     }
 }
