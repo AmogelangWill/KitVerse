@@ -62,7 +62,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
-        [HttpGet("Inventory /{ShirtSize}{ShirtId}/AmountPerSize" )]
+        [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize" )]
         public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize,int ShirtId)
         {
             List<int> NumberList = await _tshirtService.GetCountPerSzie(ShirtSize, ShirtId);
