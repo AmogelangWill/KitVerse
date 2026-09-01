@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Kitverse_backend_01.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -37,9 +38,9 @@ namespace Kitverse_backend_01.Controllers
         [HttpGet("team/{teamName}")]
         public async Task<IActionResult> GetByTeamName(string teamName)
         {
-            var tshirt =await _tshirtService.GetByTeam(teamName);
+            var tshirt = await _tshirtService.GetByTeam(teamName);
 
-            if(tshirt == null)
+            if (tshirt == null)
             {
                 return NotFound(new { message = "Shirt not found." });
             }
@@ -53,12 +54,24 @@ namespace Kitverse_backend_01.Controllers
         {
             var tshirt = await _tshirtService.GetByPriceAsc(Name);
 
-            if(tshirt == null)
+            if (tshirt == null)
             {
                 return NotFound(new { message = "Shirt Not Found" });
             }
 
             return Ok(tshirt);
+        }
+
+        [HttpGet("Inventory /{ShirtSize}{ShirtId}/AmountPerSize" )]
+        public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize,int ShirtId)
+        {
+            List<int> NumberList = await _tshirtService.GetCountPerSzie(ShirtSize, ShirtId);
+            if(NumberList == null)
+            {
+                return NotFound(new { message = "Amount Available per size not Found" });
+
+            }
+            return Ok(NumberList);
         }
 
         // Get : api/TShirt/name/descending
