@@ -13,7 +13,7 @@ namespace Kitverse_backend_01.Services
 
         Task<bool> UpdateItem(int userId, int itemId, int quantity);
 
-        Task<bool> UpdateTotal(int id);
+        Task UpdateTotal(int id);
 
         Task<bool> ClearCart(int userId);
 
