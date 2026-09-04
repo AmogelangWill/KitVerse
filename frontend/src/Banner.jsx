@@ -7,7 +7,7 @@ function Banner(){
         "https://i.ibb.co/RkbYRsDJ/sundownsbanner.png",
          "https://i.ibb.co/whpBRHQq/banner3.png",
         "https://i.ibb.co/HfLx1vsk/banner1.png"
-        
+        ];
     const [CurrentBanner, setCurrentBanner] = useState(0);
 
     useEffect(() => {
