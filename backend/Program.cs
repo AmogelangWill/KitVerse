@@ -1,6 +1,7 @@
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Kitverse_backend_01.Services;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
 
+// Register CartService so controllers can request ICartService and get a working CartService automatically
+builder.Services.AddScoped<ICartService, CartService>();
+
+
+
 
 
 builder.Services.AddCors(options =>
@@ -35,6 +41,8 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+
 
 var app = builder.Build();
 
