@@ -8,7 +8,8 @@ namespace Kitverse_backend_01.Controllers
         
         public  Task<User> Login(string username, string password); // this method is used to login a user
 
-      
-       
+        public string GenerateToken(User user);
+
+
     }
 }

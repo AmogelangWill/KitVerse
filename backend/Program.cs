@@ -2,6 +2,9 @@ using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,13 +26,28 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
 
+// JWT authentication - lets the API verify who's logged in on protected requests
+var jwtKey = builder.Configuration["Jwt:Key"];
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5175", "https://kitverse.pages.dev", "https://*.kitverse.pages.dev")
+        policy.WithOrigins("http://localhost:5175", "http://localhost:5173", "https://kitverse.pages.dev", "https://*.kitverse.pages.dev")
               .SetIsOriginAllowedToAllowWildcardSubdomains() // Localhost and Cloudflare
               .AllowAnyHeader()
               .AllowAnyMethod();
@@ -45,6 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

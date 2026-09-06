@@ -1,5 +1,7 @@
 ﻿using Kitverse_backend_01.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Kitverse_backend_01.DTOs;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -96,6 +98,22 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirts);
         }
 
-
+    // POST: api/TShirt
+    [Authorize(Roles = "Admin,Item Lister")]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateTShirt request)
+    {
+        try
+        {
+            var created = await _tshirtService.Create(request);
+            return Ok(created);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
+
+
+}
 }
