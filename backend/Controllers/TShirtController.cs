@@ -98,7 +98,6 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirts);
         }
 
-<<<<<<< HEAD
         // POST: api/TShirt
         [Authorize(Roles = "Admin,Item Lister")]
         [HttpPost]
@@ -114,26 +113,5 @@ namespace Kitverse_backend_01.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-
-=======
-    // POST: api/TShirt
-    [Authorize(Roles = "Admin,Item Lister")]
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTShirt request)
-    {
-        try
-        {
-            var created = await _tshirtService.Create(request);
-            return Ok(created);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
->>>>>>> b2fdffc180a107209c84742d957473292abc645c
     }
-
-
-}
 }
