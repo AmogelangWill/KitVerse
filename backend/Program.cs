@@ -25,6 +25,7 @@ builder.Services.AddDbContext<KitverseDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 // JWT authentication - lets the API verify who's logged in on protected requests
 var jwtKey = builder.Configuration["Jwt:Key"];
