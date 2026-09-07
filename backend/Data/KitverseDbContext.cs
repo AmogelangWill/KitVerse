@@ -80,7 +80,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.TShirtId).HasColumnName("t_shirt_id");
                 entity.Property(t => t.ShirtSeason).HasColumnName("shirt_season");
                 entity.Property(t => t.ShirtPrice).HasColumnName("shirt_price");
-                entity.Property(t => t.ShirtAffiliate).HasColumnName("shirt_affiliate");                
+                entity.Property(t => t.ShirtAffiliate).HasColumnName("shirt_affiliate");
                 entity.Property(t => t.ShirtGender).HasColumnName("shirt_gender");
                 entity.Property(t => t.ShirtDescription).HasColumnName("shirt_description");
                 entity.Property(t => t.ShirtStatus).HasColumnName("shirt_status");
@@ -157,7 +157,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(i => i.ShirtSize).HasColumnName("t_shirt_size");
                 entity.Property(i => i.AmountAvailable).HasColumnName("amount_available");
 
-                entity.HasOne(i=>i.shirt).WithMany().HasForeignKey(i => i.TshirtID);
+                entity.HasOne(i => i.shirt).WithMany().HasForeignKey(i => i.TshirtID);
 
             });
         }
