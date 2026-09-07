@@ -44,6 +44,10 @@ namespace Kitverse_backend_01.Controllers
                 {
 
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
+<<<<<<< HEAD:backend/Services/AuthService.cs
+=======
+                                                                         // Save the user to the database here (this part is not implemented yet).
+>>>>>>> b2fdffc180a107209c84742d957473292abc645c:backend/Controllers/AuthService.cs
                     _context.Users.Add(user);//adding user to the database...
                     await _context.SaveChangesAsync();
 
