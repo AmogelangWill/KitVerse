@@ -1,5 +1,6 @@
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Controllers;
+using Kitverse_backend_01.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
