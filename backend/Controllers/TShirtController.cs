@@ -1,5 +1,7 @@
 ﻿using Kitverse_backend_01.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Kitverse_backend_01.DTOs;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -62,11 +64,11 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
-        [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize" )]
-        public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize,int ShirtId)
+        [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize")]
+        public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize, int ShirtId)
         {
             List<int> NumberList = await _tshirtService.GetCountPerSzie(ShirtSize, ShirtId);
-            if(NumberList == null)
+            if (NumberList == null)
             {
                 return NotFound(new { message = "Amount Available per size not Found" });
 
@@ -80,9 +82,9 @@ namespace Kitverse_backend_01.Controllers
         {
             var tshirt = await _tshirtService.GetByPriceDesc(Name);
 
-            if(tshirt == null)
+            if (tshirt == null)
             {
-                return NotFound( new { message="Shirt Not Found"});
+                return NotFound(new { message = "Shirt Not Found" });
             }
 
             return Ok(tshirt);
@@ -94,6 +96,22 @@ namespace Kitverse_backend_01.Controllers
         {
             var tshirts = await _tshirtService.GetNewArrivals();
             return Ok(tshirts);
+        }
+
+        // POST: api/TShirt
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTShirt request)
+        {
+            try
+            {
+                var created = await _tshirtService.Create(request);
+                return Ok(created);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 

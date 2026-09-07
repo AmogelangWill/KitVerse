@@ -1,4 +1,5 @@
 ﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
@@ -24,15 +25,15 @@ namespace Kitverse_backend_01.Controllers
                 .ToListAsync();
         }
 
-        public async Task<List<TShirt>>GetByTeam(String Name)
+        public async Task<List<TShirt>> GetByTeam(String Name)
         {
             //this method is used to get tshirst By teams or by shirt name could be used for Filtering
 
 
-                return await _context.TShirts.Include(t=> t.Team)
-                                         .Include(t=> t.ShirtLinks)// I Used EF Cores provider ILike function instead of .Contains to avoid case sensetivity 
-                                         .Where(t => EF.Functions.ILike(t.Team.TeamName, $"%{Name}%") || EF.Functions.ILike(t.ShirtName, $"%{Name}%"))
-                                         .ToListAsync();
+            return await _context.TShirts.Include(t => t.Team)
+                                     .Include(t => t.ShirtLinks)// I Used EF Cores provider ILike function instead of .Contains to avoid case sensetivity 
+                                     .Where(t => EF.Functions.ILike(t.Team.TeamName, $"%{Name}%") || EF.Functions.ILike(t.ShirtName, $"%{Name}%"))
+                                     .ToListAsync();
         }
 
         public async Task<TShirt?> GetById(int id)
@@ -45,10 +46,10 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<List<TShirt>> GetByPriceAsc(String Name)
         {
-            return await _context.TShirts .Include(t => t.Team)
+            return await _context.TShirts.Include(t => t.Team)
                                           .Include(t => t.ShirtLinks)
-                                          .Where(t=> t.ShirtName==Name) //this is to allow us to get the names of the Shirts in the Sections before ordering their prices in Ascending 
-                                          .OrderBy(t=> t.ShirtPrice)
+                                          .Where(t => t.ShirtName == Name) //this is to allow us to get the names of the Shirts in the Sections before ordering their prices in Ascending 
+                                          .OrderBy(t => t.ShirtPrice)
                                           .ToListAsync();
         }
 
@@ -76,9 +77,46 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<List<int>> GetCountPerSzie(string ShirtSize, int ShirtId)
         {   //gets the amount of tshirts avaiilable per size
-            return await _context.Inventory.Where(t=>t.TshirtID == ShirtId && t.ShirtSize== ShirtSize )
+            return await _context.Inventory.Where(t => t.TshirtID == ShirtId && t.ShirtSize == ShirtSize)
                                             .Select(t => t.AmountAvailable)
                                             .ToListAsync();
+        }
+
+        public async Task<TShirt> Create(CreateTShirt request)
+        {
+            var tshirt = new TShirt
+            {
+                ShirtName = request.ShirtName,
+                ShirtSeason = request.ShirtSeason,
+                ShirtPrice = request.ShirtPrice,
+                ShirtAffiliate = request.ShirtAffiliate,
+                ShirtGender = request.ShirtGender,
+                ShirtDescription = request.ShirtDescription,
+                ShirtStatus = request.ShirtStatus,
+                TeamId = request.TeamId,
+                DateAdded = request.DateAdded,
+                ShirtLinks = request.ImageUrls.Select((url, index) => new ShirtLink
+                {
+                    ShirtLinkUrl = url,
+                    IsMain = index == 0 // first image submitted is treated as the main product image
+                }).ToList()
+            };
+
+            _context.TShirts.Add(tshirt);
+            await _context.SaveChangesAsync(); // saved first so tshirt.TShirtId is generated for the inventory rows below
+
+            foreach (var size in request.Sizes)
+            {
+                _context.Inventory.Add(new Inventory
+                {
+                    TshirtID = tshirt.TShirtId,
+                    ShirtSize = size.ShirtSize,
+                    AmountAvailable = size.AmountAvailable
+                });
+            }
+            await _context.SaveChangesAsync();
+
+            return tshirt;
         }
     }
 }

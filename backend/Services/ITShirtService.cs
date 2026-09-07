@@ -1,4 +1,5 @@
-﻿using Kitverse_backend_01.Models;
+﻿using Kitverse_backend_01.DTOs;
+using Kitverse_backend_01.Models;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -9,7 +10,7 @@ namespace Kitverse_backend_01.Controllers
         Task<List<TShirt>> GetNewArrivals();
         Task<TShirt?> GetById(int id);
 
-         Task<List<TShirt>> GetByPriceAsc(String Name);
+        Task<List<TShirt>> GetByPriceAsc(String Name);
 
         Task<List<TShirt>> GetByPriceDesc(String Name);
 
@@ -17,6 +18,7 @@ namespace Kitverse_backend_01.Controllers
 
         Task<List<TShirt>> GetByTeam(String Name);
 
+        Task<TShirt> Create(CreateTShirt request);
 
     }
 }

@@ -1,8 +1,10 @@
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Controllers;
 using Microsoft.EntityFrameworkCore;
-using Kitverse_backend_01.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,12 +26,22 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
 
-// Register CartService so controllers can request ICartService and get a working CartService automatically
-builder.Services.AddScoped<ICartService, CartService>();
+// JWT authentication - lets the API verify who's logged in on protected requests
+var jwtKey = builder.Configuration["Jwt:Key"];
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 
-
-
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -42,8 +54,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,6 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
