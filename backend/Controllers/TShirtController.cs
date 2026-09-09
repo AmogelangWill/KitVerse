@@ -64,6 +64,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
+        // Get : api/Tshirt/shirtSize/ShirtID/AmountPerSize  (Already Implemented in the FrontEnd)
         [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize")]
         public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize, int ShirtId)
         {
@@ -113,5 +114,7 @@ namespace Kitverse_backend_01.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
     }
 }

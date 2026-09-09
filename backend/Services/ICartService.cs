@@ -18,5 +18,12 @@ namespace Kitverse_backend_01.Services
         Task<bool> ClearCart(int userId);
 
         Task<decimal> GetCartTotal(int userId);
+
+        Task<bool> addToWishList(int userId,int t_shirt_id);
+
+        Task<bool> RemoveFromWishList(int userId, int t_shirtId);
+
+        Task<List<TShirt>> GetWishlist(int userId);
+
     }
 }
