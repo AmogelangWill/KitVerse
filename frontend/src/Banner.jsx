@@ -3,12 +3,11 @@ import "./Banner.css"
 import { useState, useEffect } from "react";
 function Banner(){
     const banners = [
-       
+        "https://sekbsdzqbykvocywwxsq.supabase.co/storage/v1/object/sign/Banners/Derby.png?token=eyJraWQiOiI3ZDk2N2Q0YS00ZDk5LTQwYWUtYWUzZS1hNjkwNTQ0MmRhZWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYW5uZXJzL0RlcmJ5LnBuZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3ODg1NDA0MzMsImV4cCI6MTgyMDA3NjQzM30.wG0SLgMPYxUjBGMYhwffeYUSQ2GPkQoNk9EvxFCwMtg",
         "https://i.ibb.co/RkbYRsDJ/sundownsbanner.png",
          "https://i.ibb.co/whpBRHQq/banner3.png",
         "https://i.ibb.co/HfLx1vsk/banner1.png"
-        //"https://i0.wp.com/sundayworld-prod-s3-bucket.s3.eu-west-1.amazonaws.com/wp-content/uploads/2026/08/06103254/downs-away-kit-scaled.jpg?fit=2560%2C1708&ssl=1"
-    ];
+        ];
     const [CurrentBanner, setCurrentBanner] = useState(0);
 
     useEffect(() => {

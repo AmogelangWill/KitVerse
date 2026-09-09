@@ -1,4 +1,5 @@
 ﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
@@ -79,6 +80,43 @@ namespace Kitverse_backend_01.Controllers
             return await _context.Inventory.Where(t => t.TshirtID == ShirtId && t.ShirtSize == ShirtSize)
                                             .Select(t => t.AmountAvailable)
                                             .ToListAsync();
+        }
+
+        public async Task<TShirt> Create(CreateTShirt request)
+        {
+            var tshirt = new TShirt
+            {
+                ShirtName = request.ShirtName,
+                ShirtSeason = request.ShirtSeason,
+                ShirtPrice = request.ShirtPrice,
+                ShirtAffiliate = request.ShirtAffiliate,
+                ShirtGender = request.ShirtGender,
+                ShirtDescription = request.ShirtDescription,
+                ShirtStatus = request.ShirtStatus,
+                TeamId = request.TeamId,
+                DateAdded = request.DateAdded,
+                ShirtLinks = request.ImageUrls.Select((url, index) => new ShirtLink
+                {
+                    ShirtLinkUrl = url,
+                    IsMain = index == 0 // first image submitted is treated as the main product image
+                }).ToList()
+            };
+
+            _context.TShirts.Add(tshirt);
+            await _context.SaveChangesAsync(); // saved first so tshirt.TShirtId is generated for the inventory rows below
+
+            foreach (var size in request.Sizes)
+            {
+                _context.Inventory.Add(new Inventory
+                {
+                    TshirtID = tshirt.TShirtId,
+                    ShirtSize = size.ShirtSize,
+                    AmountAvailable = size.AmountAvailable
+                });
+            }
+            await _context.SaveChangesAsync();
+
+            return tshirt;
         }
     }
 }

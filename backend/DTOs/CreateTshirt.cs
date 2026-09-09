@@ -1,5 +1,11 @@
 ﻿namespace Kitverse_backend_01.DTOs
 {
+    public class SizeStock
+    {
+        public string ShirtSize { get; set; } = string.Empty;
+        public int AmountAvailable { get; set; }
+    }
+
     public class CreateTShirt
     {
         public string ShirtName { get; set; } = string.Empty;
@@ -15,6 +21,7 @@
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
 
-        public List<string> ImageUrls { get; set; } = new(); // URLs already uploaded to Supabase Storage
+        public List<string> ImageUrls { get; set; } = new(); // first one becomes the main image
+        public List<SizeStock> Sizes { get; set; } = new(); // per-size stock counts
     }
 }
