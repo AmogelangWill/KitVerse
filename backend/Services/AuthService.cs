@@ -19,7 +19,7 @@ namespace Kitverse_backend_01.Controllers
         }
         public async Task<User> Register(User user)
         {
-            if (string.IsNullOrWhiteSpace(user.UserName) || 
+            if (string.IsNullOrWhiteSpace(user.UserName) ||
                 string.IsNullOrWhiteSpace(user.UserEmail) ||
                 string.IsNullOrWhiteSpace(user.UserSurname) ||
                 string.IsNullOrWhiteSpace(user.PasswordHash)) // checking if username, email and password are not null or empty
@@ -35,14 +35,14 @@ namespace Kitverse_backend_01.Controllers
                     throw new InvalidOperationException("User with this email already exists.");
                 }
                 else
-                {   
-                    
+                {
+
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
-                 // Save the user to the database here (this part is not implemented yet).
-                 _context.Users.Add(user);//adding user to the database...
+                                                                         // Save the user to the database here (this part is not implemented yet).
+                    _context.Users.Add(user);//adding user to the database...
                     await _context.SaveChangesAsync();
 
-                
+
                 }
             }
             catch (Exception ex)
@@ -83,19 +83,20 @@ namespace Kitverse_backend_01.Controllers
         // a songo hangwa u connect na database
         //then a remove hedzi helper method .
         private async Task<User?> GetByEmail(string email)
-        {   
+        {
             //returns the user by their email
             return await _context.Users.FirstOrDefaultAsync(u => u.UserEmail == email);
         }
 
-        private async Task<bool> VerifyPassword(string email, string password) {
+        private async Task<bool> VerifyPassword(string email, string password)
+        {
 
             var user = await GetByEmail(email);
             if (user == null)
             {
                 return false;
             }
-            return user.PasswordHash ==HashPassword(password);
+            return user.PasswordHash == HashPassword(password);
         }
 
     }

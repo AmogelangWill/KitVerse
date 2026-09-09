@@ -24,15 +24,15 @@ namespace Kitverse_backend_01.Controllers
                 .ToListAsync();
         }
 
-        public async Task<List<TShirt>>GetByTeam(String Name)
+        public async Task<List<TShirt>> GetByTeam(String Name)
         {
             //this method is used to get tshirst By teams or by shirt name could be used for Filtering
 
 
-                return await _context.TShirts.Include(t=> t.Team)
-                                         .Include(t=> t.ShirtLinks)// I Used EF Cores provider ILike function instead of .Contains to avoid case sensetivity 
-                                         .Where(t => EF.Functions.ILike(t.Team.TeamName, $"%{Name}%") || EF.Functions.ILike(t.ShirtName, $"%{Name}%"))
-                                         .ToListAsync();
+            return await _context.TShirts.Include(t => t.Team)
+                                     .Include(t => t.ShirtLinks)// I Used EF Cores provider ILike function instead of .Contains to avoid case sensetivity 
+                                     .Where(t => EF.Functions.ILike(t.Team.TeamName, $"%{Name}%") || EF.Functions.ILike(t.ShirtName, $"%{Name}%"))
+                                     .ToListAsync();
         }
 
         public async Task<TShirt?> GetById(int id)
@@ -45,10 +45,10 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<List<TShirt>> GetByPriceAsc(String Name)
         {
-            return await _context.TShirts .Include(t => t.Team)
+            return await _context.TShirts.Include(t => t.Team)
                                           .Include(t => t.ShirtLinks)
-                                          .Where(t=> t.ShirtName==Name) //this is to allow us to get the names of the Shirts in the Sections before ordering their prices in Ascending 
-                                          .OrderBy(t=> t.ShirtPrice)
+                                          .Where(t => t.ShirtName == Name) //this is to allow us to get the names of the Shirts in the Sections before ordering their prices in Ascending 
+                                          .OrderBy(t => t.ShirtPrice)
                                           .ToListAsync();
         }
 
@@ -76,7 +76,7 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<List<int>> GetCountPerSzie(string ShirtSize, int ShirtId)
         {   //gets the amount of tshirts avaiilable per size
-            return await _context.Inventory.Where(t=>t.TshirtID == ShirtId && t.ShirtSize== ShirtSize )
+            return await _context.Inventory.Where(t => t.TshirtID == ShirtId && t.ShirtSize == ShirtSize)
                                             .Select(t => t.AmountAvailable)
                                             .ToListAsync();
         }

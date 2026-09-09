@@ -48,8 +48,8 @@ namespace Kitverse_backend_01.Controllers
             {
                 var result = await _authService.Login(login.Email, login.Password);
                 if (result != null)
-                    return Ok(new { result.UserId ,result.UserName,result.UserEmail ,result.Role });
-                return Unauthorized(new {message= "Invalid credentials" });
+                    return Ok(new { result.UserId, result.UserName, result.UserEmail, result.Role });
+                return Unauthorized(new { message = "Invalid credentials" });
             }
             catch (Exception ex)
             {

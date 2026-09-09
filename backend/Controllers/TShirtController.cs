@@ -62,11 +62,11 @@ namespace Kitverse_backend_01.Controllers
             return Ok(tshirt);
         }
 
-        [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize" )]
-        public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize,int ShirtId)
+        [HttpGet("Inventory /{ShirtSize}/{ShirtId}/AmountPerSize")]
+        public async Task<IActionResult> GetAmountAvaliablePerSize(String ShirtSize, int ShirtId)
         {
             List<int> NumberList = await _tshirtService.GetCountPerSzie(ShirtSize, ShirtId);
-            if(NumberList == null)
+            if (NumberList == null)
             {
                 return NotFound(new { message = "Amount Available per size not Found" });
 
@@ -80,9 +80,9 @@ namespace Kitverse_backend_01.Controllers
         {
             var tshirt = await _tshirtService.GetByPriceDesc(Name);
 
-            if(tshirt == null)
+            if (tshirt == null)
             {
-                return NotFound( new { message="Shirt Not Found"});
+                return NotFound(new { message = "Shirt Not Found" });
             }
 
             return Ok(tshirt);

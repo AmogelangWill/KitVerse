@@ -26,7 +26,8 @@ builder.Services.AddScoped<ITShirtService, TShirtService>();
 
 // Register CartService so controllers can request ICartService and get a working CartService automatically
 builder.Services.AddScoped<ICartService, CartService>();
-
+// Register AdminService so controllers can request IAdminService and get a working AdminService automatically
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 
