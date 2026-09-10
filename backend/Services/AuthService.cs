@@ -42,16 +42,27 @@ namespace Kitverse_backend_01.Controllers
                 }
                 else
                 {
+                    // Default to Customer role if none provided
+                    if (string.IsNullOrEmpty(user.Role))
+                    {
+                        user.Role = "Customer";
+                    }
 
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
-                                                                         // Save the user to the database here (this part is not implemented yet).
-                    _context.Users.Add(user);//adding user to the database...
+                    
+                    _context.Users.Add(user); // adding user to the database...
                     await _context.SaveChangesAsync();
 
-
-                    user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
-                    _context.Users.Add(user);//adding user to the database...
-                    await _context.SaveChangesAsync();
+                    // To prevent foreign key crashes (like in CartService), create the corresponding subclass record
+                    if (user.Role == "Customer")
+                    {
+                        var customer = new Customer
+                        {
+                            UserId = user.UserId
+                        };
+                        _context.Customers.Add(customer);
+                        await _context.SaveChangesAsync();
+                    }
                 }
             }
             catch (Exception ex)
