@@ -1,0 +1,251 @@
+.CartOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.CartOverlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.CartDrawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 3000;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+    font-family: 'Archivo', sans-serif;
+}
+
+.CartDrawer.open {
+    transform: translateX(0);
+}
+
+.CartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.CartHeader h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.CartCloseBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    transition: transform 0.2s ease;
+}
+
+.CartCloseBtn:hover {
+    transform: scale(1.1);
+}
+
+.CartContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+}
+
+.CartEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7280;
+    text-align: center;
+}
+
+.CartEmpty svg {
+    margin-bottom: 15px;
+    color: #9ca3af;
+}
+
+.CartLoading {
+    text-align: center;
+    color: #6b7280;
+    padding: 20px;
+}
+
+.CartItemsList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.CartItem {
+    display: flex;
+    gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.CartItemImage {
+    width: 80px;
+    height: 100px;
+    background-color: #f9fafb;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.CartItemImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.CartItemDetails {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.CartItemName {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+}
+
+.CartItemPrice {
+    margin: 0 0 15px 0;
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.CartItemControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.CartItemQuantity {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.CartItemQuantity button {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #111;
+}
+
+.CartItemQuantity button:hover {
+    background-color: #f9fafb;
+}
+
+.CartItemQuantity span {
+    padding: 0 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.CartItemRemove {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.CartFooter {
+    padding: 25px;
+    border-top: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.CartTotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 10px;
+}
+
+.CartTaxNote {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.CartCheckoutBtn {
+    width: 100%;
+    padding: 16px;
+    background-color: #111;
+    color: #fff;
+    font-family: 'Archivo', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 10px;
+}
+
+.CartCheckoutBtn:hover {
+    background-color: #333;
+}
+
+.CartClearBtn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    font-family: 'Archivo', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.CartClearBtn:hover {
+    background-color: #fff;
+    color: #111;
+    border-color: #111;
+}

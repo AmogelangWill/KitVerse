@@ -1,0 +1,240 @@
+.AdminContainer {
+    display: flex;
+    min-height: calc(100vh - 80px); /* Assuming header is ~80px */
+    background-color: #f9fafb;
+    font-family: 'Archivo', sans-serif;
+}
+
+/* Sidebar */
+.AdminSidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.AdminSidebar h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    color: #111;
+    letter-spacing: 1px;
+}
+
+.AdminNav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.AdminNavBtn {
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.AdminNavBtn:hover {
+    background-color: #f3f4f6;
+    color: #111;
+}
+
+.AdminNavBtn.active {
+    background-color: #111;
+    color: #fff;
+}
+
+/* Main Content */
+.AdminContent {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.AdminHeader {
+    margin-bottom: 30px;
+}
+
+.AdminHeader h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 5px 0;
+}
+
+.AdminHeader p {
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Dashboard Cards */
+.DashboardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.DashboardCard {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 25px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.DashboardCardTitle {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.DashboardCardValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #111;
+}
+
+/* Tables */
+.AdminTableWrapper {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.AdminTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.AdminTable th, .AdminTable td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.AdminTable th {
+    background-color: #f9fafb;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.AdminTable td {
+    font-size: 0.95rem;
+    color: #111;
+    font-weight: 500;
+}
+
+.AdminTable tr:last-child td {
+    border-bottom: none;
+}
+
+/* Role Badges */
+.RoleBadge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.RoleBadge.Admin { background-color: #111; color: #fff; }
+.RoleBadge.Customer { background-color: #e5e7eb; color: #4b5563; }
+.RoleBadge.ItemLister { background-color: #dbeafe; color: #1d4ed8; }
+
+/* Buttons */
+.AdminActionBtn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-right: 5px;
+}
+
+.AdminActionBtn:hover {
+    background-color: #f3f4f6;
+}
+
+.AdminActionBtn.danger {
+    color: #ef4444;
+    border-color: #fca5a5;
+}
+.AdminActionBtn.danger:hover {
+    background-color: #fef2f2;
+}
+
+.AdminPrimaryBtn {
+    background-color: #111;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.AdminPrimaryBtn:hover {
+    background-color: #333;
+}
+
+/* Loading & Error */
+.AdminLoading, .AdminError {
+    padding: 40px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #6b7280;
+}
+.AdminError {
+    color: #ef4444;
+}
+
+/* Access Denied */
+.AdminDenied {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+}
+.AdminDenied h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+.AdminDenied p {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Flex header for sections */
+.SectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}

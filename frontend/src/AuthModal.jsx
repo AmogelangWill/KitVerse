@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useAuth } from "./AuthContext.jsx";
 import "./AuthModal.css";
 
 function AuthModal({ isOpen, onClose }) {
+  const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -59,7 +61,10 @@ function AuthModal({ isOpen, onClose }) {
       setSuccessMsg(isLogin ? "Login successful!" : "Account created successfully! You can now sign in.");
       
       if (isLogin) {
-        // Optional: Close modal after a short delay on successful login
+        // Save the JWT token and user info into our AuthContext!
+        login(data);
+        
+        // Close modal after a short delay on successful login
         setTimeout(() => {
           onClose();
         }, 1500);

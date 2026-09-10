@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SizeGuideDrawer from "./SizeGuideDrawer.jsx";
+import { useAuth } from "./AuthContext.jsx";
+import { useCart } from "./CartContext.jsx";
 import "./ProductDetails.css";
 
 function ProductDetails() {
@@ -10,6 +12,11 @@ function ProductDetails() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+    const { user, setIsAuthOpen } = useAuth();
+    const { setIsCartOpen, fetchCartCount } = useCart();
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+    const [wishlistActive, setWishlistActive] = useState(false);
     
     // New state for Inventory
     const [inventoryInfo, setInventoryInfo] = useState({});
@@ -64,6 +71,62 @@ function ProductDetails() {
         fetchProductAndInventory();
         window.scrollTo(0, 0);
     }, [id]);
+
+
+    const handleAddToCart = async () => {
+        if (!selectedSize) return;
+        if (!user) {
+            setIsAuthOpen(true);
+            return;
+        }
+
+        setIsAddingToCart(true);
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${id}?quantity=1`, {
+                method: "POST"
+            });
+            if (res.ok) {
+                setIsCartOpen(true);
+                fetchCartCount();
+            } else {
+                const errorData = await res.json();
+                alert(errorData.message || "Failed to add item to cart.");
+            }
+        } catch (error) {
+            console.error("Add to cart error:", error);
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
+    const handleWishlist = async () => {
+        if (!user) {
+            setIsAuthOpen(true);
+            return;
+        }
+
+        setIsAddingToWishlist(true);
+        try {
+            const method = wishlistActive ? "DELETE" : "POST";
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/Wishlist/${user.userId}/${id}`, {
+                method: method,
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+            
+            if (res.ok) {
+                setWishlistActive(!wishlistActive);
+            } else {
+                const errorData = await res.json();
+                alert(errorData.message || "Failed to update wishlist.");
+            }
+        } catch (error) {
+            console.error("Wishlist error:", error);
+        } finally {
+            setIsAddingToWishlist(false);
+        }
+    };
 
     if (loading) {
         return <div className="PDP-Loading">Loading product details...</div>;
@@ -151,11 +214,11 @@ function ProductDetails() {
 
                     {/* ACTIONS: Add to Cart + Wishlist */}
                     <div className="PDP-Actions">
-                        <button className="PDP-AddToCartBtn" disabled={!selectedSize}>
-                            {selectedSize ? "ADD TO CART" : "SELECT A SIZE"}
+                        <button className="PDP-AddToCartBtn" onClick={handleAddToCart} disabled={!selectedSize || isAddingToCart}>
+                            {isAddingToCart ? "ADDING..." : selectedSize ? "ADD TO CART" : "SELECT A SIZE"}
                         </button>
-                        <button className="PDP-WishlistBtn" aria-label="Add to Wishlist">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <button className={`PDP-WishlistBtn ${wishlistActive ? 'active' : ''}`} aria-label="Add to Wishlist" onClick={handleWishlist} disabled={isAddingToWishlist}>
+                            <svg viewBox="0 0 24 24" fill={wishlistActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
