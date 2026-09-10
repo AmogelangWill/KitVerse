@@ -5,6 +5,7 @@ import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";
 import HomePage from "./HomePage.jsx";
 import ProductDetails from "./ProductDetails.jsx";
+import AdminPage from "./AdminPage.jsx";
 
 function App(){
    return(
@@ -15,6 +16,7 @@ function App(){
            <Routes>
                <Route path="/" element={<HomePage />} />
                <Route path="/product/:id" element={<ProductDetails />} />
+               <Route path="/admin" element={<AdminPage />} />
            </Routes>
            <Footer/>
         </Router>

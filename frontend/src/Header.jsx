@@ -57,6 +57,11 @@ function Header(){
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
+                {user?.role === "Admin" && (
+                    <Link to="/admin" className="HideOnMobile" style={{textDecoration: 'none'}}>
+                        <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
+                    </Link>
+                )}
 
                 {/* On mobile, we can also show the secondary links inside the menu */}
                 <div className="MobileSecondaryLinks">
@@ -71,6 +76,11 @@ function Header(){
                         </button>
                     )}
                     <button className="NavBtn">Wishlist</button>
+                    {user?.role === "Admin" && (
+                        <Link to="/admin" style={{textDecoration: 'none'}}>
+                            <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
+                        </Link>
+                    )}
                 </div>
             </nav>
 
