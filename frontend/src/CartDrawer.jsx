@@ -35,7 +35,7 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}?quantity=${newQuantity}`, {
                 method: "PUT",
             });
-            if (res.ok) fetchCart();
+            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
         } catch (error) {
             console.error("Error updating quantity:", error);
         }
@@ -46,7 +46,7 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}`, {
                 method: "DELETE",
             });
-            if (res.ok) fetchCart();
+            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
         } catch (error) {
             console.error("Error removing item:", error);
         }
@@ -57,7 +57,7 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/clear`, {
                 method: "POST",
             });
-            if (res.ok) fetchCart();
+            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
         } catch (error) {
             console.error("Error clearing cart:", error);
         }

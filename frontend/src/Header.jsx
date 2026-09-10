@@ -12,16 +12,40 @@ function Header(){
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user, logout } = useAuth();
+    const [cartCount, setCartCount] = useState(0);
+
+    const fetchCartCount = async () => {
+        if (!user) {
+            setCartCount(0);
+            return;
+        }
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}`);
+            if (res.ok) {
+                const data = await res.json();
+                const count = data.itemLists?.reduce((total, item) => total + item.quantity, 0) || 0;
+                setCartCount(count);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     // Listen for custom "open-cart" event (e.g. dispatched by ProductDetails after adding to cart)
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
         const handleOpenAuth = () => setIsAuthOpen(true);
         window.addEventListener("open-auth", handleOpenAuth);
+        
+        fetchCartCount();
+        window.addEventListener("cart-updated", fetchCartCount);
+        window.addEventListener("open-cart", fetchCartCount);
         window.addEventListener("open-cart", handleOpenCart);
         return () => {
             window.removeEventListener("open-cart", handleOpenCart);
             window.removeEventListener("open-auth", handleOpenAuth);
+            window.removeEventListener("cart-updated", fetchCartCount);
+            window.removeEventListener("open-cart", fetchCartCount);
         };
     }, []);
 
@@ -95,13 +119,18 @@ function Header(){
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </button>
+                <div style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </button>
+                    {cartCount > 0 && (
+                        <span className="CartBadge">{cartCount}</span>
+                    )}
+                </div>
 
                 {user ? (
                     <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
