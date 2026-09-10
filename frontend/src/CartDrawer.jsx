@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import { useCart } from "./CartContext.jsx";
 import "./CartDrawer.css";
 
-function CartDrawer({ isOpen, onClose }) {
+function CartDrawer() {
     const { user } = useAuth();
+    const { isCartOpen, setIsCartOpen, fetchCartCount } = useCart();
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
 
     // Fetch the cart whenever the drawer opens or the user changes
     useEffect(() => {
-        if (isOpen && user) {
+        if (isCartOpen && user) {
             fetchCart();
         }
-    }, [isOpen, user]);
+    }, [isCartOpen, user]);
 
     const fetchCart = async () => {
         setLoading(true);
@@ -21,6 +23,7 @@ function CartDrawer({ isOpen, onClose }) {
             if (res.ok) {
                 const data = await res.json();
                 setCart(data);
+                fetchCartCount(); // Keep the global badge count perfectly in sync
             }
         } catch (error) {
             console.error("Error fetching cart:", error);
@@ -35,7 +38,9 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}?quantity=${newQuantity}`, {
                 method: "PUT",
             });
-            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
+            if (res.ok) {
+                fetchCart();
+            }
         } catch (error) {
             console.error("Error updating quantity:", error);
         }
@@ -46,7 +51,9 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}`, {
                 method: "DELETE",
             });
-            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
+            if (res.ok) {
+                fetchCart();
+            }
         } catch (error) {
             console.error("Error removing item:", error);
         }
@@ -57,21 +64,23 @@ function CartDrawer({ isOpen, onClose }) {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/clear`, {
                 method: "POST",
             });
-            if (res.ok) { fetchCart(); window.dispatchEvent(new Event("cart-updated")); }
+            if (res.ok) {
+                fetchCart();
+            }
         } catch (error) {
             console.error("Error clearing cart:", error);
         }
     };
 
-    if (!isOpen) return null;
+    if (!isCartOpen) return null;
 
     return (
         <>
-            <div className={`CartOverlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
-            <div className={`CartDrawer ${isOpen ? 'open' : ''}`}>
+            <div className={`CartOverlay ${isCartOpen ? 'open' : ''}`} onClick={() => setIsCartOpen(false)}></div>
+            <div className={`CartDrawer ${isCartOpen ? 'open' : ''}`}>
                 <div className="CartHeader">
                     <h3>Your Cart</h3>
-                    <button className="CartCloseBtn" onClick={onClose} aria-label="Close">
+                    <button className="CartCloseBtn" onClick={() => setIsCartOpen(false)} aria-label="Close">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -92,7 +101,6 @@ function CartDrawer({ isOpen, onClose }) {
                                 <div key={item.tShirtId} className="CartItem">
                                     <div className="CartItemImage">
                                         <img 
-                                            // Fallback to placeholder if backend doesn't return ShirtLinks in Cart
                                             src={item.tShirt?.shirtLinks?.[0]?.shirtLinkUrl || "/placeholder.png"} 
                                             alt={item.tShirt?.shirtName || "Product"} 
                                         />
