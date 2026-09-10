@@ -115,6 +115,22 @@ namespace Kitverse_backend_01.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpPost("Tshirt")]
+        public async Task<IActionResult> UpdateTshirt([FromBody] TShirt shirt)
+        {
+            bool Results = await _tshirtService.UpdateShirt(shirt);
+
+            if (Results == true)
+            {
+                return Ok(new {message="Shirt Updated"});
+            }
+            else
+            {
+                return BadRequest(new { message = "COuld not update the Tshirt" });
+            }
+        }
+
 
 
         // POST: api/TShirt
@@ -125,7 +141,7 @@ namespace Kitverse_backend_01.Controllers
             try
             {
                 var created = await _tshirtService.CreateBanner(request);
-                return Ok(created);
+                return Ok(created ) ;
             }
             catch(Exception ex)
             {
