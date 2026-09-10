@@ -3,11 +3,13 @@ import "./Header.css";
 import { Link } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
+import { useAuth } from "./AuthContext.jsx";
 
 function Header(){
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { user, logout } = useAuth();
 
     return(
       <>    
@@ -37,12 +39,8 @@ function Header(){
             </div>
             
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
-                <button className="NavBtn">
-                    Jerseys
-                </button>
-                <button className="NavBtn">
-                    New Arrival
-                </button>
+                <button className="NavBtn">Jerseys</button>
+                <button className="NavBtn">New Arrival</button>
                 <button className="NavBtn">
                     Nedbank Cup
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,14 +54,19 @@ function Header(){
                     </svg>
                 </button>
 
-                {/* On mobile, we can also show the secondary links (Account, Wishlist) inside the menu */}
+                {/* On mobile, we can also show the secondary links inside the menu */}
                 <div className="MobileSecondaryLinks">
-                    <button className="NavBtn" onClick={() => { setIsAuthOpen(true); setIsMobileMenuOpen(false); }}>
-                        Sign In / Register
-                    </button>
-                    <button className="NavBtn">
-                        Wishlist
-                    </button>
+                    {user ? (
+                        <>
+                            <span className="NavBtn" style={{fontWeight: 800, color: '#111'}}>Hi, {user.userName}</span>
+                            <button className="NavBtn" onClick={logout}>Sign Out</button>
+                        </>
+                    ) : (
+                        <button className="NavBtn" onClick={() => { setIsAuthOpen(true); setIsMobileMenuOpen(false); }}>
+                            Sign In / Register
+                        </button>
+                    )}
+                    <button className="NavBtn">Wishlist</button>
                 </div>
             </nav>
 
@@ -85,12 +88,23 @@ function Header(){
                         <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="IconBtn HideOnMobile" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </button>
+
+                {user ? (
+                    <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+                ) : (
+                    <button className="IconBtn HideOnMobile" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </button>
+                )}
              </div>  
        </div>
        
