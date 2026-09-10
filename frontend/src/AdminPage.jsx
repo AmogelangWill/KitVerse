@@ -15,14 +15,6 @@ function AdminPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Initial check for Auth
-    useEffect(() => {
-        if (!authLoading && (!user || user.role !== "Admin")) {
-            // Unauthenticated or not admin
-            // We stay on the page but render the Denied view.
-        }
-    }, [user, authLoading]);
-
     useEffect(() => {
         if (user && user.role === "Admin") {
             fetchData();
@@ -43,13 +35,37 @@ function AdminPage() {
                 else throw new Error("Failed to load users data");
             } else if (activeTab === "banners") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners");
-                if (res.ok) setBanners(await res.json());
-                else throw new Error("Failed to load banners data");
+                if (res.ok) {
+                    setBanners(await res.json());
+                } else if (res.status === 500) {
+                    throw new Error("Backend Error 500: The Banners table is likely missing or misconfigured in the database (EF Core Mapping). Tell the backend team!");
+                } else {
+                    throw new Error("Failed to load banners data");
+                }
             }
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRoleChange = async (userId, newRole) => {
+        if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/users/${userId}/role`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newRole)
+            });
+            if (res.ok) {
+                alert("Role changed successfully!");
+                fetchData();
+            } else {
+                alert("Failed to change user role.");
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -64,6 +80,35 @@ function AdminPage() {
             } else {
                 alert("Failed to delete user.");
             }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAddBanner = async () => {
+        const url = window.prompt("Enter the Image URL for the new banner:");
+        if (!url) return;
+        try {
+            const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageUrl: url, dateAdded: new Date().toISOString() })
+            });
+            if (res.ok) fetchData();
+            else alert("Failed to add banner.");
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteBanner = async (bannerId) => {
+        if (!window.confirm("Are you sure you want to delete this banner?")) return;
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/banners/${bannerId}`, {
+                method: "DELETE"
+            });
+            if (res.ok) fetchData();
+            else alert("Failed to delete banner.");
         } catch (err) {
             console.error(err);
         }
@@ -111,7 +156,10 @@ function AdminPage() {
                 {loading ? (
                     <div className="AdminLoading">Loading...</div>
                 ) : error ? (
-                    <div className="AdminError">{error}</div>
+                    <div className="AdminError" style={{background: '#fee2e2', padding: '20px', borderRadius: '8px', border: '1px solid #ef4444'}}>
+                        <h3 style={{marginTop: 0}}>Error</h3>
+                        {error}
+                    </div>
                 ) : (
                     <>
                         {/* DASHBOARD TAB */}
@@ -166,7 +214,7 @@ function AdminPage() {
                                                 <th>ID</th>
                                                 <th>Name</th>
                                                 <th>Email</th>
-                                                <th>Role</th>
+                                                <th>Role Controls</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -177,7 +225,16 @@ function AdminPage() {
                                                     <td>{u.userId}</td>
                                                     <td>{u.userName} {u.userSurname}</td>
                                                     <td>{u.userEmail}</td>
-                                                    <td>
+                                                    <td style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                                        <select 
+                                                            className="AdminActionBtn"
+                                                            value={u.role || 'Customer'}
+                                                            onChange={(e) => handleRoleChange(u.userId, e.target.value)}
+                                                        >
+                                                            <option value="Customer">Customer</option>
+                                                            <option value="Item Lister">Item Lister</option>
+                                                            <option value="Admin">Admin</option>
+                                                        </select>
                                                         <span className={`RoleBadge ${u.role === 'Admin' ? 'Admin' : u.role === 'Item Lister' ? 'ItemLister' : 'Customer'}`}>
                                                             {u.role || 'Customer'}
                                                         </span>
@@ -209,15 +266,16 @@ function AdminPage() {
                                         <h1>Banners</h1>
                                         <p>Manage promotional banners displayed on the homepage.</p>
                                     </div>
-                                    <button className="AdminPrimaryBtn">+ Add Banner</button>
+                                    <button className="AdminPrimaryBtn" onClick={handleAddBanner}>+ Add Banner</button>
                                 </div>
                                 <div className="AdminTableWrapper">
                                     <table className="AdminTable">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Title</th>
-                                                <th>Status</th>
+                                                <th>Image Preview</th>
+                                                <th>Image URL</th>
+                                                <th>Date Added</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -225,17 +283,21 @@ function AdminPage() {
                                             {banners.map(b => (
                                                 <tr key={b.bannerId}>
                                                     <td>{b.bannerId}</td>
-                                                    <td>{b.bannerTitle || 'Untitled Banner'}</td>
-                                                    <td>{b.bannerStatus || 'Active'}</td>
                                                     <td>
-                                                        <button className="AdminActionBtn">Edit</button>
-                                                        <button className="AdminActionBtn danger">Delete</button>
+                                                        <img src={b.imageUrl} alt="banner" style={{width: '150px', height: '40px', objectFit: 'cover', borderRadius: '4px'}} />
+                                                    </td>
+                                                    <td style={{maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                                                        <a href={b.imageUrl} target="_blank" rel="noreferrer" style={{color: '#1d4ed8'}}>{b.imageUrl}</a>
+                                                    </td>
+                                                    <td>{new Date(b.dateAdded).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <button className="AdminActionBtn danger" onClick={() => handleDeleteBanner(b.bannerId)}>Delete</button>
                                                     </td>
                                                 </tr>
                                             ))}
                                             {banners.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="4" style={{textAlign: 'center', padding: '30px'}}>No banners found.</td>
+                                                    <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No banners found. Click "+ Add Banner" to create one.</td>
                                                 </tr>
                                             )}
                                         </tbody>
