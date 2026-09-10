@@ -13,6 +13,7 @@ function ItemListerPage() {
 
     // Form State
     const [formData, setFormData] = useState({
+        tShirtId: 0,
         shirtName: "",
         shirtSeason: "",
         shirtPrice: "",
@@ -61,20 +62,78 @@ function ItemListerPage() {
         setSizes(newSizes);
     };
 
+    const resetForm = () => {
+        setFormData({
+            tShirtId: 0, shirtName: "", shirtSeason: "", shirtPrice: "", shirtAffiliate: "",
+            shirtGender: "Unisex", shirtDescription: "", shirtStatus: "Available", teamId: ""
+        });
+        setImageUrls([""]);
+        setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+    };
+
+    const openEditForm = (item) => {
+        setFormData({
+            tShirtId: item.tShirtId,
+            shirtName: item.shirtName || "",
+            shirtSeason: item.shirtSeason || "",
+            shirtPrice: item.shirtPrice || "",
+            shirtAffiliate: item.shirtAffiliate || "",
+            shirtGender: item.shirtGender || "Unisex",
+            shirtDescription: item.shirtDescription || "",
+            shirtStatus: item.shirtStatus || "Available",
+            teamId: item.teamId || ""
+        });
+        // We just map the imageUrls array back 
+        if (item.shirtLinks && item.shirtLinks.length > 0) {
+            setImageUrls(item.shirtLinks.map(link => link.shirtLinkUrl));
+        } else {
+            setImageUrls([""]);
+        }
+        
+        // Note: The backend GET doesn't easily expose sizes in the main payload without calling inventory endpoint,
+        // so we'll just populate a default size block if it's missing. (Update doesn't seem to natively handle sizes in TShirt object directly based on C# model, but we'll include it just in case).
+        setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+        setActiveTab("edit");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitLoading(true);
 
-        const payload = {
-            ...formData,
+        const isEdit = activeTab === "edit";
+
+        const payload = isEdit ? {
+            tShirtId: formData.tShirtId,
+            shirtName: formData.shirtName,
+            shirtSeason: formData.shirtSeason,
             shirtPrice: parseFloat(formData.shirtPrice),
+            shirtAffiliate: formData.shirtAffiliate,
+            shirtGender: formData.shirtGender,
+            shirtDescription: formData.shirtDescription,
+            shirtStatus: formData.shirtStatus,
+            teamId: parseInt(formData.teamId),
+            // The backend Update endpoint expects TShirt object which has ShirtLinks array
+            shirtLinks: imageUrls.filter(url => url.trim() !== "").map(url => ({ shirtLinkUrl: url }))
+        } : {
+            // Create uses CreateTShirt DTO
+            shirtName: formData.shirtName,
+            shirtSeason: formData.shirtSeason,
+            shirtPrice: parseFloat(formData.shirtPrice),
+            shirtAffiliate: formData.shirtAffiliate,
+            shirtGender: formData.shirtGender,
+            shirtDescription: formData.shirtDescription,
+            shirtStatus: formData.shirtStatus,
             teamId: parseInt(formData.teamId),
             imageUrls: imageUrls.filter(url => url.trim() !== ""),
             sizes: sizes.filter(s => s.shirtSize.trim() !== "")
         };
 
+        const url = isEdit 
+            ? "https://kitverse-production.up.railway.app/api/TShirt/Tshirt"
+            : "https://kitverse-production.up.railway.app/api/TShirt";
+
         try {
-            const res = await fetch("https://kitverse-production.up.railway.app/api/TShirt", {
+            const res = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -84,18 +143,12 @@ function ItemListerPage() {
             });
 
             if (res.ok) {
-                alert("Product successfully added to inventory!");
+                alert(`Product successfully ${isEdit ? 'updated' : 'added'}!`);
                 setActiveTab("inventory");
-                // Reset form
-                setFormData({
-                    shirtName: "", shirtSeason: "", shirtPrice: "", shirtAffiliate: "",
-                    shirtGender: "Unisex", shirtDescription: "", shirtStatus: "Available", teamId: ""
-                });
-                setImageUrls([""]);
-                setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+                resetForm();
             } else {
                 const errData = await res.json();
-                alert(`Failed to add product: ${errData.message || 'Unknown error'}`);
+                alert(`Failed to save product: ${errData.message || 'Unknown error'}`);
             }
         } catch (err) {
             alert(`Error: ${err.message}`);
@@ -129,10 +182,13 @@ function ItemListerPage() {
                     </button>
                     <button 
                         className={`AdminNavBtn ${activeTab === 'add' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('add')}
+                        onClick={() => { resetForm(); setActiveTab('add'); }}
                     >
                         Add New Product
                     </button>
+                    {activeTab === 'edit' && (
+                        <button className="AdminNavBtn active">Edit Product</button>
+                    )}
                 </nav>
             </aside>
 
@@ -144,7 +200,7 @@ function ItemListerPage() {
                                 <h1>Inventory Management</h1>
                                 <p>View all products currently listed in the store.</p>
                             </div>
-                            <button className="AdminPrimaryBtn" onClick={() => setActiveTab("add")}>
+                            <button className="AdminPrimaryBtn" onClick={() => { resetForm(); setActiveTab("add"); }}>
                                 + Add Product
                             </button>
                         </div>
@@ -161,6 +217,7 @@ function ItemListerPage() {
                                             <th>Season</th>
                                             <th>Price</th>
                                             <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,6 +240,11 @@ function ItemListerPage() {
                                                         {item.shirtStatus}
                                                     </span>
                                                 </td>
+                                                <td>
+                                                    <button className="AdminActionBtn" onClick={() => openEditForm(item)}>
+                                                        Edit
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -192,11 +254,11 @@ function ItemListerPage() {
                     </div>
                 )}
 
-                {activeTab === "add" && (
+                {(activeTab === "add" || activeTab === "edit") && (
                     <div>
                         <div className="AdminHeader">
-                            <h1>List New Product</h1>
-                            <p>Fill out the details below to add a new jersey to the storefront.</p>
+                            <h1>{activeTab === "edit" ? "Edit Product Details" : "List New Product"}</h1>
+                            <p>{activeTab === "edit" ? "Update the information for this product." : "Fill out the details below to add a new jersey to the storefront."}</p>
                         </div>
                         
                         <form className="ListerForm" onSubmit={handleSubmit}>
@@ -228,8 +290,12 @@ function ItemListerPage() {
                                     </select>
                                 </div>
                                 <div className="FormGroup">
-                                    <label>Affiliate / Brand (Optional)</label>
-                                    <input type="text" name="shirtAffiliate" value={formData.shirtAffiliate} onChange={handleFormChange} />
+                                    <label>Status</label>
+                                    <select name="shirtStatus" value={formData.shirtStatus} onChange={handleFormChange}>
+                                        <option value="Available">Available</option>
+                                        <option value="Out of Stock">Out of Stock</option>
+                                        <option value="Discontinued">Discontinued</option>
+                                    </select>
                                 </div>
                                 <div className="FormGroup full-width">
                                     <label>Description</label>
@@ -259,42 +325,49 @@ function ItemListerPage() {
                                 + Add Another Image
                             </button>
 
-                            <h3 className="FormSectionTitle">Sizes & Stock</h3>
-                            {sizes.map((sizeObj, i) => (
-                                <div className="DynamicListRow" key={i}>
-                                    <select 
-                                        value={sizeObj.shirtSize} 
-                                        onChange={(e) => handleSizeChange(i, 'shirtSize', e.target.value)}
-                                        style={{width: '120px'}}
-                                    >
-                                        <option value="S">S</option>
-                                        <option value="M">M</option>
-                                        <option value="L">L</option>
-                                        <option value="XL">XL</option>
-                                        <option value="XXL">XXL</option>
-                                    </select>
-                                    <input 
-                                        type="number" 
-                                        placeholder="Amount Available" 
-                                        value={sizeObj.amountAvailable} 
-                                        onChange={(e) => handleSizeChange(i, 'amountAvailable', e.target.value)} 
-                                        min="0"
-                                        required
-                                    />
-                                    {i > 0 && (
-                                        <button type="button" className="AdminActionBtn danger" onClick={() => setSizes(sizes.filter((_, idx) => idx !== i))}>
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                            <button type="button" className="AdminActionBtn" style={{marginTop: '10px'}} onClick={() => setSizes([...sizes, { shirtSize: "S", amountAvailable: 0 }])}>
-                                + Add Another Size
-                            </button>
+                            {activeTab === "add" && (
+                                <>
+                                    <h3 className="FormSectionTitle">Sizes & Stock</h3>
+                                    {sizes.map((sizeObj, i) => (
+                                        <div className="DynamicListRow" key={i}>
+                                            <select 
+                                                value={sizeObj.shirtSize} 
+                                                onChange={(e) => handleSizeChange(i, 'shirtSize', e.target.value)}
+                                                style={{width: '120px'}}
+                                            >
+                                                <option value="S">S</option>
+                                                <option value="M">M</option>
+                                                <option value="L">L</option>
+                                                <option value="XL">XL</option>
+                                                <option value="XXL">XXL</option>
+                                            </select>
+                                            <input 
+                                                type="number" 
+                                                placeholder="Amount Available" 
+                                                value={sizeObj.amountAvailable} 
+                                                onChange={(e) => handleSizeChange(i, 'amountAvailable', e.target.value)} 
+                                                min="0"
+                                                required
+                                            />
+                                            {i > 0 && (
+                                                <button type="button" className="AdminActionBtn danger" onClick={() => setSizes(sizes.filter((_, idx) => idx !== i))}>
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button type="button" className="AdminActionBtn" style={{marginTop: '10px'}} onClick={() => setSizes([...sizes, { shirtSize: "S", amountAvailable: 0 }])}>
+                                        + Add Another Size
+                                    </button>
+                                </>
+                            )}
 
                             <div style={{marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e5e7eb', textAlign: 'right'}}>
+                                <button type="button" className="AdminActionBtn" onClick={() => setActiveTab('inventory')} style={{marginRight: '10px'}}>
+                                    CANCEL
+                                </button>
                                 <button type="submit" className="AdminPrimaryBtn" disabled={submitLoading}>
-                                    {submitLoading ? "SAVING..." : "PUBLISH PRODUCT"}
+                                    {submitLoading ? "SAVING..." : (activeTab === "edit" ? "SAVE CHANGES" : "PUBLISH PRODUCT")}
                                 </button>
                             </div>
                         </form>
