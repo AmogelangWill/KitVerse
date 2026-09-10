@@ -92,6 +92,7 @@ namespace Kitverse_backend_01.Controllers
                 BannerUrl = request.BannerUrl,
                 Team1ID = request.Team1ID,
                 Team2ID = request.Team2ID,
+                DateAdded=DateTime.UtcNow,
             };
 
             _context.Banners.Add(banner);

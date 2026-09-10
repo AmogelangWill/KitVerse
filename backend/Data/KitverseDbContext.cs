@@ -171,6 +171,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.BannerDescription).HasColumnName("banner_description");
                 entity.Property(t => t.Team1ID).HasColumnName("team_1");
                 entity.Property(t => t.Team2ID).HasColumnName("team_2");
+                entity.Property(t => t.DateAdded).HasColumnName("banner_date_added").HasDefaultValueSql("now()");
                 entity.Property(t => t.BannerUrl).HasColumnName("banner_url");
 
             });
