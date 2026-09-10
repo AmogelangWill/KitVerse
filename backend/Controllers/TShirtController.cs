@@ -116,5 +116,38 @@ namespace Kitverse_backend_01.Controllers
         }
 
 
+
+        // POST: api/TShirt
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpPost("Banner")]
+        public async Task<IActionResult> CreateBanner([FromBody] CreateBanner request)
+        {
+            try
+            {
+                var created = await _tshirtService.CreateBanner(request);
+                return Ok(created);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
+        }
+
+        [HttpGet("Banner/{ID1}/{ID2}")]
+        public async Task<IActionResult> GetFromBannerClick(int ID1, int ID2)
+        {
+            var Shirts = await _tshirtService.GetFromBAnnerClick(ID1, ID2);
+            if(Shirts != null)
+            {
+                return Ok(Shirts);
+            }
+            else
+            {
+                return NotFound(new {message="Associated Shirts Dont't exists"});
+            }
+           
+            
+        }
+
     }
 }

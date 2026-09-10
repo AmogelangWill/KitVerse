@@ -20,5 +20,9 @@ namespace Kitverse_backend_01.Controllers
 
         Task<TShirt> Create(CreateTShirt request);
 
+        Task<Banner> CreateBanner(CreateBanner request);
+
+        Task<List<TShirt>> GetFromBAnnerClick(int ID1,int ID2);
+
     }
 }

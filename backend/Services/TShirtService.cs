@@ -82,6 +82,25 @@ namespace Kitverse_backend_01.Controllers
                                             .ToListAsync();
         }
 
+        public async Task<Banner> CreateBanner(CreateBanner request)
+        {
+            var banner = new Banner
+            {
+                BannerId = request.BannerId,
+                BannerName = request.BannerName,
+                BannerDescription = request.BannerDescription,
+                BannerUrl = request.BannerUrl,
+                Team1ID = request.Team1ID,
+                Team2ID = request.Team2ID,
+            };
+
+            _context.Banners.Add(banner);
+            await _context.SaveChangesAsync();
+
+            return banner;
+
+        }
+
         public async Task<TShirt> Create(CreateTShirt request)
         {
             var tshirt = new TShirt
@@ -117,6 +136,14 @@ namespace Kitverse_backend_01.Controllers
             await _context.SaveChangesAsync();
 
             return tshirt;
+        }
+
+        public async Task<List<TShirt>> GetFromBAnnerClick(int ID1, int ID2)
+        {
+            return await _context.TShirts.Include(t => t.Team)
+                                  .Include(t => t.ShirtLinks)
+                                  .Where(t => t.TShirtId == ID1 || t.TShirtId ==ID2).ToListAsync();
+
         }
     }
 }

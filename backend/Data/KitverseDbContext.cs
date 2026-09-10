@@ -20,6 +20,7 @@ namespace Kitverse_backend_01.Data
         public DbSet<ItemList> ItemLists { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
+        public DbSet<Banner> Banners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,6 +87,7 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.ShirtStatus).HasColumnName("shirt_status");
                 entity.Property(t => t.ShirtName).HasColumnName("shirt_name");
                 entity.Property(t => t.TeamId).HasColumnName("team_id");
+                
                 entity.Property(t => t.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
                 entity.HasOne(t => t.Team).WithMany(team => team.TShirts).HasForeignKey(t => t.TeamId);
             });
@@ -158,6 +160,18 @@ namespace Kitverse_backend_01.Data
                 entity.Property(i => i.AmountAvailable).HasColumnName("amount_available");
 
                 entity.HasOne(i => i.shirt).WithMany().HasForeignKey(i => i.TshirtID);
+
+            });
+
+            modelBuilder.Entity<Banner>(entity =>
+            {
+                entity.ToTable("banners");
+                entity.HasKey(t => t.BannerId);
+                entity.Property(t => t.BannerName).HasColumnName("banner_name");
+                entity.Property(t => t.BannerDescription).HasColumnName("banner_description");
+                entity.Property(t => t.Team1ID).HasColumnName("team_1");
+                entity.Property(t => t.Team2ID).HasColumnName("team_2");
+                entity.Property(t => t.BannerUrl).HasColumnName("banner_url");
 
             });
         }
