@@ -20,6 +20,8 @@ namespace Kitverse_backend_01.Data
         public DbSet<ItemList> ItemLists { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
+        
+        public DbSet<Banner> Banners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

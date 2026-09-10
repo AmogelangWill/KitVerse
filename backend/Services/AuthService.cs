@@ -42,6 +42,13 @@ namespace Kitverse_backend_01.Controllers
                 }
                 else
                 {
+
+                    user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
+                                                                         // Save the user to the database here (this part is not implemented yet).
+                    _context.Users.Add(user);//adding user to the database...
+                    await _context.SaveChangesAsync();
+
+
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
                     _context.Users.Add(user);//adding user to the database...
                     await _context.SaveChangesAsync();

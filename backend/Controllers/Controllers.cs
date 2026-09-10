@@ -48,6 +48,7 @@ namespace Kitverse_backend_01.Controllers
             {
                 var result = await _authService.Login(login.Email, login.Password);
                 if (result != null)
+                    return Ok(new { result.UserId, result.UserName, result.UserEmail, result.Role });
                 {
                     var token = _authService.GenerateToken(result);
                     return Ok(new { token, result.UserId, result.UserName, result.UserEmail, result.Role });

@@ -27,6 +27,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITShirtService, TShirtService>();
 builder.Services.AddScoped<ICartService, CartService>();
+// Register AdminService so controllers can request IAdminService and get a working AdminService automatically
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // JWT authentication - lets the API verify who's logged in on protected requests
 var jwtKey = builder.Configuration["Jwt:Key"];

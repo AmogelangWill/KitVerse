@@ -2,7 +2,7 @@
 
 namespace Kitverse_backend_01.Controllers
 {
-    public class SearchController :ControllerBase
+    public class SearchController : ControllerBase
     {
     }
 }
