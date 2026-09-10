@@ -5,6 +5,7 @@ import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";
 import HomePage from "./HomePage.jsx";
 import ProductDetails from "./ProductDetails.jsx";
+import RivalryPage from "./RivalryPage.jsx";
 import AdminPage from "./AdminPage.jsx";
 import ItemListerPage from "./ItemListerPage.jsx";
 
@@ -17,6 +18,7 @@ function App(){
            <Routes>
                <Route path="/" element={<HomePage />} />
                <Route path="/product/:id" element={<ProductDetails />} />
+               <Route path="/rivalry/:id1/:id2" element={<RivalryPage />} />
                <Route path="/admin" element={<AdminPage />} />
                <Route path="/inventory" element={<ItemListerPage />} />
            </Routes>

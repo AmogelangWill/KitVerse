@@ -1,0 +1,111 @@
+.RivalryContainer {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #111;
+    color: #fff;
+    padding: 40px 20px;
+    font-family: 'Archivo', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.RivalryTitle {
+    font-size: 3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 50px;
+    z-index: 10;
+    text-align: center;
+}
+
+.RivalryTitle span {
+    color: #ef4444; /* red vs */
+}
+
+.RivalrySplitScreen {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    gap: 40px;
+    z-index: 10;
+}
+
+.RivalryCard {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease, background 0.3s ease;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.RivalryCard:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.RivalryCard img {
+    width: 100%;
+    max-width: 300px;
+    height: 350px;
+    object-fit: contain;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.RivalryCard h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.RivalryCard p {
+    font-size: 1.25rem;
+    color: #a3a3a3;
+    margin-bottom: 25px;
+}
+
+.RivalryBtn {
+    background: #fff;
+    color: #111;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.RivalryCard:hover .RivalryBtn {
+    background: #ef4444;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .RivalrySplitScreen {
+        flex-direction: column;
+    }
+    
+    .RivalryTitle {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+    
+    .RivalryCard img {
+        height: 250px;
+    }
+}
