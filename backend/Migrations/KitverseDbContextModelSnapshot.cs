@@ -37,6 +37,41 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("admins", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Banner", b =>
+                {
+                    b.Property<int>("BannerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BannerId"));
+
+                    b.Property<string>("BannerDescription")
+                        .HasColumnType("text")
+                        .HasColumnName("banner_description");
+
+                    b.Property<string>("BannerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("banner_name");
+
+                    b.Property<string>("BannerUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("banner_url");
+
+                    b.Property<int>("Team1ID")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_1");
+
+                    b.Property<int>("Team2ID")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_2");
+
+                    b.HasKey("BannerId");
+
+                    b.ToTable("banners", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Customer", b =>
                 {
                     b.Property<int>("UserId")
@@ -225,9 +260,6 @@ namespace Kitverse_backend_01.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_added")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("ShirtAffiliate")
                         .HasColumnType("text")
