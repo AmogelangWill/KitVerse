@@ -1,53 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./Header.css";
 import { Link } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
 import CartDrawer from "./CartDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import { useCart } from "./CartContext.jsx";
 
 function Header(){
-    const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [isCartOpen, setIsCartOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user, logout } = useAuth();
-    const [cartCount, setCartCount] = useState(0);
-
-    const fetchCartCount = async () => {
-        if (!user) {
-            setCartCount(0);
-            return;
-        }
-        try {
-            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}`);
-            if (res.ok) {
-                const data = await res.json();
-                const count = data.itemLists?.reduce((total, item) => total + item.quantity, 0) || 0;
-                setCartCount(count);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    // Listen for custom "open-cart" event (e.g. dispatched by ProductDetails after adding to cart)
-    useEffect(() => {
-        const handleOpenCart = () => setIsCartOpen(true);
-        const handleOpenAuth = () => setIsAuthOpen(true);
-        window.addEventListener("open-auth", handleOpenAuth);
-        
-        fetchCartCount();
-        window.addEventListener("cart-updated", fetchCartCount);
-        window.addEventListener("open-cart", fetchCartCount);
-        window.addEventListener("open-cart", handleOpenCart);
-        return () => {
-            window.removeEventListener("open-cart", handleOpenCart);
-            window.removeEventListener("open-auth", handleOpenAuth);
-            window.removeEventListener("cart-updated", fetchCartCount);
-            window.removeEventListener("open-cart", fetchCartCount);
-        };
-    }, []);
+    
+    // Use our beautiful global contexts instead of hacky event listeners!
+    const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
+    const { cartCount, isCartOpen, setIsCartOpen } = useCart();
 
     return(
       <>    
@@ -119,6 +85,7 @@ function Header(){
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
+                
                 <div style={{ position: 'relative', display: 'inline-flex' }}>
                     <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -153,7 +120,7 @@ function Header(){
        
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+       <CartDrawer />
      </>
     );
 }

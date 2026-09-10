@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SizeGuideDrawer from "./SizeGuideDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import { useCart } from "./CartContext.jsx";
 import "./ProductDetails.css";
 
 function ProductDetails() {
@@ -11,7 +12,8 @@ function ProductDetails() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-    const { user } = useAuth();
+    const { user, setIsAuthOpen } = useAuth();
+    const { setIsCartOpen, fetchCartCount } = useCart();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
     const [wishlistActive, setWishlistActive] = useState(false);
@@ -74,7 +76,7 @@ function ProductDetails() {
     const handleAddToCart = async () => {
         if (!selectedSize) return;
         if (!user) {
-            window.dispatchEvent(new Event("open-auth"));
+            setIsAuthOpen(true);
             return;
         }
 
@@ -84,7 +86,8 @@ function ProductDetails() {
                 method: "POST"
             });
             if (res.ok) {
-                window.dispatchEvent(new Event("open-cart"));
+                setIsCartOpen(true);
+                fetchCartCount();
             } else {
                 const errorData = await res.json();
                 alert(errorData.message || "Failed to add item to cart.");
@@ -98,7 +101,7 @@ function ProductDetails() {
 
     const handleWishlist = async () => {
         if (!user) {
-            window.dispatchEvent(new Event("open-auth"));
+            setIsAuthOpen(true);
             return;
         }
 

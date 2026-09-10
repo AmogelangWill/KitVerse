@@ -5,6 +5,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     useEffect(() => {
         // Load token and user details from localStorage on app start
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, isAuthOpen, setIsAuthOpen }}>
             {children}
         </AuthContext.Provider>
     );
