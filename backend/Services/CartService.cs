@@ -15,9 +15,14 @@ namespace Kitverse_backend_01.Services
         public async Task<ShoppingCart?> GetCart(int userId)
         {
             // Retrieve the shopping cart for the given user id from the database
-            var cart = _context.ShoppingCarts.Include(c => c.ItemLists).
-                     ThenInclude(il => il.TShirt).
-                     FirstOrDefault(c => c.UserId == userId && c.CartStatus == "Active");
+            var cart = await _context.ShoppingCarts
+                .Include(c => c.ItemLists)
+                    .ThenInclude(il => il.TShirt)
+                        .ThenInclude(t => t.ShirtLinks)
+                .Include(c => c.ItemLists)
+                    .ThenInclude(il => il.TShirt)
+                        .ThenInclude(t => t.Team)
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.CartStatus == "Active");
 
             // If no active cart exists, create a new one for the user
             if (cart == null)
