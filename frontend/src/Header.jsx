@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Header.css";
 import { Link } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
+import CartDrawer from "./CartDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
 
 function Header(){
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user, logout } = useAuth();
+
+    // Listen for custom "open-cart" event (e.g. dispatched by ProductDetails after adding to cart)
+    useEffect(() => {
+        const handleOpenCart = () => setIsCartOpen(true);
+        window.addEventListener("open-cart", handleOpenCart);
+        return () => window.removeEventListener("open-cart", handleOpenCart);
+    }, []);
 
     return(
       <>    
@@ -81,7 +90,7 @@ function Header(){
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="IconBtn" aria-label="Shopping Bag">
+                <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -110,6 +119,7 @@ function Header(){
        
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
      </>
     );
 }
