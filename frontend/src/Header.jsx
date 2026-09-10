@@ -71,6 +71,11 @@ function Header(){
                         </button>
                     )}
                     <button className="NavBtn">Wishlist</button>
+                    {user?.role === "Admin" && (
+                        <Link to="/admin" style={{textDecoration: 'none'}}>
+                            <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
+                        </Link>
+                    )}
                 </div>
             </nav>
 
