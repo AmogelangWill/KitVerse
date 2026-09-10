@@ -102,6 +102,29 @@ namespace Kitverse_backend_01.Controllers
 
         }
 
+        public async Task<bool> UpdateShirt(TShirt shirt)
+        {
+            var shirt1 = await _context.TShirts.FirstOrDefaultAsync(t => t.TShirtId == shirt.TShirtId);
+            if (shirt1 != null)
+            {
+                shirt1.ShirtSeason = shirt.ShirtSeason;
+                shirt1.ShirtPrice = shirt.ShirtPrice;
+                shirt1.ShirtAffiliate = shirt.ShirtAffiliate;
+                shirt1.ShirtGender = shirt.ShirtGender;
+                shirt1.ShirtDescription = shirt.ShirtDescription;
+                shirt1.ShirtStatus = shirt.ShirtStatus;
+                shirt1.ShirtName = shirt.ShirtName;
+                shirt1.TeamId = shirt.TeamId;
+                shirt1.DateAdded = shirt.DateAdded;
+                shirt1.ShirtLinks = shirt.ShirtLinks;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+
         public async Task<TShirt> Create(CreateTShirt request)
         {
             var tshirt = new TShirt
