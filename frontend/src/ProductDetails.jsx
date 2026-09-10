@@ -6,18 +6,16 @@ import "./ProductDetails.css";
 
 function ProductDetails() {
     const { id } = useParams();
-    const { user } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-    
-    // Action states
+    const { user } = useAuth();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
     const [wishlistActive, setWishlistActive] = useState(false);
-
+    
     // New state for Inventory
     const [inventoryInfo, setInventoryInfo] = useState({});
     const [inventoryLoading, setInventoryLoading] = useState(true);
@@ -72,6 +70,7 @@ function ProductDetails() {
         window.scrollTo(0, 0);
     }, [id]);
 
+
     const handleAddToCart = async () => {
         if (!selectedSize) return;
         if (!user) {
@@ -85,7 +84,6 @@ function ProductDetails() {
                 method: "POST"
             });
             if (res.ok) {
-                // Dispatch a custom event that Header.jsx can listen to in order to open the CartDrawer
                 window.dispatchEvent(new Event("open-cart"));
             } else {
                 const errorData = await res.json();
@@ -106,7 +104,6 @@ function ProductDetails() {
 
         setIsAddingToWishlist(true);
         try {
-            // If it's already active, remove it. Otherwise add it.
             const method = wishlistActive ? "DELETE" : "POST";
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/Wishlist/${user.userId}/${id}`, {
                 method: method,
@@ -141,109 +138,83 @@ function ProductDetails() {
         ? product.shirtLinks[currentIndex].shirtLinkUrl 
         : "/placeholder.png";
 
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev - 1 + product.shirtLinks.length) % product.shirtLinks.length);
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev + 1) % product.shirtLinks.length);
+    };
+
     return (
         <>
             <div className="PDP-Container">
-                {/* LEFT: IMAGE GALLERY */}
-                <div className="PDP-LeftGallery">
-                    {product.shirtLinks && product.shirtLinks.length > 0 && (
+                {/* LEFT SIDE: Image Gallery */}
+                <div className="PDP-Gallery">
+                    <div className="PDP-MainImageContainer" style={{ position: 'relative' }}>
+                        {hasMultipleImages && (
+                            <button className="PDP-ArrowBtn left" onClick={handlePrev} aria-label="Previous image">❮</button>
+                        )}
+                        
+                        <img src={currentImageUrl} alt={product.shirtName} className="PDP-MainImage" />
+                        
+                        {hasMultipleImages && (
+                            <button className="PDP-ArrowBtn right" onClick={handleNext} aria-label="Next image">❯</button>
+                        )}
+                    </div>
+                    
+                    {hasMultipleImages && (
                         <div className="PDP-Thumbnails">
                             {product.shirtLinks.map((link, index) => (
-                                <button 
-                                    key={link.linkId} 
-                                    className={`PDP-ThumbnailBtn ${currentIndex === index ? 'active' : ''}`}
+                                <img 
+                                    key={link.linkId}
+                                    src={link.shirtLinkUrl} 
+                                    alt={`${product.shirtName} thumbnail`}
+                                    className={`PDP-Thumbnail ${currentIndex === index ? 'active' : ''}`}
                                     onClick={() => setCurrentIndex(index)}
-                                >
-                                    <img src={link.shirtLinkUrl} alt={`Thumbnail ${index + 1}`} />
-                                </button>
+                                />
                             ))}
                         </div>
                     )}
-                    <div className="PDP-MainImageContainer">
-                        {hasMultipleImages && (
-                            <button 
-                                className="PDP-ImageNavBtn left"
-                                onClick={() => setCurrentIndex((prev) => (prev === 0 ? product.shirtLinks.length - 1 : prev - 1))}
-                            >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                        )}
-                        
-                        <img className="PDP-MainImage" src={currentImageUrl} alt={product.shirtName} />
-                        
-                        {hasMultipleImages && (
-                            <button 
-                                className="PDP-ImageNavBtn right"
-                                onClick={() => setCurrentIndex((prev) => (prev === product.shirtLinks.length - 1 ? 0 : prev + 1))}
-                            >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                        )}
-                    </div>
                 </div>
 
-                {/* RIGHT: PRODUCT INFO & ACTIONS */}
-                <div className="PDP-RightInfo">
-                    {/* BREADCRUMB / BADGE (Optional layout elements) */}
-                    <div className="PDP-Badges">
-                        {product.shirtSeason && <span className="PDP-Badge">{product.shirtSeason}</span>}
-                        {product.shirtGender && <span className="PDP-Badge">{product.shirtGender}</span>}
+                {/* RIGHT SIDE: Product Info */}
+                <div className="PDP-Info">
+                    <div className="PDP-Header">
+                        <span className="PDP-Brand">{product.shirtAffiliate || "Premium Kit"}</span>
+                        <h1 className="PDP-Title">{product.team?.teamName} {product.shirtSeason} Jersey</h1>
+                        <p className="PDP-Price">R {product.shirtPrice.toFixed(2)}</p>
                     </div>
 
-                    <h1 className="PDP-Title">{product.shirtName}</h1>
-                    <h2 className="PDP-Price">R {product.shirtPrice.toFixed(2)}</h2>
-
-                    {/* SIZE SELECTOR */}
                     <div className="PDP-SizeSection">
                         <div className="PDP-SizeHeader">
-                            <span className="PDP-SizeLabel">Select Size</span>
-                            <button className="PDP-SizeGuideBtn" onClick={() => setIsSizeGuideOpen(true)}>
-                                Size Guide
-                            </button>
+                            <span className="PDP-SizeLabel">Size</span>
+                            <span className="PDP-SizeGuide" onClick={() => setIsSizeGuideOpen(true)}>Size guide</span>
                         </div>
-                        
-                        {inventoryLoading ? (
-                            <div className="PDP-SizeLoading">Checking live inventory...</div>
-                        ) : (
-                            <div className="PDP-SizeGrid">
-                                {availableSizes.map(size => {
-                                    const amountAvailable = inventoryInfo[size] || 0;
-                                    const isOutOfStock = amountAvailable === 0;
-
-                                    return (
-                                        <button 
-                                            key={size}
-                                            className={`PDP-SizeBtn ${selectedSize === size ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
-                                            onClick={() => !isOutOfStock && setSelectedSize(size)}
-                                            disabled={isOutOfStock}
-                                        >
-                                            {size}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
+                        <div className="PDP-SizeGrid">
+                            {availableSizes.map((size) => {
+                                const isOutOfStock = !inventoryLoading && (!inventoryInfo[size] || inventoryInfo[size] <= 0);
+                                return (
+                                    <button 
+                                        key={size}
+                                        className={`PDP-SizeBtn ${selectedSize === size ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
+                                        onClick={() => !isOutOfStock && setSelectedSize(size)}
+                                        disabled={isOutOfStock || inventoryLoading}
+                                        title={isOutOfStock ? 'Out of stock' : `${inventoryInfo[size]} available`}
+                                    >
+                                        {size}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
-                    {/* ADD TO BAG & WISHLIST */}
+                    {/* ACTIONS: Add to Cart + Wishlist */}
                     <div className="PDP-Actions">
-                        <button 
-                            className="PDP-AddToCartBtn" 
-                            onClick={handleAddToCart}
-                            disabled={!selectedSize || isAddingToCart}
-                        >
+                        <button className="PDP-AddToCartBtn" onClick={handleAddToCart} disabled={!selectedSize || isAddingToCart}>
                             {isAddingToCart ? "ADDING..." : selectedSize ? "ADD TO CART" : "SELECT A SIZE"}
                         </button>
-                        <button 
-                            className={`PDP-WishlistBtn ${wishlistActive ? 'active' : ''}`} 
-                            aria-label="Add to Wishlist"
-                            onClick={handleWishlist}
-                            disabled={isAddingToWishlist}
-                        >
+                        <button className={`PDP-WishlistBtn ${wishlistActive ? 'active' : ''}`} aria-label="Add to Wishlist" onClick={handleWishlist} disabled={isAddingToWishlist}>
                             <svg viewBox="0 0 24 24" fill={wishlistActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
@@ -265,15 +236,17 @@ function ProductDetails() {
                                 </span>
                             </div>
                             <div className="PDP-InfoRow">
-                                <span className="PDP-InfoKey">Team</span>
-                                <span className="PDP-InfoValue">{product.team?.teamName || "N/A"}</span>
+                                <span className="PDP-InfoKey">Material</span>
+                                <span className="PDP-InfoValue">
+                                    {product.shirtMaterial || "65% polyester Recycled, 35% viscose"}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* SIZE GUIDE DRAWER */}
+            {/* Slide Out Drawer */}
             <SizeGuideDrawer isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
         </>
     );
