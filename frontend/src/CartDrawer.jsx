@@ -98,7 +98,7 @@ function CartDrawer({ isOpen, onClose }) {
                                         />
                                     </div>
                                     <div className="CartItemDetails">
-                                        <h4 className="CartItemName">{item.tShirt?.shirtName || "Premium Kit"}</h4>
+                                        <h4 className="CartItemName">{item.tShirt?.team?.teamName} {item.tShirt?.shirtSeason} Jersey</h4>
                                         <p className="CartItemPrice">R {item.unitPurchaseAtTime.toFixed(2)}</p>
                                         <div className="CartItemControls">
                                             <div className="CartItemQuantity">
