@@ -59,6 +59,12 @@ namespace Kitverse_backend_01.Migrations
                         .HasColumnType("text")
                         .HasColumnName("banner_url");
 
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("banner_date_added")
+                        .HasDefaultValueSql("now()");
+
                     b.Property<int>("Team1ID")
                         .HasColumnType("integer")
                         .HasColumnName("team_1");

@@ -139,7 +139,7 @@ namespace Kitverse_backend_01.Services
             if (banner == null)
                 return null;
 
-            banner.ImageUrl = bannerUpdate.ImageUrl;
+            banner.BannerUrl = bannerUpdate.BannerUrl;
 
             await _context.SaveChangesAsync();
 
