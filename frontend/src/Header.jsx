@@ -62,6 +62,11 @@ function Header(){
                         <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
                     </Link>
                 )}
+                {(user?.role === "Admin" || user?.role === "Item Lister") && (
+                    <Link to="/inventory" className="HideOnMobile" style={{textDecoration: 'none'}}>
+                        <button className="NavBtn" style={{color: '#1d4ed8', fontWeight: '800'}}>Inventory</button>
+                    </Link>
+                )}
 
                 {/* On mobile, we can also show the secondary links inside the menu */}
                 <div className="MobileSecondaryLinks">
@@ -79,6 +84,11 @@ function Header(){
                     {user?.role === "Admin" && (
                         <Link to="/admin" style={{textDecoration: 'none'}}>
                             <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
+                        </Link>
+                    )}
+                    {(user?.role === "Admin" || user?.role === "Item Lister") && (
+                        <Link to="/inventory" style={{textDecoration: 'none'}}>
+                            <button className="NavBtn" style={{color: '#1d4ed8', fontWeight: '800'}}>Inventory Portal</button>
                         </Link>
                     )}
                 </div>
