@@ -74,7 +74,7 @@ function ProductDetails() {
     const handleAddToCart = async () => {
         if (!selectedSize) return;
         if (!user) {
-            alert("Please sign in to add items to your cart.");
+            window.dispatchEvent(new Event("open-auth"));
             return;
         }
 
@@ -98,7 +98,7 @@ function ProductDetails() {
 
     const handleWishlist = async () => {
         if (!user) {
-            alert("Please sign in to add items to your wishlist.");
+            window.dispatchEvent(new Event("open-auth"));
             return;
         }
 

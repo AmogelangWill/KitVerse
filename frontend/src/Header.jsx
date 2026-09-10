@@ -16,8 +16,13 @@ function Header(){
     // Listen for custom "open-cart" event (e.g. dispatched by ProductDetails after adding to cart)
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleOpenAuth = () => setIsAuthOpen(true);
+        window.addEventListener("open-auth", handleOpenAuth);
         window.addEventListener("open-cart", handleOpenCart);
-        return () => window.removeEventListener("open-cart", handleOpenCart);
+        return () => {
+            window.removeEventListener("open-cart", handleOpenCart);
+            window.removeEventListener("open-auth", handleOpenAuth);
+        };
     }, []);
 
     return(
