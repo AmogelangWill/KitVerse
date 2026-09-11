@@ -11,6 +11,7 @@ function AdminPage() {
     const [dashboardData, setDashboardData] = useState(null);
     const [users, setUsers] = useState([]);
     const [banners, setBanners] = useState([]);
+    const [tshirts, setTshirts] = useState([]); // Needed for banner dropdowns
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const [newBanner, setNewBanner] = useState({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
     
@@ -37,6 +38,12 @@ function AdminPage() {
                 else throw new Error("Failed to load users data");
             } else if (activeTab === "banners") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners");
+                const tshirtRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
+                
+                if (tshirtRes.ok) {
+                    setTshirts(await tshirtRes.json());
+                }
+
                 if (res.ok) {
                     setBanners(await res.json());
                 } else if (res.status === 500) {
@@ -109,8 +116,15 @@ function AdminPage() {
                 setIsBannerModalOpen(false);
                 setNewBanner({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
                 fetchData();
+            } else if (res.status === 401 || res.status === 403) {
+                alert("Your session has expired or you are unauthorized. Please log out and log in again.");
             } else {
-                const errorData = await res.json();
+                let errorData;
+                try {
+                    errorData = await res.json();
+                } catch {
+                    errorData = { message: `Server error ${res.status}` };
+                }
                 alert(`Failed to add banner: ${errorData.message || "Unknown error"}`);
             }
         } catch (err) {
@@ -309,11 +323,21 @@ function AdminPage() {
                                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: '#f9fafb', padding: '15px', borderRadius: '6px'}}>
                                                 <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                                                     <label style={{fontSize: '0.85rem', fontWeight: 700}}>T-Shirt 1 ID</label>
-                                                    <input type="number" value={newBanner.team1ID} onChange={e => setNewBanner({...newBanner, team1ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="Enter T-Shirt ID" />
+                                                    <select value={newBanner.team1ID} onChange={e => setNewBanner({...newBanner, team1ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}}>
+                                                        <option value="">Select a T-Shirt</option>
+                                                        {tshirts.map(t => (
+                                                            <option key={t.tShirtId} value={t.tShirtId}>{t.shirtName} (ID: {t.tShirtId})</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                                 <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                                                     <label style={{fontSize: '0.85rem', fontWeight: 700}}>T-Shirt 2 ID (Rivalry only)</label>
-                                                    <input type="number" value={newBanner.team2ID} onChange={e => setNewBanner({...newBanner, team2ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="Leave empty if single product" />
+                                                    <select value={newBanner.team2ID} onChange={e => setNewBanner({...newBanner, team2ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}}>
+                                                        <option value="">Leave empty if single product</option>
+                                                        {tshirts.map(t => (
+                                                            <option key={t.tShirtId} value={t.tShirtId}>{t.shirtName} (ID: {t.tShirtId})</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
                                             
