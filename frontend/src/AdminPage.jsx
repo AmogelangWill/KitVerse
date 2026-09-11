@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import { useToast } from "./ToastContext.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import "./AdminPage.css";
 
 function AdminPage() {
     const { user, loading: authLoading, logout } = useAuth();
+    const { showToast } = useToast();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("dashboard");
     
@@ -68,10 +70,10 @@ function AdminPage() {
                 body: JSON.stringify(newRole)
             });
             if (res.ok) {
-                alert("Role changed successfully!");
+                showToast("Role changed successfully!", "success");
                 fetchData();
             } else {
-                alert("Failed to change user role.");
+                showToast("Failed to change user role.", "error");
             }
         } catch (err) {
             console.error(err);
@@ -87,7 +89,7 @@ function AdminPage() {
             if (res.ok) {
                 fetchData(); 
             } else {
-                alert("Failed to delete user.");
+                showToast("Failed to delete user.", "error");
             }
         } catch (err) {
             console.error(err);
@@ -117,7 +119,7 @@ function AdminPage() {
                 setNewBanner({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
                 fetchData();
             } else if (res.status === 401 || res.status === 403) {
-                alert("Your session has expired. You are being logged out.");
+                showToast("Your session has expired. You are being logged out.", "error");
                 logout();
             } else {
                 let errorData;
@@ -126,7 +128,7 @@ function AdminPage() {
                 } catch {
                     errorData = { message: `Server error ${res.status}` };
                 }
-                alert(`Failed to add banner: ${errorData.message || "Unknown error"}`);
+                showToast(`Failed to add banner: ${errorData.message || "Unknown error"}`, "error");
             }
         } catch (err) {
             console.error(err);
@@ -140,7 +142,7 @@ function AdminPage() {
                 method: "DELETE"
             });
             if (res.ok) fetchData();
-            else alert("Failed to delete banner.");
+            else showToast("Failed to delete banner.", "error");
         } catch (err) {
             console.error(err);
         }

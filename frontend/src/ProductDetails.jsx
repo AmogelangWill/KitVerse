@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SizeGuideDrawer from "./SizeGuideDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import { useToast } from "./ToastContext.jsx";
 import { useCart } from "./CartContext.jsx";
 import "./ProductDetails.css";
 
@@ -13,6 +14,7 @@ function ProductDetails() {
     const [selectedSize, setSelectedSize] = useState("");
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const { user, setIsAuthOpen } = useAuth();
+    const { showToast } = useToast();
     const { setIsCartOpen, fetchCartCount } = useCart();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
@@ -90,7 +92,7 @@ function ProductDetails() {
                 fetchCartCount();
             } else {
                 const errorData = await res.json();
-                alert(errorData.message || "Failed to add item to cart.");
+                showToast(errorData.message || "Failed to add item to cart.", "error");
             }
         } catch (error) {
             console.error("Add to cart error:", error);
@@ -119,7 +121,7 @@ function ProductDetails() {
                 setWishlistActive(!wishlistActive);
             } else {
                 const errorData = await res.json();
-                alert(errorData.message || "Failed to update wishlist.");
+                showToast(errorData.message || "Failed to update wishlist.", "error");
             }
         } catch (error) {
             console.error("Wishlist error:", error);
