@@ -145,9 +145,17 @@ function ItemListerPage() {
             if (res.ok) {
                 alert(`Product successfully ${isEdit ? 'updated' : 'added'}!`);
                 setActiveTab("inventory");
+                fetchInventory();
                 resetForm();
+            } else if (res.status === 401 || res.status === 403) {
+                alert("Your session has expired or you are unauthorized. Please log out and log in again.");
             } else {
-                const errData = await res.json();
+                let errData;
+                try {
+                    errData = await res.json();
+                } catch {
+                    errData = { message: `Server error ${res.status}` };
+                }
                 alert(`Failed to save product: ${errData.message || 'Unknown error'}`);
             }
         } catch (err) {
@@ -277,8 +285,13 @@ function ItemListerPage() {
                                     <input type="number" step="0.01" name="shirtPrice" value={formData.shirtPrice} onChange={handleFormChange} required />
                                 </div>
                                 <div className="FormGroup">
-                                    <label>Team ID</label>
-                                    <input type="number" name="teamId" value={formData.teamId} onChange={handleFormChange} required />
+                                    <label>Team</label>
+                                    <select name="teamId" value={formData.teamId} onChange={handleFormChange} required>
+                                        <option value="" disabled>Select a Team</option>
+                                        {Array.from(new Map(inventory.filter(t => t.team).map(t => [t.team.teamId, t.team])).values()).map(team => (
+                                            <option key={team.teamId} value={team.teamId}>{team.teamName}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="FormGroup">
                                     <label>Gender</label>
