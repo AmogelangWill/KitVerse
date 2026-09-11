@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "./RivalryPage.css";
+import "./ProductsPage.css"; // Reuse the standard landing page CSS
 
 function RivalryPage() {
     const { id1, id2 } = useParams();
     const navigate = useNavigate();
-    const [shirt1, setShirt1] = useState(null);
-    const [shirt2, setShirt2] = useState(null);
+    const [shirts, setShirts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,11 +15,10 @@ function RivalryPage() {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.length === 2) {
-                        // Keep the order based on the URL params
+                        // Order them as id1 then id2
                         const s1 = data.find(s => s.tShirtId.toString() === id1) || data[0];
                         const s2 = data.find(s => s.tShirtId.toString() === id2) || data[1];
-                        setShirt1(s1);
-                        setShirt2(s2);
+                        setShirts([s1, s2]);
                     }
                 }
             } catch (err) {
@@ -35,43 +33,60 @@ function RivalryPage() {
         }
     }, [id1, id2]);
 
+    const formatPrice = (price) => {
+        return `R${price.toFixed(2)}`;
+    };
+
     if (loading) {
-        return <div className="RivalryContainer"><h2>Loading Rivalry...</h2></div>;
+        return <div className="BodyWrapper"><p style={{padding: '100px 20px', textAlign: 'center'}}>Loading Collection...</p></div>;
     }
 
-    if (!shirt1 || !shirt2) {
+    if (shirts.length !== 2) {
         return (
-            <div className="RivalryContainer">
-                <h2>Rivalry Not Found</h2>
-                <button className="RivalryBtn" onClick={() => navigate('/')}>Return Home</button>
+            <div className="BodyWrapper">
+                <p style={{padding: '100px 20px', textAlign: 'center'}}>Collection not found.</p>
             </div>
         );
     }
 
     return (
-        <div className="RivalryContainer">
-            <h1 className="RivalryTitle">CHOOSE YOUR <span>SIDE</span></h1>
-            
-            <div className="RivalrySplitScreen">
-                <div className="RivalryCard" onClick={() => navigate(`/product/${shirt1.tShirtId}`)}>
-                    <img 
-                        src={shirt1.shirtLinks?.[0]?.shirtLinkUrl || "/placeholder.png"} 
-                        alt={shirt1.shirtName} 
-                    />
-                    <h2>{shirt1.shirtName.replace(/_/g, " ")}</h2>
-                    <p>R {shirt1.shirtPrice.toFixed(2)}</p>
-                    <button className="RivalryBtn">Select {shirt1.shirtName.split('_')[0]}</button>
+        <div className="BodyWrapper" style={{ paddingTop: '40px', minHeight: '60vh' }}>
+            <div className="Description">
+                <h2 className="DOutliner">
+                    FEATURED COLLECTION
+                </h2>
+                <div className="FilterDiv">
+                    <button className="BtnFilter">
+                        <span className="FilterText">All Collections</span>
+                        <svg className="ChevronRightSVG" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
                 </div>
+            </div>
 
-                <div className="RivalryCard" onClick={() => navigate(`/product/${shirt2.tShirtId}`)}>
-                    <img 
-                        src={shirt2.shirtLinks?.[0]?.shirtLinkUrl || "/placeholder.png"} 
-                        alt={shirt2.shirtName} 
-                    />
-                    <h2>{shirt2.shirtName.replace(/_/g, " ")}</h2>
-                    <p>R {shirt2.shirtPrice.toFixed(2)}</p>
-                    <button className="RivalryBtn">Select {shirt2.shirtName.split('_')[0]}</button>
-                </div>
+            <div className="ProductsContainer">
+                {shirts.map((product) => (
+                    <div className="Product" key={product.tShirtId} onClick={() => navigate(`/product/${product.tShirtId}`)} style={{ cursor: "pointer" }}>
+                        <div className="ProductImgWrapper">
+                            <img
+                                className="ProductImg"
+                                src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
+                                alt={`${product.team?.teamName || product.shirtName.replace(/_/g, ' ')} Jersey`}
+                                loading="lazy"
+                            />
+                            <div className="ShopNowOverlay">
+                                Add To Cart <svg className="ChevronRightSVG" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                            </div>
+                        </div>
+                        <p className="PDescription">{`${product.team?.teamName || product.shirtName.replace(/_/g, ' ')} ${product.shirtSeason || ''} Jersey`}</p>
+                        <p className="PPrice">{formatPrice(product.shirtPrice)}</p>
+                    </div>
+                ))}
             </div>
         </div>
     );
