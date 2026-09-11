@@ -11,6 +11,8 @@ function AdminPage() {
     const [dashboardData, setDashboardData] = useState(null);
     const [users, setUsers] = useState([]);
     const [banners, setBanners] = useState([]);
+    const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+    const [newBanner, setNewBanner] = useState({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -38,7 +40,7 @@ function AdminPage() {
                 if (res.ok) {
                     setBanners(await res.json());
                 } else if (res.status === 500) {
-                    throw new Error("Backend Error 500: The Banners table is likely missing or misconfigured in the database (EF Core Mapping). Tell the backend team!");
+                    throw new Error("Backend Error 500: The Banners table is missing or misconfigured in the database.");
                 } else {
                     throw new Error("Failed to load banners data");
                 }
@@ -76,7 +78,7 @@ function AdminPage() {
                 method: "DELETE"
             });
             if (res.ok) {
-                fetchData(); // Refresh list
+                fetchData(); 
             } else {
                 alert("Failed to delete user.");
             }
@@ -85,17 +87,32 @@ function AdminPage() {
         }
     };
 
-    const handleAddBanner = async () => {
-        const url = window.prompt("Enter the Image URL for the new banner:");
-        if (!url) return;
+    const handleAddBannerSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners", {
+            const payload = {
+                bannerName: newBanner.bannerName,
+                bannerDescription: newBanner.bannerDescription || null,
+                bannerUrl: newBanner.bannerUrl,
+                team1ID: newBanner.team1ID ? parseInt(newBanner.team1ID) : 0,
+                team2ID: newBanner.team2ID ? parseInt(newBanner.team2ID) : 0,
+            };
+            const res = await fetch("https://kitverse-production.up.railway.app/api/TShirt/Banner", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ imageUrl: url, dateAdded: new Date().toISOString() })
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "Authorization": `Bearer ${user?.token}` 
+                },
+                body: JSON.stringify(payload)
             });
-            if (res.ok) fetchData();
-            else alert("Failed to add banner.");
+            if (res.ok) {
+                setIsBannerModalOpen(false);
+                setNewBanner({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
+                fetchData();
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to add banner: ${errorData.message || "Unknown error"}`);
+            }
         } catch (err) {
             console.error(err);
         }
@@ -266,16 +283,56 @@ function AdminPage() {
                                         <h1>Banners</h1>
                                         <p>Manage promotional banners displayed on the homepage.</p>
                                     </div>
-                                    <button className="AdminPrimaryBtn" onClick={handleAddBanner}>+ Add Banner</button>
+                                    <button className="AdminPrimaryBtn" onClick={() => setIsBannerModalOpen(true)}>+ Add Banner</button>
                                 </div>
+
+                                {isBannerModalOpen && (
+                                    <div style={{background: '#ffffff', padding: '30px', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '25px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)'}}>
+                                        <h3 style={{marginTop: 0, marginBottom: '20px', fontSize: '1.25rem', fontWeight: 800}}>Create New Banner</h3>
+                                        <form onSubmit={handleAddBannerSubmit} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+                                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+                                                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                    <label style={{fontSize: '0.85rem', fontWeight: 700}}>Banner Name / Title</label>
+                                                    <input type="text" value={newBanner.bannerName} onChange={e => setNewBanner({...newBanner, bannerName: e.target.value})} required style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="e.g., Summer Derby" />
+                                                </div>
+                                                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                    <label style={{fontSize: '0.85rem', fontWeight: 700}}>Image URL (Required)</label>
+                                                    <input type="text" value={newBanner.bannerUrl} onChange={e => setNewBanner({...newBanner, bannerUrl: e.target.value})} required style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="https://example.com/banner.png" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                <label style={{fontSize: '0.85rem', fontWeight: 700}}>Short Description (Optional)</label>
+                                                <input type="text" value={newBanner.bannerDescription} onChange={e => setNewBanner({...newBanner, bannerDescription: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="Get ready for the biggest rivalry..." />
+                                            </div>
+
+                                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: '#f9fafb', padding: '15px', borderRadius: '6px'}}>
+                                                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                    <label style={{fontSize: '0.85rem', fontWeight: 700}}>T-Shirt 1 ID</label>
+                                                    <input type="number" value={newBanner.team1ID} onChange={e => setNewBanner({...newBanner, team1ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="Enter T-Shirt ID" />
+                                                </div>
+                                                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                    <label style={{fontSize: '0.85rem', fontWeight: 700}}>T-Shirt 2 ID (Rivalry only)</label>
+                                                    <input type="number" value={newBanner.team2ID} onChange={e => setNewBanner({...newBanner, team2ID: e.target.value})} style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="Leave empty if single product" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div style={{display: 'flex', gap: '15px', justifyContent: 'flex-end', marginTop: '10px'}}>
+                                                <button type="button" className="AdminActionBtn" onClick={() => setIsBannerModalOpen(false)}>Cancel</button>
+                                                <button type="submit" className="AdminPrimaryBtn">Publish Banner</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+
                                 <div className="AdminTableWrapper">
                                     <table className="AdminTable">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Image Preview</th>
-                                                <th>Image URL</th>
-                                                <th>Date Added</th>
+                                                <th>Preview</th>
+                                                <th>Name & Details</th>
+                                                <th>Linked IDs</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -284,12 +341,21 @@ function AdminPage() {
                                                 <tr key={b.bannerId}>
                                                     <td>{b.bannerId}</td>
                                                     <td>
-                                                        <img src={b.imageUrl} alt="banner" style={{width: '150px', height: '40px', objectFit: 'cover', borderRadius: '4px'}} />
+                                                        <img src={b.bannerUrl || b.imageUrl} alt="banner" style={{width: '120px', height: '40px', objectFit: 'cover', borderRadius: '4px'}} />
                                                     </td>
-                                                    <td style={{maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                                                        <a href={b.imageUrl} target="_blank" rel="noreferrer" style={{color: '#1d4ed8'}}>{b.imageUrl}</a>
+                                                    <td>
+                                                        <strong>{b.bannerName || 'Untitled Banner'}</strong>
+                                                        <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>{b.bannerDescription}</div>
                                                     </td>
-                                                    <td>{new Date(b.dateAdded).toLocaleDateString()}</td>
+                                                    <td>
+                                                        {(b.team1ID || b.team2ID) ? (
+                                                            <span className="RoleBadge Admin" style={{background: '#fef08a', color: '#854d0e'}}>
+                                                                IDs: {b.team1ID || '0'} / {b.team2ID || '0'}
+                                                            </span>
+                                                        ) : (
+                                                            <span style={{color: '#a3a3a3'}}>None</span>
+                                                        )}
+                                                    </td>
                                                     <td>
                                                         <button className="AdminActionBtn danger" onClick={() => handleDeleteBanner(b.bannerId)}>Delete</button>
                                                     </td>
@@ -297,7 +363,7 @@ function AdminPage() {
                                             ))}
                                             {banners.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No banners found. Click "+ Add Banner" to create one.</td>
+                                                    <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No banners found. Click "+ Add Banner" above to create one.</td>
                                                 </tr>
                                             )}
                                         </tbody>
