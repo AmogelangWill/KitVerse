@@ -11,7 +11,27 @@ export const AuthProvider = ({ children }) => {
         // Load token and user details from localStorage on app start
         const storedUser = localStorage.getItem('kitverse_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser.token) {
+                    // Decode the JWT payload (middle section)
+                    const payload = JSON.parse(atob(parsedUser.token.split('.')[1]));
+                    // exp is in seconds, Date.now() is in milliseconds
+                    if (payload.exp * 1000 < Date.now()) {
+                        // Token is expired! Kick the user out.
+                        localStorage.removeItem('kitverse_user');
+                        setUser(null);
+                    } else {
+                        setUser(parsedUser);
+                    }
+                } else {
+                    setUser(parsedUser);
+                }
+            } catch (err) {
+                // If token is invalid or parsing fails, clear it out
+                localStorage.removeItem('kitverse_user');
+                setUser(null);
+            }
         }
         setLoading(false);
     }, []);

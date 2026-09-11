@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "./AdminPage.css";
 
 function AdminPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("dashboard");
     
@@ -117,7 +117,8 @@ function AdminPage() {
                 setNewBanner({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
                 fetchData();
             } else if (res.status === 401 || res.status === 403) {
-                alert("Your session has expired or you are unauthorized. Please log out and log in again.");
+                alert("Your session has expired. You are being logged out.");
+                logout();
             } else {
                 let errorData;
                 try {
