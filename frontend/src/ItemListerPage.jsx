@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import { useToast } from "./ToastContext.jsx";
 import { Link } from "react-router-dom";
 import "./AdminPage.css"; // Reuse table styles
 import "./ItemListerPage.css";
 
 function ItemListerPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, logout } = useAuth();
+    const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState("inventory");
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -143,12 +145,13 @@ function ItemListerPage() {
             });
 
             if (res.ok) {
-                alert(`Product successfully ${isEdit ? 'updated' : 'added'}!`);
+                showToast(`Product successfully ${isEdit ? 'updated' : 'added'}!`, 'success');
                 setActiveTab("inventory");
                 fetchInventory();
                 resetForm();
             } else if (res.status === 401 || res.status === 403) {
-                alert("Your session has expired or you are unauthorized. Please log out and log in again.");
+                showToast("Your session has expired. You are being logged out.", "error");
+                logout();
             } else {
                 let errData;
                 try {
@@ -156,10 +159,10 @@ function ItemListerPage() {
                 } catch {
                     errData = { message: `Server error ${res.status}` };
                 }
-                alert(`Failed to save product: ${errData.message || 'Unknown error'}`);
+                showToast(`Failed to save product: ${errData.message || 'Unknown error'}`, "error");
             }
         } catch (err) {
-            alert(`Error: ${err.message}`);
+            showToast(`Error: ${err.message}`, "error");
         } finally {
             setSubmitLoading(false);
         }
