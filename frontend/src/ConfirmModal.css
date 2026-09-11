@@ -1,0 +1,107 @@
+.ConfirmOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.ConfirmModal {
+    background: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    font-family: 'Archivo', sans-serif;
+    animation: scaleUp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ConfirmModal-Header {
+    padding: 24px 24px 16px;
+}
+
+.ConfirmModal-Title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111;
+}
+
+.ConfirmModal-Body {
+    padding: 0 24px 24px;
+}
+
+.ConfirmModal-Body p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.ConfirmModal-Footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+}
+
+.ConfirmBtn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ConfirmBtn--Cancel {
+    background: transparent;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+}
+
+.ConfirmBtn--Cancel:hover {
+    background: #f3f4f6;
+    color: #111;
+}
+
+.ConfirmBtn--Primary {
+    background: #111;
+    color: #fff;
+}
+
+.ConfirmBtn--Primary:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.ConfirmBtn--Danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+.ConfirmBtn--Danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
