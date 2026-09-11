@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthContext.jsx";
 import { CartProvider } from "./CartContext.jsx";
 import { ToastProvider } from "./ToastContext.jsx";
+import { ConfirmProvider } from "./ConfirmContext.jsx";
 import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";
 import HomePage from "./HomePage.jsx";
@@ -14,6 +15,7 @@ function App(){
    return(
     <AuthProvider>
       <ToastProvider>
+        <ConfirmProvider>
       <CartProvider>
         <Router>
            <Header/>
@@ -27,7 +29,8 @@ function App(){
            <Footer/>
         </Router>
     </CartProvider>
-    </ToastProvider>
+    </ConfirmProvider>
+      </ToastProvider>
     </AuthProvider>
    )
 }

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { useToast } from "./ToastContext.jsx";
+import { useConfirm } from "./ConfirmContext.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import "./AdminPage.css";
 
 function AdminPage() {
     const { user, loading: authLoading, logout } = useAuth();
     const { showToast } = useToast();
+    const { confirm } = useConfirm();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("dashboard");
     
@@ -62,7 +64,12 @@ function AdminPage() {
     };
 
     const handleRoleChange = async (userId, newRole) => {
-        if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+        const isConfirmed = await confirm({
+            title: "Change User Role",
+            message: `Are you sure you want to change this user's role to ${newRole}? They will immediately gain or lose access based on this new role.`,
+            confirmText: "Change Role"
+        });
+        if (!isConfirmed) return;
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/users/${userId}/role`, {
                 method: "PUT",
@@ -81,7 +88,13 @@ function AdminPage() {
     };
 
     const handleDeleteUser = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete User",
+            message: "Are you sure you want to permanently delete this user account? This action cannot be undone.",
+            confirmText: "Delete User",
+            danger: true
+        });
+        if (!isConfirmed) return;
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/users/${userId}`, {
                 method: "DELETE"
@@ -136,7 +149,13 @@ function AdminPage() {
     };
 
     const handleDeleteBanner = async (bannerId) => {
-        if (!window.confirm("Are you sure you want to delete this banner?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Banner",
+            message: "Are you sure you want to remove this banner from the storefront? It will no longer be visible to customers.",
+            confirmText: "Delete Banner",
+            danger: true
+        });
+        if (!isConfirmed) return;
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/banners/${bannerId}`, {
                 method: "DELETE"
