@@ -18,6 +18,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+//Service For Storage
+builder.Services.AddHttpClient<IStorageService, StorageService>();
 // Register the database connection - reads the connection string from raw environment variables
 builder.Services.AddDbContext<KitverseDbContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL")));
