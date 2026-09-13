@@ -165,5 +165,54 @@ namespace Kitverse_backend_01.Controllers
             
         }
 
+
+        // GET: api/TShirt/competitions
+        [HttpGet("competitions")]
+        public async Task<IActionResult> GetAllCompetitions()
+        {
+            var competitions = await _tshirtService.GetAllCompetitions();
+            return Ok(competitions);
+        }
+
+        // GET: api/TShirt/competition/5
+        [HttpGet("competition/{competitionId:int}")]
+        public async Task<IActionResult> GetByCompetition(int competitionId)
+        {
+            var tshirts = await _tshirtService.GetByCompetition(competitionId);
+            return Ok(tshirts);
+        }
+
+        // POST: api/TShirt/competition
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpPost("competition")]
+        public async Task<IActionResult> AddShirtToCompetition([FromBody] AddShirtToCompetition request)
+        {
+            try
+            {
+                await _tshirtService.AddShirtToCompetition(request.TShirtId, request.CompetitionId);
+                return Ok(new { message = "Shirt added to competition." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // POST: api/TShirt/competitions
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpPost("competitions")]
+        public async Task<IActionResult> CreateCompetition([FromBody] CreateCompetition request)
+        {
+            try
+            {
+                var competition = await _tshirtService.CreateCompetition(request.CompetitionName);
+                return Ok(competition);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }

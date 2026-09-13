@@ -78,6 +78,25 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("banners", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Competition", b =>
+                {
+                    b.Property<int>("CompetitionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("competition_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CompetitionId"));
+
+                    b.Property<string>("CompetitionName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("competition_name");
+
+                    b.HasKey("CompetitionId");
+
+                    b.ToTable("competitions", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Customer", b =>
                 {
                     b.Property<int>("UserId")
@@ -311,6 +330,23 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("t_shirts", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.TShirtCompetition", b =>
+                {
+                    b.Property<int>("TShirtId")
+                        .HasColumnType("integer")
+                        .HasColumnName("t_shirt_id");
+
+                    b.Property<int>("CompetitionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("competition_id");
+
+                    b.HasKey("TShirtId", "CompetitionId");
+
+                    b.HasIndex("CompetitionId");
+
+                    b.ToTable("t_shirt_competitions", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Team", b =>
                 {
                     b.Property<int>("TeamId")
@@ -505,6 +541,25 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.TShirtCompetition", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.Competition", "Competition")
+                        .WithMany("TShirtCompetitions")
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
+                        .WithMany("TShirtCompetitions")
+                        .HasForeignKey("TShirtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Competition");
+
+                    b.Navigation("TShirt");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Wishlist", b =>
                 {
                     b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
@@ -524,6 +579,11 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("TShirt");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Competition", b =>
+                {
+                    b.Navigation("TShirtCompetitions");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ShoppingCart", b =>
                 {
                     b.Navigation("ItemLists");
@@ -534,6 +594,8 @@ namespace Kitverse_backend_01.Migrations
             modelBuilder.Entity("Kitverse_backend_01.Models.TShirt", b =>
                 {
                     b.Navigation("ShirtLinks");
+
+                    b.Navigation("TShirtCompetitions");
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.Team", b =>

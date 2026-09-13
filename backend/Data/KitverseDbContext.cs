@@ -22,6 +22,9 @@ namespace Kitverse_backend_01.Data
         public DbSet<Inventory> Inventory { get; set; }
         public DbSet<Banner> Banners { get; set; }
 
+        public DbSet<Competition> Competitions { get; set; }
+        public DbSet<TShirtCompetition> TShirtCompetitions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //this is where we tell which Entity to Map to in PostgreSQL in our cloud host
@@ -161,6 +164,24 @@ namespace Kitverse_backend_01.Data
 
                 entity.HasOne(i => i.shirt).WithMany().HasForeignKey(i => i.TshirtID);
 
+            });
+
+            modelBuilder.Entity<Competition>(entity =>
+            {
+                entity.ToTable("competitions");
+                entity.HasKey(c => c.CompetitionId);
+                entity.Property(c => c.CompetitionId).HasColumnName("competition_id");
+                entity.Property(c => c.CompetitionName).HasColumnName("competition_name");
+            });
+
+            modelBuilder.Entity<TShirtCompetition>(entity =>
+            {
+                entity.ToTable("t_shirt_competitions");
+                entity.HasKey(tc => new { tc.TShirtId, tc.CompetitionId }); // composite key - prevents duplicate links
+                entity.Property(tc => tc.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(tc => tc.CompetitionId).HasColumnName("competition_id");
+                entity.HasOne(tc => tc.TShirt).WithMany(t => t.TShirtCompetitions).HasForeignKey(tc => tc.TShirtId);
+                entity.HasOne(tc => tc.Competition).WithMany(c => c.TShirtCompetitions).HasForeignKey(tc => tc.CompetitionId);
             });
 
             modelBuilder.Entity<Banner>(entity =>
