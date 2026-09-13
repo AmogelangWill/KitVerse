@@ -116,14 +116,12 @@ namespace Kitverse_backend_01.Controllers
                 shirt1.ShirtName = shirt.ShirtName;
                 shirt1.TeamId = shirt.TeamId;
                 shirt1.DateAdded = shirt.DateAdded;
-                shirt1.ShirtLinks = shirt.ShirtLinks;
 
                 await _context.SaveChangesAsync();
                 return true;
             }
             return false;
         }
-
 
         public async Task<TShirt> Create(CreateTShirt request)
         {
