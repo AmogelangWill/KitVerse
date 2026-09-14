@@ -97,6 +97,37 @@ namespace Kitverse_backend_01.Controllers
                 return NotFound();
             return Ok(new { message = "User deleted successfully." });
         }
+        // GET: api/admin/invoices
+        [HttpGet("invoices")]
+        public async Task<IActionResult> GetInvoices()
+        {
+            var invoices = await _adminService.GetInvoices();
+            return Ok(invoices);
+        }
+        // GET: api/admin/invoices/{id}
+        [HttpGet("invoices/{id}")]
+        public async Task<IActionResult> GetInvoice(int id)
+        {
+            var invoice = await _adminService.GetInvoiceById(id);
+            if (invoice == null)
+                return NotFound();
+            return Ok(invoice);
+        }
+        //GET: api/admin/analytics/avg-sales
+        [HttpGet("analytics/avg-sales")]
+        public async Task<IActionResult> GetAvgSales()
+        {
+            var avgSales = await _adminService.GetAvgSales();
+            return Ok(avgSales);
+        }
+
+        //GET: api/admin/analytics/avg-users-per-month
+        [HttpGet("analytics/avg-users")]
+        public async Task<IActionResult> GetAvgUsersPerMonth()
+        {
+            var avgUsers = await _adminService.GetAvgUserPerMonth();
+            return Ok(avgUsers);
+        }
 
     }
 }
