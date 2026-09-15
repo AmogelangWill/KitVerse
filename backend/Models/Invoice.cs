@@ -22,7 +22,7 @@
 
         public decimal total { get; set; }
 
-        public string status { get; set; } = "Issued"
+        public string status { get; set; } = "Issued";
 
     }
 }
