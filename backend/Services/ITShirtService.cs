@@ -26,5 +26,10 @@ namespace Kitverse_backend_01.Controllers
 
         Task<bool> UpdateShirt(TShirt shirt);
 
+        Task<List<Competition>> GetAllCompetitions();
+        Task<List<TShirt>> GetByCompetition(int competitionId);
+        Task AddShirtToCompetition(int tshirtId, int competitionId);
+        Task<Competition> CreateCompetition(string competitionName);
+
     }
 }

@@ -78,6 +78,25 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("banners", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Competition", b =>
+                {
+                    b.Property<int>("CompetitionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("competition_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CompetitionId"));
+
+                    b.Property<string>("CompetitionName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("competition_name");
+
+                    b.HasKey("CompetitionId");
+
+                    b.ToTable("competitions", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Customer", b =>
                 {
                     b.Property<int>("UserId")
@@ -187,6 +206,46 @@ namespace Kitverse_backend_01.Migrations
                     b.HasIndex("CartId");
 
                     b.ToTable("payments", (string)null);
+                });
+
+            modelBuilder.Entity("Kitverse_backend_01.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("review_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReviewId"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("Stars")
+                        .HasColumnType("integer")
+                        .HasColumnName("stars");
+
+                    b.Property<int>("TShirtId")
+                        .HasColumnType("integer")
+                        .HasColumnName("t_shirt_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("TShirtId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("reviews", (string)null);
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.ShirtLink", b =>
@@ -309,6 +368,23 @@ namespace Kitverse_backend_01.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("t_shirts", (string)null);
+                });
+
+            modelBuilder.Entity("Kitverse_backend_01.Models.TShirtCompetition", b =>
+                {
+                    b.Property<int>("TShirtId")
+                        .HasColumnType("integer")
+                        .HasColumnName("t_shirt_id");
+
+                    b.Property<int>("CompetitionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("competition_id");
+
+                    b.HasKey("TShirtId", "CompetitionId");
+
+                    b.HasIndex("CompetitionId");
+
+                    b.ToTable("t_shirt_competitions", (string)null);
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.Team", b =>
@@ -472,6 +548,25 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("ShoppingCart");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Review", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
+                        .WithMany("Reviews")
+                        .HasForeignKey("TShirtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kitverse_backend_01.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TShirt");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ShirtLink", b =>
                 {
                     b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
@@ -505,6 +600,25 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.TShirtCompetition", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.Competition", "Competition")
+                        .WithMany("TShirtCompetitions")
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
+                        .WithMany("TShirtCompetitions")
+                        .HasForeignKey("TShirtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Competition");
+
+                    b.Navigation("TShirt");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Wishlist", b =>
                 {
                     b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
@@ -524,6 +638,11 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("TShirt");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Competition", b =>
+                {
+                    b.Navigation("TShirtCompetitions");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ShoppingCart", b =>
                 {
                     b.Navigation("ItemLists");
@@ -533,7 +652,11 @@ namespace Kitverse_backend_01.Migrations
 
             modelBuilder.Entity("Kitverse_backend_01.Models.TShirt", b =>
                 {
+                    b.Navigation("Reviews");
+
                     b.Navigation("ShirtLinks");
+
+                    b.Navigation("TShirtCompetitions");
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.Team", b =>

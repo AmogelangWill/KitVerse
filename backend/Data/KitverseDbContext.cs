@@ -25,6 +25,10 @@ namespace Kitverse_backend_01.Data
         public DbSet<Inventory> Inventory { get; set; }
         public DbSet<Banner> Banners { get; set; }
 
+        public DbSet<Competition> Competitions { get; set; }
+        public DbSet<TShirtCompetition> TShirtCompetitions { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //this is where we tell which Entity to Map to in PostgreSQL in our cloud host
@@ -166,6 +170,24 @@ namespace Kitverse_backend_01.Data
 
             });
 
+            modelBuilder.Entity<Competition>(entity =>
+            {
+                entity.ToTable("competitions");
+                entity.HasKey(c => c.CompetitionId);
+                entity.Property(c => c.CompetitionId).HasColumnName("competition_id");
+                entity.Property(c => c.CompetitionName).HasColumnName("competition_name");
+            });
+
+            modelBuilder.Entity<TShirtCompetition>(entity =>
+            {
+                entity.ToTable("t_shirt_competitions");
+                entity.HasKey(tc => new { tc.TShirtId, tc.CompetitionId }); // composite key - prevents duplicate links
+                entity.Property(tc => tc.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(tc => tc.CompetitionId).HasColumnName("competition_id");
+                entity.HasOne(tc => tc.TShirt).WithMany(t => t.TShirtCompetitions).HasForeignKey(tc => tc.TShirtId);
+                entity.HasOne(tc => tc.Competition).WithMany(c => c.TShirtCompetitions).HasForeignKey(tc => tc.CompetitionId);
+            });
+
             modelBuilder.Entity<Banner>(entity =>
             {
                 entity.ToTable("banners");
@@ -177,6 +199,20 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.DateAdded).HasColumnName("banner_date_added").HasDefaultValueSql("now()");
                 entity.Property(t => t.BannerUrl).HasColumnName("banner_url");
 
+            });
+
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.ToTable("reviews");
+                entity.HasKey(r => r.ReviewId);
+                entity.Property(r => r.ReviewId).HasColumnName("review_id");
+                entity.Property(r => r.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(r => r.UserId).HasColumnName("user_id");
+                entity.Property(r => r.Stars).HasColumnName("stars");
+                entity.Property(r => r.Comment).HasColumnName("comment");
+                entity.Property(r => r.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
+                entity.HasOne(r => r.TShirt).WithMany(t => t.Reviews).HasForeignKey(r => r.TShirtId);
+                entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId);
             });
         }
     }

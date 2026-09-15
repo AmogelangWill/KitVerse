@@ -116,14 +116,12 @@ namespace Kitverse_backend_01.Controllers
                 shirt1.ShirtName = shirt.ShirtName;
                 shirt1.TeamId = shirt.TeamId;
                 shirt1.DateAdded = shirt.DateAdded;
-                shirt1.ShirtLinks = shirt.ShirtLinks;
 
                 await _context.SaveChangesAsync();
                 return true;
             }
             return false;
         }
-
 
         public async Task<TShirt> Create(CreateTShirt request)
         {
@@ -168,6 +166,61 @@ namespace Kitverse_backend_01.Controllers
                                   .Include(t => t.ShirtLinks)
                                   .Where(t => t.TShirtId == ID1 || t.TShirtId ==ID2).ToListAsync();
 
+        }
+
+        public async Task<List<Competition>> GetAllCompetitions()
+        {
+            return await _context.Competitions.ToListAsync();
+        }
+
+        public async Task<List<TShirt>> GetByCompetition(int competitionId)
+        {
+            return await _context.TShirtCompetitions
+                .Where(tc => tc.CompetitionId == competitionId)
+                .Include(tc => tc.TShirt).ThenInclude(t => t.Team)
+                .Include(tc => tc.TShirt).ThenInclude(t => t.ShirtLinks)
+                .Select(tc => tc.TShirt)
+                .ToListAsync();
+        }
+
+        public async Task AddShirtToCompetition(int tshirtId, int competitionId)
+        {
+            var shirtExists = await _context.TShirts.AnyAsync(t => t.TShirtId == tshirtId);
+            var competitionExists = await _context.Competitions.AnyAsync(c => c.CompetitionId == competitionId);
+
+            if (!shirtExists || !competitionExists)
+            {
+                throw new ArgumentException("Shirt or competition not found.");
+            }
+
+            var alreadyLinked = await _context.TShirtCompetitions
+                .AnyAsync(tc => tc.TShirtId == tshirtId && tc.CompetitionId == competitionId);
+
+            if (alreadyLinked)
+            {
+                throw new InvalidOperationException("This shirt is already linked to this competition.");
+            }
+
+            _context.TShirtCompetitions.Add(new TShirtCompetition
+            {
+                TShirtId = tshirtId,
+                CompetitionId = competitionId
+            });
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Competition> CreateCompetition(string competitionName)
+        {
+            var exists = await _context.Competitions.AnyAsync(c => c.CompetitionName == competitionName);
+            if (exists)
+            {
+                throw new InvalidOperationException("A competition with this name already exists.");
+            }
+
+            var competition = new Competition { CompetitionName = competitionName };
+            _context.Competitions.Add(competition);
+            await _context.SaveChangesAsync();
+            return competition;
         }
     }
 }
