@@ -17,6 +17,9 @@ namespace Kitverse_backend_01.Data
         public DbSet<ShirtLink> ShirtLinks { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
         public DbSet<ItemList> ItemLists { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Inventory> Inventory { get; set; }

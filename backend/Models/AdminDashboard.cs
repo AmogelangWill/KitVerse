@@ -9,5 +9,10 @@
         public int ActiveUsers { get; set; }
         public int InactiveUsers { get; set; }
         public int TotalAdmins { get; set; }
+
+        //stats
+        public double avgmonthlyUsers { get; set; }
+        public double avgsales { get; set; }
+
     }
 }

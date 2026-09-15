@@ -45,7 +45,7 @@ namespace Kitverse_backend_01.Services
                 UserEmail = u.UserEmail,
                 Role = u.Role,
                 DateAdded = u.DateAdded,
-           
+
 
             }).ToListAsync();
         }
@@ -62,7 +62,7 @@ namespace Kitverse_backend_01.Services
                     UserEmail = u.UserEmail,
                     Role = u.Role,
                     DateAdded = u.DateAdded,
-                  
+
                 }).FirstOrDefaultAsync();
 
         }
@@ -87,11 +87,11 @@ namespace Kitverse_backend_01.Services
                 UserEmail = user.UserEmail,
                 Role = user.Role,
                 DateAdded = user.DateAdded,
-               
+
             };
         }
 
-      
+
 
         public async Task<bool> DeleteUser(int userId)
         {
@@ -169,6 +169,68 @@ namespace Kitverse_backend_01.Services
             await _context.SaveChangesAsync();
 
             return banner;
+        }
+
+        public async Task<double> GetAvgSales()
+        {
+            var monthlysales = await _context.Orders
+                            .Where(o => o.orderStatus != "Cancelled"
+                            && o.orderStatus != "Pending")
+                            .GroupBy(o =>
+                                 new
+                                 {
+                                     o.orderDate.Year,
+                                     o.orderDate.Month
+                                 })
+                            .Select(g => g.Sum(o => o.totalAmount))
+                            .ToListAsync();
+
+            return monthlysales.Any()
+                ? (double)
+                monthlysales.Average()
+                : 0.0;
+        }
+
+
+        public async Task<double> GetAvgUserPerMonth()
+        {
+
+            var firstUser = await _context.Users
+                           .OrderBy(u => u.DateAdded).
+                           FirstOrDefaultAsync();
+            if (firstUser == null)
+            {
+                return 0.0;
+            }
+            var now = DateTime.UtcNow;
+
+            var month = ((now.Year - firstUser.DateAdded!.Value.Year) * 12)
+                         + now.Month - firstUser.DateAdded!.Value.Month + 1;
+            if (month <= 0)
+            {
+                return 0.0;
+            }
+            var totalUsers = await _context.Users.CountAsync();
+
+            return (double)totalUsers / month;
+        }
+        public async Task<List<Invoice>> GetInvoices()
+        {
+            return await _context.Invoices
+                .Include(i => i.Payment)
+                .Include(i => i.User)
+                .OrderByDescending(i => i.invoiceDate)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<Invoice?> GetInvoiceById(int invoiceId)
+        {
+            return await _context.Invoices
+                .Include(i => i.Payment)
+                .Include(i => i.User)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == invoiceId);
         }
     }
 }

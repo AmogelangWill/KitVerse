@@ -10,7 +10,14 @@ namespace Kitverse_backend_01.Services
 
         Task<List<User>> GetUsers();
 
+        //Analytics
+        Task<Double> GetAvgSales();
+        Task<Double> GetAvgUserPerMonth();
 
+        //invoice 
+        Task<List<Invoice>> GetInvoices();
+
+        Task<Invoice?> GetInvoiceById(int invoiceId);
         Task<User> GetUserById(int userId);
 
         Task<User?> UpdateUser(int userID, UpdateUser userUpdate);
