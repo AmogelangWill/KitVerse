@@ -208,6 +208,46 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("payments", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("review_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReviewId"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("Stars")
+                        .HasColumnType("integer")
+                        .HasColumnName("stars");
+
+                    b.Property<int>("TShirtId")
+                        .HasColumnType("integer")
+                        .HasColumnName("t_shirt_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("TShirtId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("reviews", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ShirtLink", b =>
                 {
                     b.Property<int>("LinkId")
@@ -508,6 +548,25 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("ShoppingCart");
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.Review", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
+                        .WithMany("Reviews")
+                        .HasForeignKey("TShirtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kitverse_backend_01.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TShirt");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.ShirtLink", b =>
                 {
                     b.HasOne("Kitverse_backend_01.Models.TShirt", "TShirt")
@@ -593,6 +652,8 @@ namespace Kitverse_backend_01.Migrations
 
             modelBuilder.Entity("Kitverse_backend_01.Models.TShirt", b =>
                 {
+                    b.Navigation("Reviews");
+
                     b.Navigation("ShirtLinks");
 
                     b.Navigation("TShirtCompetitions");

@@ -24,6 +24,7 @@ namespace Kitverse_backend_01.Data
 
         public DbSet<Competition> Competitions { get; set; }
         public DbSet<TShirtCompetition> TShirtCompetitions { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -195,6 +196,20 @@ namespace Kitverse_backend_01.Data
                 entity.Property(t => t.DateAdded).HasColumnName("banner_date_added").HasDefaultValueSql("now()");
                 entity.Property(t => t.BannerUrl).HasColumnName("banner_url");
 
+            });
+
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.ToTable("reviews");
+                entity.HasKey(r => r.ReviewId);
+                entity.Property(r => r.ReviewId).HasColumnName("review_id");
+                entity.Property(r => r.TShirtId).HasColumnName("t_shirt_id");
+                entity.Property(r => r.UserId).HasColumnName("user_id");
+                entity.Property(r => r.Stars).HasColumnName("stars");
+                entity.Property(r => r.Comment).HasColumnName("comment");
+                entity.Property(r => r.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
+                entity.HasOne(r => r.TShirt).WithMany(t => t.Reviews).HasForeignKey(r => r.TShirtId);
+                entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId);
             });
         }
     }

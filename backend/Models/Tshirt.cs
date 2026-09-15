@@ -20,5 +20,6 @@ namespace Kitverse_backend_01.Models
         public Team Team { get; set; } = null!;
         public List<TShirtCompetition> TShirtCompetitions { get; set; } = new();
         public List<ShirtLink> ShirtLinks { get; set; } = new();
+        public List<Review> Reviews { get; set; } = new();
     }
 }
