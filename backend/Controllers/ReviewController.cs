@@ -15,8 +15,8 @@ namespace Kitverse_backend_01.Controllers
             _reviewService = reviewService;
         }
 
-        // POST: api/Review
-        [Authorize] // any logged-in user can leave a review, not just Admin/Item Lister
+        //POST: api/Review
+        [Authorize] //any logged-in user can leave a review, not just Admin/Item Lister
         [HttpPost]
         public async Task<IActionResult> AddReview([FromBody] CreateReview request)
         {
@@ -31,7 +31,7 @@ namespace Kitverse_backend_01.Controllers
             }
         }
 
-        // GET: api/Review/shirt/5
+        //GET: api/Review/shirt/5
         [HttpGet("shirt/{tshirtId:int}")]
         public async Task<IActionResult> GetReviewsForShirt(int tshirtId)
         {
@@ -39,7 +39,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(reviews);
         }
 
-        // GET: api/Review/shirt/5/stars/4
+        //GET: api/Review/shirt/5/stars/4
         [HttpGet("shirt/{tshirtId:int}/stars/{stars:int}")]
         public async Task<IActionResult> GetReviewsForShirtByStars(int tshirtId, int stars)
         {
