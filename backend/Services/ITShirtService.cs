@@ -31,5 +31,7 @@ namespace Kitverse_backend_01.Controllers
         Task AddShirtToCompetition(int tshirtId, int competitionId);
         Task<Competition> CreateCompetition(string competitionName);
 
+        Task<List<TShirt>> Search(string query);
+
     }
 }
