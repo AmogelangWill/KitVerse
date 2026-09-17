@@ -405,7 +405,20 @@ function AdminPage() {
                                                 </div>
                                                 <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                                                     <label style={{fontSize: '0.85rem', fontWeight: 700}}>Image URL (Required)</label>
-                                                    <input type="text" value={newBanner.bannerUrl} onChange={e => setNewBanner({...newBanner, bannerUrl: e.target.value})} required style={{padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} placeholder="https://example.com/banner.png" />
+                                                    <ImageUploader 
+                                                        endpoint="/api/Upload/banner" 
+                                                        multiple={false} 
+                                                        onUploadSuccess={(url) => setNewBanner({ ...newBanner, bannerUrl: url })} 
+                                                    />
+                                                    {newBanner.bannerUrl && (
+                                                        <div style={{ marginTop: '10px', width: '200px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                                                            <img src={newBanner.bannerUrl} alt="Preview" style={{ width: '100%', display: 'block' }} />
+                                                            <button type="button" onClick={() => setNewBanner({ ...newBanner, bannerUrl: "" })} style={{ width: '100%', background: '#ef4444', color: 'white', border: 'none', padding: '5px', cursor: 'pointer' }}>Remove</button>
+                                                        </div>
+                                                    )}
+                                                    <div style={{marginTop: '10px'}}>
+                                                        <input type="text" placeholder="Or paste image URL directly..." value={newBanner.bannerUrl} onChange={(e) => setNewBanner({ ...newBanner, bannerUrl: e.target.value })} required style={{width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '4px'}} />
+                                                    </div>
                                                 </div>
                                             </div>
                                             
