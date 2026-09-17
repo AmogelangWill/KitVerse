@@ -123,7 +123,7 @@ function ItemListerPage() {
             shirtStatus: formData.shirtStatus,
             teamId: parseInt(formData.teamId),
             // The backend Update endpoint expects TShirt object which has ShirtLinks array
-            shirtLinks: imageUrls.filter(url => url.trim() !== "").map(url => ({ shirtLinkUrl: url })),
+            imageUrls: imageUrls.filter(url => url.trim() !== ""), // Fixed to match CreateTShirt DTO
             team: { teamId: parseInt(formData.teamId), teamName: "Bypass", teamLeague: "Bypass" },
             tShirtCompetitions: [],
             reviews: []
