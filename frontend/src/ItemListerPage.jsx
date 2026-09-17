@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { useToast } from "./ToastContext.jsx";
+import ImageUploader from "./ImageUploader.jsx";
 import { Link } from "react-router-dom";
 import "./AdminPage.css"; // Reuse table styles
 import "./ItemListerPage.css";
@@ -10,6 +11,8 @@ function ItemListerPage() {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState("inventory");
     const [inventory, setInventory] = useState([]);
+    const [competitions, setCompetitions] = useState([]);
+    const [selectedCompetitions, setSelectedCompetitions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -41,6 +44,9 @@ function ItemListerPage() {
         try {
             const res = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
             if (res.ok) setInventory(await res.json());
+            
+            const compRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
+            if (compRes.ok) setCompetitions(await compRes.json());
         } catch (err) {
             console.error(err);
         } finally {
@@ -71,6 +77,7 @@ function ItemListerPage() {
         });
         setImageUrls([""]);
         setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+        setSelectedCompetitions([]);
     };
 
     const openEditForm = (item) => {
@@ -95,6 +102,7 @@ function ItemListerPage() {
         // Note: The backend GET doesn't easily expose sizes in the main payload without calling inventory endpoint,
         // so we'll just populate a default size block if it's missing. (Update doesn't seem to natively handle sizes in TShirt object directly based on C# model, but we'll include it just in case).
         setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+        setSelectedCompetitions([]);
         setActiveTab("edit");
     };
 
@@ -144,8 +152,29 @@ function ItemListerPage() {
                 body: JSON.stringify(payload)
             });
 
+            
             if (res.ok) {
+                const data = await res.json();
+                const createdShirtId = isEdit ? formData.tShirtId : (data.tShirtId || data.id);
+                
+                // Link to competitions
+                if (createdShirtId && selectedCompetitions.length > 0) {
+                    for (const compId of selectedCompetitions) {
+                        try {
+                            await fetch("https://kitverse-production.up.railway.app/api/TShirt/competition", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${user?.token}`
+                                },
+                                body: JSON.stringify({ tShirtId: createdShirtId, competitionId: compId })
+                            });
+                        } catch(err) { console.error("Failed to link competition", err); }
+                    }
+                }
+
                 showToast(`Product successfully ${isEdit ? 'updated' : 'added'}!`, 'success');
+
                 setActiveTab("inventory");
                 fetchInventory();
                 resetForm();
@@ -321,16 +350,40 @@ function ItemListerPage() {
 
                             <h3 className="FormSectionTitle">Images</h3>
                             <p style={{fontSize: '0.85rem', color: '#6b7280', marginBottom: '15px'}}>The first image will be set as the Main image.</p>
+                            
+                            <ImageUploader 
+                                endpoint="/api/Upload/jersey" 
+                                multiple={true} 
+                                onUploadSuccess={(url) => {
+                                    // If first slot is empty, replace it. Else append.
+                                    if (imageUrls.length === 1 && imageUrls[0] === "") {
+                                        setImageUrls([url]);
+                                    } else {
+                                        setImageUrls([...imageUrls, url]);
+                                    }
+                                }} 
+                            />
+                            
                             {imageUrls.map((url, i) => (
                                 <div className="DynamicListRow" key={i}>
+                                    {url && (
+                                        <div style={{width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e5e7eb'}}>
+                                            <img src={url} alt="Preview" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                                        </div>
+                                    )}
                                     <input 
                                         type="text" 
-                                        placeholder="https://example.com/image.png" 
-                                        value={url} 
-                                        onChange={(e) => handleImageChange(i, e.target.value)} 
-                                        required={i === 0}
+                                        placeholder="Or paste image URL"
+                                        value={url}
+                                        onChange={(e) => {
+                                            const newUrls = [...imageUrls];
+                                            newUrls[i] = e.target.value;
+                                            setImageUrls(newUrls);
+                                        }}
+                                        required 
+                                        style={{flexGrow: 1}}
                                     />
-                                    {i > 0 && (
+                                    {imageUrls.length > 1 && (
                                         <button type="button" className="AdminActionBtn danger" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))}>
                                             Remove
                                         </button>
