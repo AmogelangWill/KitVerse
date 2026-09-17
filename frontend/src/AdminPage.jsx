@@ -16,6 +16,8 @@ function AdminPage() {
     const [dashboardData, setDashboardData] = useState(null);
     const [users, setUsers] = useState([]);
     const [banners, setBanners] = useState([]);
+    const [competitions, setCompetitions] = useState([]);
+    const [newCompetitionName, setNewCompetitionName] = useState("");
     const [tshirts, setTshirts] = useState([]); // Needed for banner dropdowns
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const [newBanner, setNewBanner] = useState({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
@@ -33,7 +35,10 @@ function AdminPage() {
         setLoading(true);
         setError(null);
         try {
-            if (activeTab === "dashboard") {
+            if (activeTab === "competitions") {
+                const cRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
+                if (cRes.ok) setCompetitions(await cRes.json());
+            } else if (activeTab === "dashboard") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/dashboard");
                 if (res.ok) setDashboardData(await res.json());
                 else throw new Error("Failed to load dashboard data");
@@ -107,6 +112,28 @@ function AdminPage() {
             }
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleCreateCompetition = async (e) => {
+        e.preventDefault();
+        try {
+            const token = user?.token;
+            const res = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify({ competitionName: newCompetitionName })
+            });
+
+            if (res.ok) {
+                showToast("Competition created successfully!", "success");
+                setNewCompetitionName("");
+                fetchData();
+            } else {
+                showToast("Failed to create competition.", "error");
+            }
+        } catch (error) {
+            showToast("Network error.", "error");
         }
     };
 
@@ -313,6 +340,50 @@ function AdminPage() {
                         )}
 
                         {/* BANNERS TAB */}
+                        {activeTab === 'competitions' && (
+                            <div className="AdminSection">
+                                <h2 className="AdminTitle">Manage Competitions</h2>
+                                <p className="AdminSubtitle" style={{marginBottom: '20px'}}>Create competitions so Item Listers can assign T-Shirts to them.</p>
+
+                                <form className="BannerForm" onSubmit={handleCreateCompetition} style={{marginBottom: '30px'}}>
+                                    <div className="FormGroup">
+                                        <label>Competition Name</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. CAF Champions League" 
+                                            value={newCompetitionName} 
+                                            onChange={(e) => setNewCompetitionName(e.target.value)} 
+                                            required 
+                                        />
+                                    </div>
+                                    <button type="submit" className="AdminActionBtn">Create Competition</button>
+                                </form>
+
+                                <div className="AdminTableWrapper">
+                                    <table className="AdminTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Competition Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {competitions.map(comp => (
+                                                <tr key={comp.competitionId}>
+                                                    <td>{comp.competitionId}</td>
+                                                    <td>{comp.competitionName}</td>
+                                                </tr>
+                                            ))}
+                                            {competitions.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="2" style={{textAlign: 'center', padding: '20px'}}>No competitions created yet.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                         {activeTab === 'banners' && (
                             <div>
                                 <div className="SectionHeader">
