@@ -1,0 +1,151 @@
+.CollectionPageContainer {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Archivo', sans-serif;
+}
+
+/* Sidebar Styling */
+.CollectionSidebar {
+    width: 250px;
+    flex-shrink: 0;
+    margin-right: 40px;
+    padding-top: 10px;
+}
+
+.SidebarHeader {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.FilterSection {
+    margin-bottom: 30px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+}
+
+.FilterSection h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.FilterOption {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+.FilterOption input[type="checkbox"] {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    accent-color: #111;
+    cursor: pointer;
+}
+
+.FilterOption:hover {
+    color: #111;
+}
+
+/* Main Content Styling */
+.CollectionContent {
+    flex-grow: 1;
+}
+
+.CollectionTopBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.ActiveFilters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.FilterTag {
+    background: #f3f4f6;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.FilterTag button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #9ca3af;
+}
+
+.FilterTag button:hover {
+    color: #111;
+}
+
+.ClearAllBtn {
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ef4444;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.SortSelect {
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Product Grid */
+.CollectionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .CollectionPageContainer {
+        flex-direction: column;
+    }
+    
+    .CollectionSidebar {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 30px;
+    }
+    
+    .CollectionGrid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+    }
+}

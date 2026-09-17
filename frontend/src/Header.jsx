@@ -43,20 +43,10 @@ function Header(){
             </div>
             
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
-                <button className="NavBtn">Jerseys</button>
-                <button className="NavBtn">New Arrival</button>
-                <button className="NavBtn">
-                    Nedbank Cup
-                    <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </button>
-                <button className="NavBtn">
-                    CAF
-                    <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </button>
+                <Link to="/collections" style={{textDecoration: "none"}}><button className="NavBtn">Jerseys</button></Link>
+                <Link to="/collections?filter=new" style={{textDecoration: "none"}}><button className="NavBtn">New Arrival</button></Link>
+                <Link to="/collections" style={{textDecoration: "none"}}><button className="NavBtn">Nedbank Cup</button></Link>
+                <Link to="/collections" style={{textDecoration: "none"}}><button className="NavBtn">CAF</button></Link>
                 {user?.role === "Admin" && (
                     <Link to="/admin" className="HideOnMobile" style={{textDecoration: 'none'}}>
                         <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
