@@ -351,6 +351,27 @@ function ItemListerPage() {
                             <h3 className="FormSectionTitle">Images</h3>
                             <p style={{fontSize: '0.85rem', color: '#6b7280', marginBottom: '15px'}}>The first image will be set as the Main image.</p>
                             
+                            
+                            <h3 className="FormSectionTitle">Competitions (Optional)</h3>
+                            <div className="FormGrid" style={{display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '30px'}}>
+                                {competitions.map(comp => (
+                                    <label key={comp.competitionId} style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600}}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={selectedCompetitions.includes(comp.competitionId)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedCompetitions([...selectedCompetitions, comp.competitionId]);
+                                                else setSelectedCompetitions(selectedCompetitions.filter(id => id !== comp.competitionId));
+                                            }}
+                                            style={{width: '16px', height: '16px', accentColor: '#111'}}
+                                        />
+                                        {comp.competitionName}
+                                    </label>
+                                ))}
+                                {competitions.length === 0 && <span style={{color: '#6b7280', fontSize: '0.9rem'}}>No competitions available. Add them in the Admin portal.</span>}
+                            </div>
+                            
+                            <h3 className="FormSectionTitle">Image Links</h3>
                             <ImageUploader 
                                 endpoint="/api/Upload/jersey" 
                                 multiple={true} 
