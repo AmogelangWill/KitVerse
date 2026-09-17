@@ -150,3 +150,64 @@
     font-size: 0.85rem;
   }
 }
+
+/* Search Results */
+.SearchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.SearchResultItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  text-decoration: none;
+  color: #111;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.SearchResultItem:hover {
+  background-color: #f3f4f6;
+}
+
+.SearchResultImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+  background-color: #f3f4f6;
+}
+
+.SearchResultInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.SearchResultName {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.SearchResultTeam {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.SearchResultPrice {
+  font-weight: 600;
+  color: #111;
+  margin-top: 4px;
+}
+
+.SearchLoading {
+  font-size: 0.95rem;
+  color: #6b7280;
+  text-align: center;
+  padding: 20px;
+}

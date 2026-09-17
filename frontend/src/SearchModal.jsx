@@ -1,28 +1,72 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./SearchModal.css";
 
 function SearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   // Auto-focus the input when the modal opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      // Small timeout ensures the transition is ready
-      setTimeout(() => inputRef.current.focus(), 100);
+    if (isOpen) {
+      if (inputRef.current) {
+        setTimeout(() => inputRef.current.focus(), 100);
+      }
+    } else {
+      // Clear on close
+      setQuery("");
+      setResults([]);
     }
   }, [isOpen]);
 
+  // Debounced search API call
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!query.trim()) {
+        setResults([]);
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        const res = await fetch(`https://kitverse-production.up.railway.app/api/Search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(data);
+        } else {
+          setResults([]);
+        }
+      } catch (err) {
+        console.error("Search error", err);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchResults, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [query]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // This is where the backend team will trigger the search API
-    console.log("Backend API Call -> Searching for:", query);
-    // Optional: onClose();
+    if (query.trim()) {
+       // Optional: Navigate to a dedicated search page or just rely on the live dropdown results
+       // navigate(`/collections?search=${encodeURIComponent(query)}`);
+       // onClose();
+    }
   };
 
   const handleSuggestionClick = (term) => {
     setQuery(term);
-    console.log("Backend API Call -> Searching for:", term);
+  };
+
+  const handleResultClick = (id) => {
+    navigate(`/product/${id}`);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -53,16 +97,48 @@ function SearchModal({ isOpen, onClose }) {
           </form>
         </div>
 
-        <div className="SearchSuggestions">
-          <h4 className="SuggestionsTitle">Popular Searches</h4>
-          <div className="SuggestionsList">
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Real Madrid")}>Mamelodi Sundowns</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Retro Kits")}>Retro Kits</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("World Cup 2026")}>Orlando Pirates</button>
-            <button className="SuggestionPill" onClick={() => handleSuggestionClick("Arsenal")}>Kaizer Chiefs</button>
-            
+        {query.trim() ? (
+          <div className="SearchResultsContainer">
+            {loading ? (
+              <div className="SearchLoading">Searching...</div>
+            ) : results.length > 0 ? (
+              <div className="SearchResults">
+                {results.map(shirt => {
+                  const imageUrl = shirt.shirtLinks && shirt.shirtLinks.length > 0 
+                    ? shirt.shirtLinks.find(l => l.isMain)?.shirtLinkUrl || shirt.shirtLinks[0].shirtLinkUrl 
+                    : "";
+                  return (
+                    <div 
+                      key={shirt.tShirtId} 
+                      className="SearchResultItem" 
+                      onClick={() => handleResultClick(shirt.tShirtId)}
+                      style={{cursor: 'pointer'}}
+                    >
+                      {imageUrl && <img src={imageUrl} alt={shirt.shirtName} className="SearchResultImage" />}
+                      <div className="SearchResultInfo">
+                        <span className="SearchResultName">{shirt.shirtName}</span>
+                        <span className="SearchResultTeam">{shirt.team?.teamName || shirt.shirtSeason}</span>
+                        <span className="SearchResultPrice">R{shirt.shirtPrice}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="SearchLoading">No results found for "{query}"</div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="SearchSuggestions">
+            <h4 className="SuggestionsTitle">Popular Searches</h4>
+            <div className="SuggestionsList">
+              <button className="SuggestionPill" onClick={() => handleSuggestionClick("Mamelodi Sundowns")}>Mamelodi Sundowns</button>
+              <button className="SuggestionPill" onClick={() => handleSuggestionClick("Retro Kits")}>Retro Kits</button>
+              <button className="SuggestionPill" onClick={() => handleSuggestionClick("Orlando Pirates")}>Orlando Pirates</button>
+              <button className="SuggestionPill" onClick={() => handleSuggestionClick("Kaizer Chiefs")}>Kaizer Chiefs</button>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
