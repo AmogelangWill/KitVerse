@@ -25,6 +25,25 @@ function CollectionPage() {
     const [isNewArrivals, setIsNewArrivals] = useState(initialFilter === 'new');
     const [sortOrder, setSortOrder] = useState("");
 
+    
+    // Listen for URL changes (e.g., clicking Header links while already on the page)
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        
+        setIsNewArrivals(params.get('filter') === 'new');
+        
+        const comp = params.get('competition');
+        if (comp) setSelectedCompetitions([parseInt(comp)]);
+        // We don't reset to [] if comp is missing here to allow sidebar checkboxes to work independently of the URL.
+        // However, if the user explicitly clicked "Jerseys" (which has NO search params), we should reset everything.
+        // Let's check if there are NO search params at all:
+        if (!location.search) {
+            setSelectedCompetitions([]);
+            setSelectedTeams([]);
+            setIsNewArrivals(false);
+        }
+    }, [location.search]);
+
     // Fetch initial data
     useEffect(() => {
         const fetchInitialData = async () => {
