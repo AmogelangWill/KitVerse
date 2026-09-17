@@ -1,0 +1,126 @@
+.ImageUploader {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    background-color: #f9fafb;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ImageUploader.DragActive {
+    border-color: #111;
+    background-color: #f3f4f6;
+}
+
+.ImageUploader:hover {
+    border-color: #9ca3af;
+    background-color: #f3f4f6;
+}
+
+.ImageUploader-Content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.ImageUploader-Icon {
+    width: 40px;
+    height: 40px;
+    color: #6b7280;
+}
+
+.ImageUploader-Text {
+    font-size: 0.95rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.ImageUploader-Text span {
+    color: #111;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.ImageUploader-Subtext {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.ImageUploader-Preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.PreviewItem {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.PreviewItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.PreviewItem-Remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.PreviewItem-Remove:hover {
+    background: #ef4444;
+}
+
+.UploadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #111;
+}
+
+.Spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #111;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

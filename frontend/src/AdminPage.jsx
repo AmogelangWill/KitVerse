@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { useToast } from "./ToastContext.jsx";
 import { useConfirm } from "./ConfirmContext.jsx";
+import ImageUploader from "./ImageUploader.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import "./AdminPage.css";
 
