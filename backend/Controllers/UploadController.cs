@@ -21,7 +21,7 @@ namespace Kitverse_backend_01.Controllers
         [HttpPost("jersey")]
         public async Task<IActionResult> UploadJerseyImage(IFormFile file)
         {
-            return await Upload(file, _config["Supabase:JerseyBucket"] ?? "Football jerseys");
+            return await Upload(file, _config["Supabase:JerseyBucket"]!);
         }
 
         // POST: api/Upload/banner
@@ -29,7 +29,7 @@ namespace Kitverse_backend_01.Controllers
         [HttpPost("banner")]
         public async Task<IActionResult> UploadBannerImage(IFormFile file)
         {
-            return await Upload(file, _config["Supabase:BannerBucket"] ?? "Banners");
+            return await Upload(file, _config["Supabase:BannerBucket"]!);
         }
 
         private async Task<IActionResult> Upload(IFormFile file, string bucket)

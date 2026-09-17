@@ -117,9 +117,9 @@ namespace Kitverse_backend_01.Controllers
 
         [Authorize(Roles = "Admin,Item Lister")]
         [HttpPost("Tshirt")]
-        public async Task<IActionResult> UpdateTshirt([FromBody] UpdateTShirt request)
+        public async Task<IActionResult> UpdateTshirt([FromBody] TShirt shirt)
         {
-            bool Results = await _tshirtService.UpdateShirt(request);
+            bool Results = await _tshirtService.UpdateShirt(shirt);
 
             if (Results == true)
             {

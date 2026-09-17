@@ -15,9 +15,8 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<string> UploadImage(IFormFile file, string bucket)
         {
-            var supabaseUrl = _config["Supabase:Url"] ?? "https://sekbsdzqbykvocywwxsq.supabase.co";
+            var supabaseUrl = _config["Supabase:Url"];
             var serviceKey = _config["Supabase:ServiceRoleKey"];
-            if (string.IsNullOrEmpty(serviceKey)) throw new Exception("Supabase ServiceRoleKey is missing in environment variables. Please check Railway dashboard.");
 
             // unique filename so uploads never overwrite each other
             var fileName = $"{Guid.NewGuid()}_{file.FileName}";

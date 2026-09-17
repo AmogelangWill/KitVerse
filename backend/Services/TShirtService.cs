@@ -102,7 +102,7 @@ namespace Kitverse_backend_01.Controllers
 
         }
 
-        public async Task<bool> UpdateShirt(UpdateTShirt shirt)
+        public async Task<bool> UpdateShirt(TShirt shirt)
         {
             var shirt1 = await _context.TShirts.FirstOrDefaultAsync(t => t.TShirtId == shirt.TShirtId);
             if (shirt1 != null)

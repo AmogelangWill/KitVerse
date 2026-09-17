@@ -24,7 +24,7 @@ namespace Kitverse_backend_01.Controllers
 
         Task<List<TShirt>> GetFromBAnnerClick(int ID1,int ID2);
 
-        Task<bool> UpdateShirt(UpdateTShirt shirt);
+        Task<bool> UpdateShirt(TShirt shirt);
 
         Task<List<Competition>> GetAllCompetitions();
         Task<List<TShirt>> GetByCompetition(int competitionId);
