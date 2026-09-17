@@ -390,8 +390,6 @@ function ItemListerPage() {
                                     )}
                                 </div>
                             ))}
-                                </div>
-                            ))}
                             <button type="button" className="AdminActionBtn" style={{marginTop: '10px'}} onClick={() => setImageUrls([...imageUrls, ""])}>
                                 + Add Another Image
                             </button>
