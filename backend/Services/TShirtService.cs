@@ -222,5 +222,18 @@ namespace Kitverse_backend_01.Controllers
             await _context.SaveChangesAsync();
             return competition;
         }
+
+        public async Task<List<TShirt>> Search(string query)
+        {
+            return await _context.TShirts
+                .Include(t => t.Team)
+                .Include(t => t.ShirtLinks)
+                .Where(t =>
+                    EF.Functions.ILike(t.ShirtName, $"%{query}%") ||
+                    EF.Functions.ILike(t.Team.TeamName, $"%{query}%") ||
+                    EF.Functions.ILike(t.ShirtDescription, $"%{query}%") ||
+                    EF.Functions.ILike(t.ShirtSeason, $"%{query}%"))
+                .ToListAsync();
+        }
     }
 }

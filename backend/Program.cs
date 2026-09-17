@@ -34,6 +34,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
+builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+
 // JWT authentication - lets the API verify who's logged in on protected requests
 var jwtKey = builder.Configuration["Jwt:Key"];
 
