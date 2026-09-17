@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./Header.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
 import CartDrawer from "./CartDrawer.jsx";
@@ -14,6 +14,7 @@ function Header(){
     // Use our beautiful global contexts instead of hacky event listeners!
     const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
     const { cartCount, isCartOpen, setIsCartOpen } = useCart();
+    const navigate = useNavigate();
 
     return(
       <>    
@@ -43,8 +44,8 @@ function Header(){
             </div>
             
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
-                <button className="NavBtn">Jerseys</button>
-                <button className="NavBtn">New Arrival</button>
+                <button className="NavBtn" onClick={() => navigate('/collections')}>Jerseys</button>
+                <button className="NavBtn" onClick={() => navigate('/collections?filter=new')}>New Arrival</button>
                 <button className="NavBtn">
                     Nedbank Cup
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
