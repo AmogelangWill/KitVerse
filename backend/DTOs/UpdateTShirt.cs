@@ -11,5 +11,6 @@ namespace Kitverse_backend_01.DTOs
         public string ShirtStatus { get; set; } = string.Empty;
         public string ShirtName { get; set; } = string.Empty;
         public int TeamId { get; set; }
+        public DateTime? DateAdded { get; set; }
     }
 }
