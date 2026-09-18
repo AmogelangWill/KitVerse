@@ -167,7 +167,7 @@ namespace Kitverse_backend_01.Controllers
             {
                 throw new ArgumentException("Invalid Google token.");
             }
-
+            
             var existingUser = await GetByEmail(payload.Email);
             if (existingUser != null)
             {

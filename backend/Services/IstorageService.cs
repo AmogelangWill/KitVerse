@@ -3,5 +3,7 @@
     public interface IStorageService
     {
         Task<string> UploadImage(IFormFile file, string bucket);
+
+        Task<String> DeleteImage(int ShirtLinkID,string bucket);
     }
 }
