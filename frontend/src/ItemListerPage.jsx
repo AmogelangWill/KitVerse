@@ -30,6 +30,7 @@ function ItemListerPage() {
     });
     const [imageUrls, setImageUrls] = useState([""]);
     const [sizes, setSizes] = useState([{ shirtSize: "M", amountAvailable: 10 }]);
+    const [stockAdjustments, setStockAdjustments] = useState([{ shirtSize: "M", amount: 0 }]);
 
     const isAuthorized = user && (user.role === "Admin" || user.role === "Item Lister");
 
@@ -77,6 +78,7 @@ function ItemListerPage() {
         });
         setImageUrls([""]);
         setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+        setStockAdjustments([{ shirtSize: "M", amount: 0 }]);
         setSelectedCompetitions([]);
     };
 
@@ -102,6 +104,7 @@ function ItemListerPage() {
         // Note: The backend GET doesn't easily expose sizes in the main payload without calling inventory endpoint,
         // so we'll just populate a default size block if it's missing. (Update doesn't seem to natively handle sizes in TShirt object directly based on C# model, but we'll include it just in case).
         setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
+        setStockAdjustments([{ shirtSize: "M", amount: 0 }]);
         setSelectedCompetitions([]);
         setActiveTab("edit");
     };
@@ -417,6 +420,53 @@ function ItemListerPage() {
                             <button type="button" className="AdminActionBtn" style={{marginTop: '10px'}} onClick={() => setImageUrls([...imageUrls, ""])}>
                                 + Add Another Image
                             </button>
+
+                            {activeTab === "edit" && (
+                                <>
+                                    <h3 className="FormSectionTitle">Adjust Stock Levels (Optional)</h3>
+                                    <p style={{fontSize: '0.85rem', color: '#6b7280', marginBottom: '10px'}}>
+                                        Use positive numbers to add stock, and negative numbers to reduce stock. Leave at 0 to make no changes.
+                                    </p>
+                                    {stockAdjustments.map((adj, i) => (
+                                        <div className="DynamicListRow" key={`adj-${i}`}>
+                                            <select 
+                                                value={adj.shirtSize} 
+                                                onChange={(e) => {
+                                                    const newAdj = [...stockAdjustments];
+                                                    newAdj[i].shirtSize = e.target.value;
+                                                    setStockAdjustments(newAdj);
+                                                }}
+                                                style={{width: '120px'}}
+                                            >
+                                                <option value="S">S</option>
+                                                <option value="M">M</option>
+                                                <option value="L">L</option>
+                                                <option value="XL">XL</option>
+                                                <option value="XXL">XXL</option>
+                                            </select>
+                                            <input 
+                                                type="number" 
+                                                placeholder="e.g. 5 or -2"
+                                                value={adj.amount} 
+                                                onChange={(e) => {
+                                                    const newAdj = [...stockAdjustments];
+                                                    newAdj[i].amount = parseInt(e.target.value) || 0;
+                                                    setStockAdjustments(newAdj);
+                                                }} 
+                                                required
+                                            />
+                                            {i > 0 && (
+                                                <button type="button" className="AdminActionBtn danger" onClick={() => setStockAdjustments(stockAdjustments.filter((_, idx) => idx !== i))}>
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button type="button" className="AdminActionBtn" style={{marginTop: '10px'}} onClick={() => setStockAdjustments([...stockAdjustments, { shirtSize: "S", amount: 0 }])}>
+                                        + Add Another Adjustment
+                                    </button>
+                                </>
+                            )}
 
                             {activeTab === "add" && (
                                 <>
