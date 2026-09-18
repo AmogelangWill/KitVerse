@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -84,6 +85,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // POST: api/Auth/set-password
+        [Authorize]
         [HttpPost("set-password")]
         public async Task<IActionResult> SetPassword([FromBody] SetPassword request)
         {
