@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import "./AuthModal.css";
+import { GoogleLogin } from "@react-oauth/google";
 
 function AuthModal({ isOpen, onClose }) {
   const { login } = useAuth();
@@ -83,9 +84,31 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  const handleGoogleAuth = () => {
-    // Backend team can trigger Google OAuth here
-    console.log("Google auth clicked");
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const res = await fetch("https://kitverse-production.up.railway.app/api/Auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: credentialResponse.credential })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        login(data);
+        onClose();
+        if (data.needsPassword) {
+          // Ideally we prompt for a password here, but the backend set-password is unprotected
+          // For now, they are fully logged in and can use the app normally!
+        }
+      } else {
+        setErrorMsg(data.message || "Google Login failed");
+      }
+    } catch (err) {
+      setErrorMsg("Network error during Google Login");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reset states when switching between login/register
@@ -119,15 +142,18 @@ function AuthModal({ isOpen, onClose }) {
         {errorMsg && <div className="AuthError">{errorMsg}</div>}
         {successMsg && <div className="AuthSuccess">{successMsg}</div>}
 
-        <button className="GoogleBtn" type="button" onClick={handleGoogleAuth}>
-          <svg className="GoogleIcon" viewBox="0 0 24 24">
-            <path d="M23.52 12.273c0-.85-.077-1.668-.218-2.455H12v4.642h6.458c-.278 1.5-1.124 2.771-2.395 3.622v3.01h3.878c2.269-2.09 3.579-5.166 3.579-8.819z" fill="#4285F4"/>
-            <path d="M12 24c3.24 0 5.956-1.074 7.942-2.907l-3.878-3.01c-1.075.72-2.449 1.145-4.064 1.145-3.125 0-5.771-2.11-6.715-4.947H1.276v3.11C3.251 21.31 7.309 24 12 24z" fill="#34A853"/>
-            <path d="M5.285 14.281c-.24-.72-.376-1.489-.376-2.28 0-.792.136-1.561.376-2.281v-3.11H1.276A11.966 11.966 0 0 0 0 12c0 1.936.464 3.77 1.276 5.39l4.009-3.109z" fill="#FBBC05"/>
-            <path d="M12 4.773c1.762 0 3.344.605 4.587 1.795l3.442-3.442C17.951 1.19 15.234 0 12 0 7.309 0 3.251 2.69 1.276 6.611l4.009 3.109c.944-2.837 3.59-4.947 6.715-4.947z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '10px' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setErrorMsg("Google Login was closed or failed.")}
+            useOneTap
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            text="continue_with"
+            width="100%"
+          />
+        </div>
 
         <div className="AuthDivider">
           <span>Or {isLogin ? "sign in" : "sign up"} with your email</span>
