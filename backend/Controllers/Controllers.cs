@@ -54,10 +54,45 @@ namespace Kitverse_backend_01.Controllers
                 }
                 return Unauthorized(new { message = "Invalid credentials" });
             }
+            catch (InvalidOperationException ex)
+            {
+                return Ok(new { needsPassword = true, message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+
+        // POST: api/Auth/google-login
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLogin request)
+        {
+            try
+            {
+                var user = await _authService.GoogleLogin(request.IdToken);
+                var token = _authService.GenerateToken(user);
+                var needsPassword = string.IsNullOrEmpty(user.PasswordHash);
+
+                return Ok(new { token, user.UserId, user.UserName, user.UserEmail, user.Role, needsPassword });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // POST: api/Auth/set-password
+        [HttpPost("set-password")]
+        public async Task<IActionResult> SetPassword([FromBody] SetPassword request)
+        {
+            var success = await _authService.SetPassword(request.Email, request.NewPassword);
+            if (!success)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+            return Ok(new { message = "Password set successfully." });
         }
     }
 }

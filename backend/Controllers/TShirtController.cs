@@ -214,5 +214,29 @@ namespace Kitverse_backend_01.Controllers
             }
         }
 
+        [Authorize(Roles ="Admin,Item Lister")]
+        [HttpPut("StockUpdate")]
+        public async Task<IActionResult> UpdateStock([FromBody] List< StockUpdate> Stock)
+        { 
+            try
+            {
+                var list = await _tshirtService.UpdateStockSizesBulk(Stock);
+
+                if (list == null) //it means that all tshirts were successfully updated
+                {
+                    return Ok(new { message = "All Shirts Stock Successfully updated" });
+                }
+                else //some or all were unsuccessfully Updated ... you will check the message 
+                {
+                    return Ok(list);
+                }
+            }
+            catch(Exception ex) //to return if an exception was encountered 
+            {
+                 return BadRequest(new {message = ex.Message});
+            }
+            
+        }
+
     }
 }

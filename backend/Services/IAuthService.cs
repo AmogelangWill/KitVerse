@@ -11,5 +11,9 @@ namespace Kitverse_backend_01.Controllers
         public string GenerateToken(User user);
 
 
+        Task<User> GoogleLogin(string idToken);
+        Task<bool> SetPassword(string email, string newPassword);
+
+
     }
 }

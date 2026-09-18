@@ -9,7 +9,7 @@ using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 using static Kitverse_backend_01.Services.PasswordHasher; // importing the static class PasswordHasher to use the HashPassword method without creating an instance of the class.
-
+using Google.Apis.Auth;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -77,19 +77,33 @@ namespace Kitverse_backend_01.Controllers
 
         //changed login requirements from using a username to using a user email     
         //users will login with email instead of their usernames
-        public async Task<User> Login(string email, string password)
+        public async Task<User?> Login(string email, string password)
         {
             try
             {
                 var user = await GetByEmail(email);
-                if (user != null && user.UserEmail == email && user.PasswordHash == HashPassword(password))
-                {
-                    return user;
-                }
-                else
+
+                if (user == null)
                 {
                     return null;
                 }
+
+                if (string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    // account exists but was created via Google - no password to check against yet
+                    throw new InvalidOperationException("This account was created with Google. Please set a password first.");
+                }
+
+                if (user.UserEmail == email && user.PasswordHash == HashPassword(password))
+                {
+                    return user;
+                }
+
+                return null;
+            }
+            catch (InvalidOperationException)
+            {
+                throw; // let the controller catch and report this specific case distinctly
             }
             catch (Exception ex)
             {
@@ -139,5 +153,52 @@ namespace Kitverse_backend_01.Controllers
             return user.PasswordHash == HashPassword(password);
         }
 
+        public async Task<User> GoogleLogin(string idToken)
+        {
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _config["Google:ClientId"] }
+                });
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Invalid Google token.");
+            }
+            
+            var existingUser = await GetByEmail(payload.Email);
+            if (existingUser != null)
+            {
+                return existingUser; // already registered - either via Google before, or normally
+            }
+
+            // brand new account created purely from Google sign-in - no password yet
+            var newUser = new User
+            {
+                UserName = payload.Name ?? payload.Email.Split('@')[0],
+                UserEmail = payload.Email,
+                PasswordHash = null, // deliberately left empty - see SetPassword below
+                Role = "Customer"
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+            return newUser;
+        }
+
+        public async Task<bool> SetPassword(string email, string newPassword)
+        {
+            var user = await GetByEmail(email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.PasswordHash = HashPassword(newPassword);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace Kitverse_backend_01.Controllers
                 throw new ArgumentException("Cart not found.");
             }
 
-            var secretKey = _config["Paystack:SecretKey"];
+            var secretKey = _config["Paystack:SecretKey"];//this one comes from dotnet user secrets that i set up earlier
             var amountInCents = cart.TotalCost * 100; // Paystack expects the smallest currency unit
 
             var payload = new
@@ -60,7 +60,7 @@ namespace Kitverse_backend_01.Controllers
             return authorizationUrl!;
         }
 
-        // Step 2: after the customer pays, confirm with Paystack directly - never trust the frontend alone
+        //Step 2: after the customer pays, confirm with Paystack directly -never trust the frontend alone
         public async Task<bool> VerifyTransaction(string reference, int cartId)
         {
             var secretKey = _config["Paystack:SecretKey"];

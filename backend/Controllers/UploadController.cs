@@ -49,5 +49,35 @@ namespace Kitverse_backend_01.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
+        private async Task<IActionResult> deleteImage(int ShirtlinkId ,string Bucket)
+        {
+            try
+            {
+                var result = await _storageService.DeleteImage(ShirtlinkId, Bucket);
+                return Ok(new { result });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+        }
+
+        [Authorize(Roles ="Admin,Item Lister")]
+        [HttpDelete("banner")]
+        public async Task<IActionResult> DeleteBanner(int ShirtlinkId)
+        {
+            return await deleteImage(ShirtlinkId, _config["Supabase:BannerBucket"]!);
+        }
+
+
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpDelete("Jersey")]
+        public async Task<IActionResult> DeleteJersey(int ShirtlinkId)
+        {
+            return await deleteImage(ShirtlinkId, _config["Supabase:JerseyBucket"]!);
+        }
     }
 }

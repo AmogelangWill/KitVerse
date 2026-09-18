@@ -19,7 +19,7 @@ namespace Kitverse_backend_01.Controllers
         {
             if (string.IsNullOrWhiteSpace(q))
             {
-                return Ok(new List<object>()); // empty search returns nothing, not the whole catalog
+                return Ok(new List<object>()); //empty search returns nothing, not the whole catalog
             }
 
             var results = await _tshirtService.Search(q);

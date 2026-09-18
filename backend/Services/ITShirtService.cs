@@ -33,5 +33,7 @@ namespace Kitverse_backend_01.Controllers
 
         Task<List<TShirt>> Search(string query);
 
+        Task<List<string>> UpdateStockSizesBulk(List<StockUpdate> updates);
+
     }
 }
