@@ -256,5 +256,6 @@ namespace Kitverse_backend_01.Controllers
                     EF.Functions.ILike(t.ShirtSeason, $"%{query}%"))
                 .ToListAsync();
         }
+
     }
 }
