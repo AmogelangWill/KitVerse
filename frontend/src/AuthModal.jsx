@@ -150,7 +150,7 @@ function AuthModal({ isOpen, onClose }) {
             shape="rectangular"
             theme="outline"
             size="large"
-            text="continue_with"
+            text={isLogin ? "signin_with" : "signup_with"}
             width="100%"
           />
         </div>
