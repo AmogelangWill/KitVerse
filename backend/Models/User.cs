@@ -10,8 +10,7 @@
 
         public string UserEmail { get; set; } = string.Empty;
 
-        public string PasswordHash { get; set; } = string.Empty;
-
+        public string? PasswordHash { get; set; }//nullable
         public string Role { get; set; } = string.Empty;
 
         public DateTime? DateAdded { get; set; }
