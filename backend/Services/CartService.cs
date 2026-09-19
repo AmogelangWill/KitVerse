@@ -45,22 +45,19 @@ namespace Kitverse_backend_01.Services
         {
             if (quantity <= 0)
                 return false;
+
             var cart = await GetCart(userId);
 
             var tshirt = await _context.TShirts.FindAsync(itemId);
-
             if (tshirt == null)
-
                 return false;
 
+            var existingItem = cart.ItemLists.FirstOrDefault(i => i.TShirtId == itemId);
 
-            var existingItem = cart.ItemLists.
-                FirstOrDefault(i => i.TShirtId == itemId);
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
                 existingItem.UnitPurchaseAtTime = tshirt.ShirtPrice;
-
             }
             else
             {
@@ -70,20 +67,15 @@ namespace Kitverse_backend_01.Services
                     TShirtId = itemId,
                     Quantity = quantity,
                     UnitPurchaseAtTime = tshirt.ShirtPrice
-
-
                 };
                 cart.ItemLists.Add(newItem);
-                await UpdateTotal(cart.CartId);
-
-                await _context.SaveChangesAsync();
-
-                return true;
-
-
             }
-            return false;
+
+            await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+            return true;
         }
+
 
         public async Task<bool> RemoveItem(int userId, int tShirtId)
         {

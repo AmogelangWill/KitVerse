@@ -167,24 +167,29 @@ namespace Kitverse_backend_01.Controllers
             {
                 throw new ArgumentException("Invalid Google token.");
             }
-            
+
             var existingUser = await GetByEmail(payload.Email);
             if (existingUser != null)
             {
-                return existingUser; // already registered - either via Google before, or normally
+                return existingUser;
             }
 
-            // brand new account created purely from Google sign-in - no password yet
             var newUser = new User
             {
-                UserName = payload.Name ?? payload.Email.Split('@')[0],
+                UserName = payload.GivenName ?? payload.Email.Split('@')[0],
+                UserSurname = payload.FamilyName ?? string.Empty,
                 UserEmail = payload.Email,
-                PasswordHash = null, // deliberately left empty - see SetPassword below
+                PasswordHash = null,
                 Role = "Customer"
             };
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
+
+            var customer = new Customer { UserId = newUser.UserId };
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
             return newUser;
         }
 
