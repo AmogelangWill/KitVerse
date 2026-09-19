@@ -49,6 +49,7 @@ namespace Kitverse_backend_01.Services
             var cart = await GetCart(userId);
 
             var tshirt = await _context.TShirts.FindAsync(itemId);
+
             if (tshirt == null)
                 return false;
 
