@@ -128,6 +128,60 @@ namespace Kitverse_backend_01.Controllers
             var avgUsers = await _adminService.GetAvgUserPerMonth();
             return Ok(avgUsers);
         }
+   
+        //POST: api/admin/emails/send-newsletter
+        [HttpPost("emails/send-newsletter")]
+        public async Task<IActionResult> SendNewsletter([FromBody] Newsletter request)
+        {
+            try
+            {
+                var sentCount = await _adminService.SendNewsletter(request.subject, request.htmlBody);
+
+                return Ok(new
+                {
+                    msg = "Newsletter sent successfully",
+                    emailsSent = sentCount
+                });
+
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new
+                {
+                    msg = ex.Message
+                });
+            }
+        }
+        //POST: api/admin/send-invoice
+        [HttpPost("send-invoice/{invoiceId}")]
+        public async Task<IActionResult> SendInvoice(int invoiceId)
+        {
+            try
+            {
+                var success = await _adminService.SendInvoice(invoiceId);
+
+                if (!success)
+                {
+                    return NotFound(new
+                    {
+                        message = "Invoice not found."
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Invoice sent successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
 
     }
 }

@@ -13,6 +13,7 @@
         //stats
         public double avgmonthlyUsers { get; set; }
         public double avgsales { get; set; }
+        public double avgdailyUsers { get; set; }
 
     }
 }

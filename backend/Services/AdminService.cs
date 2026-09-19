@@ -5,6 +5,9 @@ using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.DTOs;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 
 namespace Kitverse_backend_01.Services
@@ -12,10 +15,12 @@ namespace Kitverse_backend_01.Services
     public class AdminService : IAdminService
     {
         private readonly KitverseDbContext _context;
+        private readonly IEmailService _emailservice;
 
-        public AdminService(KitverseDbContext context)
+        public AdminService(KitverseDbContext context, IEmailService emailservice)
         {
             _context = context;
+            _emailservice = emailservice;   
         }
         //get stats for admin dashboard
         public async Task<AdminDashboard> GetAdminDashboard()
@@ -30,7 +35,12 @@ namespace Kitverse_backend_01.Services
                     .CountAsync(u => u.Role == "ItemLister"),
 
                 TotalAdmins = await _context.Users
-                    .CountAsync(u => u.Role == "Admin")
+                    .CountAsync(u => u.Role == "Admin"),
+                avgdailyUsers = await GetAvgUserPerDay(),
+
+                avgmonthlyUsers = await GetAvgUserPerMonth(),
+
+                avgsales = await GetAvgSales()
             };
         }
 
@@ -214,6 +224,33 @@ namespace Kitverse_backend_01.Services
 
             return (double)totalUsers / month;
         }
+        public async Task<Double> GetAvgUserPerDay()
+        {
+            var users = await _context.Users
+                .Where(u => u.DateAdded != null)
+                .ToListAsync();
+
+            if (!users.Any())
+            {
+                return 0;
+            }
+
+            var firstDate = users
+                .Min(u => u.DateAdded!.Value.Date);
+
+            var lastDate = users
+                .Max(u => u.DateAdded!.Value.Date);
+
+            var numberOfDays =
+                (lastDate - firstDate).Days + 1;
+
+            if (numberOfDays <= 0)
+            {
+                return users.Count;
+            }
+
+            return (double)users.Count / numberOfDays;
+        }
         public async Task<List<Invoice>> GetInvoices()
         {
             return await _context.Invoices
@@ -231,6 +268,106 @@ namespace Kitverse_backend_01.Services
                 .Include(i => i.User)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == invoiceId);
+        }
+
+
+        public async Task<bool> SendInvoice(int invoiceid)
+        {
+            var invoice = await _context.Invoices
+                        .Include(i => i.User)
+                        .FirstOrDefaultAsync(i => i.Id == invoiceid);
+            if(invoice == null)
+            {
+                return false;
+            }
+            //invoice pdf 
+            byte[] invoicePdf = GenInvPdf(invoice);
+
+            await _emailservice.SendInvoiceEmail(
+                invoice.User.UserEmail,
+                invoice.User.UserName,
+                invoicePdf);
+            return true;
+        }
+        //helper method to generate invoice pdf using QuestPDF
+        private byte[] GenInvPdf(Invoice invoice)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+
+                {
+                    page.Margin(40);
+
+                    page.Header()
+                        .Text("KitVerse Invoice")
+                        .FontSize(24)
+                        .Bold();
+
+                    page.Content()
+                        .PaddingVertical(20)
+                        .Column(column =>
+                        {
+                            column.Item()
+                                  .Text($"Invoice Number: {invoice.invoiceNumber}");
+
+                            column.Item()
+                                  .Text($"Invoice Date: {invoice.invoiceDate}");
+                            column.Item()
+                                   .Text($"Customer: {invoice.User.UserName} {invoice.User.UserSurname}");
+                            column.Item()
+                                   .Text($"Email: {invoice.User.UserEmail}");
+                            column.Item()
+                                   .PaddingTop(20)
+                                   .LineHorizontal(1);
+                            column.Item()
+                                   .PaddingTop(15)
+                                   .Text($"Subtotal: R{invoice.subtotal:F2}");
+                            column.Item()
+                                     .Text($"Total: R{invoice.total:F2}")
+                                     .Bold()
+                                     .FontSize(16);
+
+                            column.Item()
+                                .PaddingTop(15)
+                                .Text($"Status: {invoice.status}");
+                        });
+                    page.Footer()
+                        .AlignLeft()
+                        .Text("Thank you for shopping with KitVerse!");
+
+                });
+
+            });
+            return document.GeneratePdf();
+        }
+        
+
+        public async Task<int> SendNewsletter(string subject, string htmlBody)
+        {
+            var user = await _context.Users
+                        .Where(u => u.NewsLetterSub)
+                        .ToListAsync();
+
+            int sentCount = 0;
+
+            foreach (var item in user)
+            {
+                try
+                {
+                    await _emailservice.SendNewsletter(
+                            item.UserEmail,
+                            subject, htmlBody);
+                        sentCount++;
+                }
+                catch (Exception ex)
+                {
+                    ex.GetBaseException();
+                }
+            }
+            return sentCount;
         }
     }
 }

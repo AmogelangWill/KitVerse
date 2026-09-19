@@ -13,7 +13,12 @@ namespace Kitverse_backend_01.Controllers
 
         Task<User> GoogleLogin(string idToken);
         Task<bool> SetPassword(string email, string newPassword);
+        
+        //Task<bool> VerifyPassword(string email, string password);
 
+        Task <bool> ForgotPassword(string email);
+
+        Task<bool> ResetPassword(string token, string newPassword);
 
     }
 }
