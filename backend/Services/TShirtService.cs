@@ -166,19 +166,33 @@ namespace Kitverse_backend_01.Controllers
 
             foreach (var update in updates)
             {
-                var size = await _context.Inventory.FirstOrDefaultAsync(t => t.TshirtID == update.ShirtId && t.ShirtSize == update.ShirtSize);
+                var size = await _context.Inventory.FirstOrDefaultAsync(
+                    t => t.TshirtID == update.ShirtId && t.ShirtSize == update.ShirtSize);
 
                 if (size == null)
                 {
-                    failed.Add($"Shirt {update.ShirtId}, size {update.ShirtSize} not found.");
+                    var shirtExists = await _context.TShirts.AnyAsync(t => t.TShirtId == update.ShirtId);
+                    if (!shirtExists)
+                    {
+                        failed.Add($"Shirt {update.ShirtId} does not exist.");
+                        continue;
+                    }
+
+                    // no stock row yet for this size - create it fresh instead of skipping
+                    _context.Inventory.Add(new Inventory
+                    {
+                        TshirtID = update.ShirtId,
+                        ShirtSize = update.ShirtSize,
+                        AmountAvailable = update.Amount
+                    });
                     continue;
                 }
 
                 size.AmountAvailable += update.Amount;
             }
 
-            await _context.SaveChangesAsync(); //saving evrything at the end
-            return failed; // if the list is eempty then everything succeeded
+            await _context.SaveChangesAsync();
+            return failed;
         }
 
         public async Task<List<TShirt>> GetFromBAnnerClick(int ID1, int ID2)
