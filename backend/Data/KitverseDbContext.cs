@@ -11,6 +11,7 @@ namespace Kitverse_backend_01.Data
         public DbSet<Admin> Admins { get; set; }
         public DbSet<ItemLister> ItemListers { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         public DbSet<Team> Teams { get; set; }
         public DbSet<TShirt> TShirts { get; set; }
@@ -214,6 +215,12 @@ namespace Kitverse_backend_01.Data
                 entity.HasOne(r => r.TShirt).WithMany(t => t.Reviews).HasForeignKey(r => r.TShirtId);
                 entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId);
             });
+            // Configure the relationship between PasswordResetToken and User
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasOne(p=> p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // When a User is deleted, delete their PasswordResetTokens as well
         }
     }
 }

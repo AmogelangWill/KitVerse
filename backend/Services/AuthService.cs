@@ -10,6 +10,8 @@ using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 using static Kitverse_backend_01.Services.PasswordHasher; // importing the static class PasswordHasher to use the HashPassword method without creating an instance of the class.
 using Google.Apis.Auth;
+using System.Security.Cryptography;
+using Kitverse_backend_01.Services;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -18,10 +20,12 @@ namespace Kitverse_backend_01.Controllers
         private readonly KitverseDbContext _context; //this is the database connection this service will use to read and wirte system users
         private readonly IConfiguration _config; //used to read the JWT signing key from User Secrets
 
-        public AuthService(KitverseDbContext context, IConfiguration config) //getting a ready to use DbContext from ASP.net
+        private readonly IEmailService _emailService; // Inject the email service
+        public AuthService(KitverseDbContext context, IConfiguration config, IEmailService emailService) //getting a ready to use DbContext from ASP.net
         {
             _context = context;
             _config = config;
+            _emailService = emailService;
         }
         public async Task<User> Register(User user)
         {
@@ -203,6 +207,82 @@ namespace Kitverse_backend_01.Controllers
 
             user.PasswordHash = HashPassword(newPassword);
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ForgotPassword(string email)
+        {
+            var user = await GetByEmail(email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            // Generate a password reset token and send it to the user's email
+            var resetToken = RandomNumberGenerator.GetBytes(32);
+           var tokenString = Convert.ToBase64String(resetToken);
+
+            using var hasher = SHA256.Create();
+
+            var hashBytes = hasher.ComputeHash(Encoding.UTF8.GetBytes(tokenString));
+            var tokenHash = Convert.ToBase64String(hashBytes);
+
+        var oldToken = await _context.PasswordResetTokens.Where(t => t.UserId == user.UserId && t.isValid).ToListAsync();
+
+            foreach (var token in oldToken)
+            {
+                token.isValid = false; // invalidate any previous tokens for this user
+            }
+            var resetTokenEntity = new PasswordResetToken
+            {
+                TokenHash = tokenHash,
+                Expiration = DateTime.UtcNow.AddMinutes(30),
+                UserId = user.UserId,
+                isValid = true
+            };
+
+           _context.PasswordResetTokens.Add(resetTokenEntity);
+            await _context.SaveChangesAsync();
+            
+            var resetlink = $"http://localhost:3000/reset-password?token={Uri.EscapeDataString(tokenString)}"; // this is the link that will be sent to the user's email. it will contain the token as a query parameter.
+             //generate QR code for the reset link
+            using var qrGenerator = new QRCoder.QRCodeGenerator();
+
+            using var qrCodeData = qrGenerator.CreateQrCode(resetlink, QRCoder.QRCodeGenerator.ECCLevel.Q);
+
+            var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+
+            byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+            //send the email with the reset link and QR code
+            await _emailService.SendPasswordResetEmail(user.UserEmail, tokenString, qrCodeImage);
+            return true;
+
+        }
+
+        public async Task<bool> ResetPassword(string token, string newPassword)
+        {
+           using var hasher = SHA256.Create();
+            var hashBytes = hasher.ComputeHash(Encoding.UTF8.GetBytes(token));
+            var tokenHash = Convert.ToBase64String(hashBytes);
+            var resetTokenEntity =  await _context.PasswordResetTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash && t.isValid);
+
+            if(resetTokenEntity == null || resetTokenEntity.Expiration < DateTime.UtcNow)
+            {
+                return false; // token is invalid or expired
+            }
+            var user = await _context.Users.FirstOrDefaultAsync
+                            (u => u.UserId == resetTokenEntity.UserId);
+            if(user == null)
+            {
+                return false;
+            }
+            user.PasswordHash = HashPassword(newPassword);
+
+            resetTokenEntity.isValid = false;
+
+            await _context.SaveChangesAsync();
+
             return true;
         }
     }

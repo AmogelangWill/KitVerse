@@ -96,5 +96,57 @@ namespace Kitverse_backend_01.Controllers
             }
             return Ok(new { message = "Password set successfully." });
         }
+        //POST: /api/Auth/forgot-password
+        [HttpPost("forgot-password")]
+        public async Task <IActionResult> ForgotPassword([FromBody] ForgotPassword request)
+        {
+            try
+            {
+                await _authService.ForgotPassword(request.Email);
+
+                return Ok(new
+                {
+                    message = "Password reset link sent to email, please check your email and spam folder"
+
+                });
+            }catch(Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+
+                });
+            }
+
+        }
+        //POST: /api/Auth/reset-password 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPassword request)
+        {
+            try
+            {
+                var success = await _authService.ResetPassword
+                               (request.Token, request.NewPassword);
+                if (!success)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid or expired password reset token"
+                    });
+
+                }
+
+                return Ok(new { 
+                msg =  "Password reset successfully"
+                });
+
+            }catch(Exception ex)
+            {
+                return BadRequest(new
+                {
+                    msg = ex.Message
+                });
+            }
+        }
     }
 }

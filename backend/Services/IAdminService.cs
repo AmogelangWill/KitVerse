@@ -13,6 +13,7 @@ namespace Kitverse_backend_01.Services
         //Analytics
         Task<Double> GetAvgSales();
         Task<Double> GetAvgUserPerMonth();
+        Task<Double> GetAvgUserPerDay();
 
         //invoice 
         Task<List<Invoice>> GetInvoices();
@@ -33,6 +34,11 @@ namespace Kitverse_backend_01.Services
         Task<Banner?> UpdateBanner(int bannerId, Banner bannerUpdate);
 
         Task<bool> DeleteBanner(int bannerId);
+
+        //Email management
+        Task<bool> SendInvoice(int invoiceid);
+
+        Task<int> SendNewsletter(string subject, string htmlBody);
     }
 }
 
