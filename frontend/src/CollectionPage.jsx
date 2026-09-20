@@ -34,6 +34,15 @@ function CollectionPage() {
         
         const comp = params.get('competition');
         if (comp) setSelectedCompetitions([parseInt(comp)]);
+        
+        const compName = params.get('competitionName');
+        if (compName && competitions.length > 0) {
+            const matched = competitions.find(c => c.competitionName.toLowerCase().includes(compName.toLowerCase()));
+            if (matched) {
+                setSelectedCompetitions([matched.competitionId]);
+            }
+        }
+        
         // We don't reset to [] if comp is missing here to allow sidebar checkboxes to work independently of the URL.
         // However, if the user explicitly clicked "Jerseys" (which has NO search params), we should reset everything.
         // Let's check if there are NO search params at all:
@@ -62,9 +71,21 @@ function CollectionPage() {
                 }
 
                 // Fetch all competitions
+                let compsData = [];
                 const compRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
                 if (compRes.ok) {
-                    setCompetitions(await compRes.json());
+                    compsData = await compRes.json();
+                    setCompetitions(compsData);
+                }
+
+                // If navigation used a named competition, pre-select it now that we have the IDs
+                const params = new URLSearchParams(window.location.search);
+                const compName = params.get('competitionName');
+                if (compName && compsData.length > 0) {
+                    const matched = compsData.find(c => c.competitionName.toLowerCase().includes(compName.toLowerCase()));
+                    if (matched) {
+                        setSelectedCompetitions([matched.competitionId]);
+                    }
                 }
 
             } catch (error) {

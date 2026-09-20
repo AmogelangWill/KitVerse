@@ -46,13 +46,13 @@ function Header(){
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
                 <button className="NavBtn" onClick={() => navigate('/collections')}>Jerseys</button>
                 <button className="NavBtn" onClick={() => navigate('/collections?filter=new')}>New Arrival</button>
-                <button className="NavBtn">
+                <button className="NavBtn" onClick={() => navigate('/collections?competitionName=Nedbank')}>
                     Nedbank Cup
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="NavBtn">
+                <button className="NavBtn" onClick={() => navigate('/collections?competitionName=CAF')}>
                     CAF
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
