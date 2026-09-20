@@ -31,7 +31,7 @@ builder.Services.AddScoped<ITShirtService, TShirtService>();
 builder.Services.AddScoped<ICartService, CartService>();
 // Register AdminService so controllers can request IAdminService and get a working AdminService automatically
 builder.Services.AddScoped<IAdminService, AdminService>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddHttpClient<IPaymentService, PaymentService>();
