@@ -1,4 +1,4 @@
-﻿namespace Kitverse_backend_01.Models
+﻿namespace Kitverse_backend_01.DTOs
 {
     public class AdminDashboard
     {

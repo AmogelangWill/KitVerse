@@ -16,11 +16,16 @@ namespace Kitverse_backend_01.Services
     {
         private readonly KitverseDbContext _context;
         private readonly IEmailService _emailservice;
+        private readonly IConfiguration _config;
+        private readonly ILogger<AdminService> _logger;
 
-        public AdminService(KitverseDbContext context, IEmailService emailservice)
+        public AdminService(KitverseDbContext context, IEmailService emailservice,
+                            IConfiguration config, ILogger<AdminService> logger)
         {
             _context = context;
-            _emailservice = emailservice;   
+            _emailservice = emailservice;
+            _config = config;
+            _logger = logger;
         }
         //get stats for admin dashboard
         public async Task<AdminDashboard> GetAdminDashboard()
@@ -108,10 +113,16 @@ namespace Kitverse_backend_01.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
                 return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                return false; // user has orders/invoices that must be kept
+            }
         }
 
 
@@ -183,24 +194,14 @@ namespace Kitverse_backend_01.Services
 
         public async Task<double> GetAvgSales()
         {
-            var monthlysales = await _context.Orders
-                            .Where(o => o.orderStatus != "Cancelled"
-                            && o.orderStatus != "Pending")
-                            .GroupBy(o =>
-                                 new
-                                 {
-                                     o.orderDate.Year,
-                                     o.orderDate.Month
-                                 })
-                            .Select(g => g.Sum(o => o.totalAmount))
-                            .ToListAsync();
+            var monthlySales = await _context.Orders
+                .Where(o => o.OrderStatus != "Cancelled" && o.OrderStatus != "Pending")
+                .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .Select(g => g.Sum(o => o.TotalAmount))
+                .ToListAsync();
 
-            return monthlysales.Any()
-                ? (double)
-                monthlysales.Average()
-                : 0.0;
+            return monthlySales.Any() ? (double)monthlySales.Average() : 0.0;
         }
-
 
         public async Task<double> GetAvgUserPerMonth()
         {
@@ -343,28 +344,33 @@ namespace Kitverse_backend_01.Services
             });
             return document.GeneratePdf();
         }
-        
+
 
         public async Task<int> SendNewsletter(string subject, string htmlBody)
         {
-            var user = await _context.Users
-                        .Where(u => u.NewsLetterSub)
-                        .ToListAsync();
+            var subscribers = await _context.NewsletterSubscribers
+                .Where(s => s.IsActive)
+                .AsNoTracking()
+                .ToListAsync();
 
+            var baseUrl = _config["Frontend:BaseUrl"] ?? "https://kitverse.pages.dev";
             int sentCount = 0;
 
-            foreach (var item in user)
+            foreach (var sub in subscribers)
             {
+                var unsubscribeUrl = $"{baseUrl}/unsubscribe?token={sub.UnsubscribeToken}";
+                var body = htmlBody +
+                    $"<hr><p style=\"font-size:12px;color:#888\">You're receiving this because you subscribed " +
+                    $"to the KitVerse newsletter. <a href=\"{unsubscribeUrl}\">Unsubscribe</a></p>";
+
                 try
                 {
-                    await _emailservice.SendNewsletter(
-                            item.UserEmail,
-                            subject, htmlBody);
-                        sentCount++;
+                    await _emailservice.SendNewsletter(sub.Email, subject, body);
+                    sentCount++;
                 }
                 catch (Exception ex)
                 {
-                    ex.GetBaseException();
+                    _logger.LogWarning(ex, "Newsletter send failed for subscriber {Id}", sub.Id);
                 }
             }
             return sentCount;
