@@ -135,49 +135,55 @@ namespace Kitverse_backend_01.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("invoice_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("invoiceDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("invoice_date");
 
                     b.Property<string>("invoiceNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("invoice_number");
 
                     b.Property<int>("pay_id")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("pay_id");
 
                     b.Property<string>("status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<decimal>("subtotal")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("subtotal");
 
                     b.Property<decimal>("tax")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("tax");
 
                     b.Property<decimal>("total")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("total");
 
                     b.Property<int>("user_id")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentId");
+                    b.HasIndex("invoiceNumber")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("pay_id");
 
-                    b.ToTable("Invoices");
+                    b.HasIndex("user_id");
+
+                    b.ToTable("invoices", (string)null);
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.ItemList", b =>
@@ -220,60 +226,113 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("item_listers", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.NewsletterSubscriber", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("subscriber_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime>("SubscribedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("subscribed_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("UnsubscribeToken")
+                        .HasColumnType("uuid")
+                        .HasColumnName("unsubscribe_token");
+
+                    b.Property<DateTime?>("UnsubscribedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("unsubscribed_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("UnsubscribeToken")
+                        .IsUnique();
+
+                    b.ToTable("newsletter_subscribers", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("order_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_id");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("order_date");
 
-                    b.Property<DateTime>("orderDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("order_status");
 
-                    b.Property<string>("orderStatus")
-                        .HasColumnType("text");
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_id");
 
-                    b.Property<int?>("paymentID")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("totalAmount")
-                        .HasColumnType("numeric");
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_amount");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CustomerId");
 
-                    b.HasIndex("paymentID");
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
 
-                    b.ToTable("Orders");
+                    b.ToTable("orders", (string)null);
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.OrderItem", b =>
                 {
                     b.Property<int>("OrderItemId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("order_item_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderItemId"));
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("order_id");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("price");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
 
                     b.HasKey("OrderItemId");
 
@@ -281,7 +340,7 @@ namespace Kitverse_backend_01.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.Payment", b =>
@@ -586,6 +645,42 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("wishlists", (string)null);
                 });
 
+            modelBuilder.Entity("PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiration");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("token_hash");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.Property<bool>("isValid")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_valid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("password_reset_tokens", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Admin", b =>
                 {
                     b.HasOne("Kitverse_backend_01.Models.User", "User")
@@ -623,14 +718,14 @@ namespace Kitverse_backend_01.Migrations
                 {
                     b.HasOne("Kitverse_backend_01.Models.Payment", "Payment")
                         .WithMany()
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("pay_id")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Kitverse_backend_01.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("user_id")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Payment");
@@ -672,13 +767,14 @@ namespace Kitverse_backend_01.Migrations
                 {
                     b.HasOne("Kitverse_backend_01.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Kitverse_backend_01.Models.Payment", "Payment")
                         .WithMany()
-                        .HasForeignKey("paymentID");
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Payment");
 
@@ -696,7 +792,7 @@ namespace Kitverse_backend_01.Migrations
                     b.HasOne("Kitverse_backend_01.Models.TShirt", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -803,6 +899,17 @@ namespace Kitverse_backend_01.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("TShirt");
+                });
+
+            modelBuilder.Entity("PasswordResetToken", b =>
+                {
+                    b.HasOne("Kitverse_backend_01.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Kitverse_backend_01.Models.Competition", b =>

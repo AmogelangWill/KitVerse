@@ -13,6 +13,7 @@ namespace Kitverse_backend_01.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
+        public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TShirt> TShirts { get; set; }
         public DbSet<ShirtLink> ShirtLinks { get; set; }
@@ -215,12 +216,96 @@ namespace Kitverse_backend_01.Data
                 entity.HasOne(r => r.TShirt).WithMany(t => t.Reviews).HasForeignKey(r => r.TShirtId);
                 entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId);
             });
-            // Configure the relationship between PasswordResetToken and User
-            modelBuilder.Entity<PasswordResetToken>()
-                .HasOne(p=> p.User)
-                .WithMany()
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // When a User is deleted, delete their PasswordResetTokens as well
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.ToTable("orders");
+                entity.HasKey(o => o.Id);
+                entity.Property(o => o.Id).HasColumnName("order_id");
+                entity.Property(o => o.CustomerId).HasColumnName("customer_id");
+                entity.Property(o => o.PaymentId).HasColumnName("payment_id");
+                entity.Property(o => o.OrderDate).HasColumnName("order_date");
+                entity.Property(o => o.TotalAmount).HasColumnName("total_amount");
+                entity.Property(o => o.OrderStatus).HasColumnName("order_status");
+                entity.HasIndex(o => o.PaymentId).IsUnique(); // one order per payment
+
+                entity.HasOne(o => o.User).WithMany()
+                      .HasForeignKey(o => o.CustomerId)
+                      .OnDelete(DeleteBehavior.Restrict);      // can't delete a user who has orders
+
+                entity.HasOne(o => o.Payment).WithMany()
+                      .HasForeignKey(o => o.PaymentId)
+                      .OnDelete(DeleteBehavior.Restrict);      // can't delete a payment that has an order
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.ToTable("order_items");
+                entity.HasKey(oi => oi.OrderItemId);
+                entity.Property(oi => oi.OrderItemId).HasColumnName("order_item_id");
+                entity.Property(oi => oi.OrderId).HasColumnName("order_id");
+                entity.Property(oi => oi.ProductId).HasColumnName("product_id");
+                entity.Property(oi => oi.Quantity).HasColumnName("quantity");
+                entity.Property(oi => oi.Price).HasColumnName("price");
+
+                entity.HasOne(oi => oi.Order).WithMany(o => o.OrderItems)
+                      .HasForeignKey(oi => oi.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);       // deleting an order removes its line items
+
+                entity.HasOne(oi => oi.Product).WithMany()
+                      .HasForeignKey(oi => oi.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);      // can't delete a shirt that has been sold
+            });
+
+            modelBuilder.Entity<Invoice>(entity =>
+            {
+                entity.ToTable("invoices");
+                entity.HasKey(i => i.Id);
+                entity.Property(i => i.Id).HasColumnName("invoice_id");
+                entity.Property(i => i.invoiceNumber).HasColumnName("invoice_number").IsRequired();
+                entity.Property(i => i.pay_id).HasColumnName("pay_id");
+                entity.Property(i => i.user_id).HasColumnName("user_id");
+                entity.Property(i => i.invoiceDate).HasColumnName("invoice_date");
+                entity.Property(i => i.subtotal).HasColumnName("subtotal");
+                entity.Property(i => i.tax).HasColumnName("tax");
+                entity.Property(i => i.total).HasColumnName("total");
+                entity.Property(i => i.status).HasColumnName("status");
+                entity.HasIndex(i => i.invoiceNumber).IsUnique();
+
+                entity.HasOne(i => i.Payment).WithMany()
+                      .HasForeignKey(i => i.pay_id)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.User).WithMany()
+                      .HasForeignKey(i => i.user_id)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.ToTable("password_reset_tokens");
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.Id).HasColumnName("id");
+                entity.Property(p => p.UserId).HasColumnName("user_id");
+                entity.Property(p => p.TokenHash).HasColumnName("token_hash").IsRequired();
+                entity.Property(p => p.Expiration).HasColumnName("expiration");
+                entity.Property(p => p.isValid).HasColumnName("is_valid");
+                entity.HasIndex(p => p.TokenHash).IsUnique();
+                entity.HasIndex(p => p.UserId);
+                entity.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<NewsletterSubscriber>(entity =>
+            {
+                entity.ToTable("newsletter_subscribers");
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.Id).HasColumnName("subscriber_id");
+                entity.Property(n => n.Email).HasColumnName("email").IsRequired();
+                entity.Property(n => n.IsActive).HasColumnName("is_active");
+                entity.Property(n => n.SubscribedAt).HasColumnName("subscribed_at").HasDefaultValueSql("now()");
+                entity.Property(n => n.UnsubscribedAt).HasColumnName("unsubscribed_at");
+                entity.Property(n => n.UnsubscribeToken).HasColumnName("unsubscribe_token");
+                entity.HasIndex(n => n.Email).IsUnique();
+                entity.HasIndex(n => n.UnsubscribeToken).IsUnique();
+            });
         }
     }
 }

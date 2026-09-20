@@ -89,15 +89,56 @@ namespace Kitverse_backend_01.Controllers
 
             if (wasSuccessful)
             {
-                var cart = await _context.ShoppingCarts.FirstOrDefaultAsync(c => c.CartId == cartId);
+                var cart = await _context.ShoppingCarts
+                    .Include(c => c.ItemLists)
+                    .FirstOrDefaultAsync(c => c.CartId == cartId);
+
                 if (cart != null)
                 {
                     cart.CartStatus = "Paid";
+                    await _context.SaveChangesAsync(); // save the payment row + status first, so payment.PaymentId exists
+
+                    var payment = await _context.Payments
+                        .Where(p => p.CartId == cartId && p.PaymentStatus == "Success")
+                        .OrderByDescending(p => p.TransactionDate)
+                        .FirstOrDefaultAsync();
+
+                    if (payment != null)
+                    {
+                        await CreateOrderFromCart(cart, payment.PaymentId);
+                    }
                 }
             }
 
             await _context.SaveChangesAsync();
             return wasSuccessful;
+        }
+
+
+        private async Task CreateOrderFromCart(ShoppingCart cart, int paymentId)
+        {
+            var order = new Order
+            {
+                CustomerId = cart.UserId,
+                PaymentId = paymentId,
+                OrderDate = DateTime.UtcNow,
+                TotalAmount = cart.TotalCost,
+                OrderStatus = "Paid",
+                OrderItems = cart.ItemLists.Select(il => new OrderItem
+                {
+                    ProductId = il.TShirtId,
+                    Quantity = il.Quantity,
+                    Price = il.UnitPurchaseAtTime // the locked-in price at time of purchase
+                }).ToList()
+            };
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+        }
+
+        Task IPaymentService.CreateOrderFromCart(ShoppingCart cart, int paymentId)
+        {
+            return CreateOrderFromCart(cart, paymentId);
         }
     }
 }

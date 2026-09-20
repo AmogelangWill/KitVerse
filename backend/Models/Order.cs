@@ -4,16 +4,14 @@
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
+        public User User { get; set; } = null!;
 
-        public User User { get; set; }
-
-        public int? paymentID { get; set; }
+        public int? PaymentId { get; set; }
         public Payment? Payment { get; set; }
 
-        public DateTime orderDate { get; set; }
-        public decimal totalAmount { get; set; }
-        
-        public string? orderStatus { get; set; }= "Pending";
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        public decimal TotalAmount { get; set; }
+        public string OrderStatus { get; set; } = "Pending";
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
