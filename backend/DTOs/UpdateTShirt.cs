@@ -12,5 +12,6 @@ namespace Kitverse_backend_01.DTOs
         public string ShirtName { get; set; } = string.Empty;
         public int TeamId { get; set; }
         public DateTime? DateAdded { get; set; }
+        public List<string> ImageUrls { get; set; } = new();
     }
 }

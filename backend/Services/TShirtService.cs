@@ -104,7 +104,7 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<bool> UpdateShirt(UpdateTShirt shirt)
         {
-            var shirt1 = await _context.TShirts.FirstOrDefaultAsync(t => t.TShirtId == shirt.TShirtId);
+            var shirt1 = await _context.TShirts.Include(t => t.ShirtLinks).FirstOrDefaultAsync(t => t.TShirtId == shirt.TShirtId);
             if (shirt1 != null)
             {
                 shirt1.ShirtSeason = shirt.ShirtSeason;
@@ -116,6 +116,16 @@ namespace Kitverse_backend_01.Controllers
                 shirt1.ShirtName = shirt.ShirtName;
                 shirt1.TeamId = shirt.TeamId;
                 shirt1.DateAdded = shirt.DateAdded;
+
+                if (shirt.ImageUrls != null && shirt.ImageUrls.Any())
+                {
+                    _context.ShirtLinks.RemoveRange(shirt1.ShirtLinks);
+                    shirt1.ShirtLinks = shirt.ImageUrls.Select((url, index) => new ShirtLink
+                    {
+                        ShirtLinkUrl = url,
+                        IsMain = index == 0
+                    }).ToList();
+                }
 
                 await _context.SaveChangesAsync();
                 return true;
