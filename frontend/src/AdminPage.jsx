@@ -275,6 +275,14 @@ function AdminPage() {
                                         <span className="DashboardCardTitle">Inactive Accounts</span>
                                         <span className="DashboardCardValue">{dashboardData.inactiveUsers}</span>
                                     </div>
+                                    <div className="DashboardCard">
+                                        <span className="DashboardCardTitle">Avg Monthly Users</span>
+                                        <span className="DashboardCardValue">{dashboardData.avgmonthlyUsers ? dashboardData.avgmonthlyUsers.toFixed(1) : '0'}</span>
+                                    </div>
+                                    <div className="DashboardCard">
+                                        <span className="DashboardCardTitle">Avg Monthly Sales</span>
+                                        <span className="DashboardCardValue">R {dashboardData.avgsales ? dashboardData.avgsales.toFixed(2) : '0.00'}</span>
+                                    </div>
                                 </div>
                             </div>
                         )}
