@@ -157,6 +157,11 @@ function ProductDetails() {
             });
             
             if (res.ok) {
+                if (wishlistActive) {
+                    showToast("Removed from wishlist", "success");
+                } else {
+                    showToast("Added to wishlist! Click the heart icon in the menu to view it.", "success");
+                }
                 setWishlistActive(!wishlistActive);
             } else {
                 const errorData = await res.json();
