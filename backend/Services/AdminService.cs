@@ -411,21 +411,27 @@ namespace Kitverse_backend_01.Services
         }
         public async Task<List<Invoice>> GetInvoices()
         {
-            return await _context.Invoices
+            var invoices = await _context.Invoices
                 .Include(i => i.Payment)
                 .Include(i => i.User)
                 .OrderByDescending(i => i.invoiceDate)
                 .AsNoTracking()
                 .ToListAsync();
+
+            foreach (var i in invoices) i.User.PasswordHash = null;
+            return invoices;
         }
 
         public async Task<Invoice?> GetInvoiceById(int invoiceId)
         {
-            return await _context.Invoices
+            var invoice = await _context.Invoices
                 .Include(i => i.Payment)
                 .Include(i => i.User)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == invoiceId);
+
+            if (invoice != null) invoice.User.PasswordHash = null;
+            return invoice;
         }
 
 
