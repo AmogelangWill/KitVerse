@@ -108,13 +108,21 @@ namespace Kitverse_backend_01.Services
             QuestPDF.Settings.License = LicenseType.Community;
             
             // Register bundled fonts so Railway doesn't crash
-            try 
-            {
-                var basePath = AppContext.BaseDirectory;
-                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(System.IO.Path.Combine(basePath, "Roboto-Regular.ttf")));
-                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(System.IO.Path.Combine(basePath, "Roboto-Bold.ttf")));
+            var basePath = AppContext.BaseDirectory;
+            var regPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Regular.ttf")) 
+                ? System.IO.Path.Combine(basePath, "Roboto-Regular.ttf") 
+                : "Roboto-Regular.ttf";
+                
+            var boldPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Bold.ttf")) 
+                ? System.IO.Path.Combine(basePath, "Roboto-Bold.ttf") 
+                : "Roboto-Bold.ttf";
+            
+            if (System.IO.File.Exists(regPath)) {
+                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(regPath));
             }
-            catch (Exception) { /* fallback */ }
+            if (System.IO.File.Exists(boldPath)) {
+                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(boldPath));
+            }
 
             return Document.Create(container =>
             {
