@@ -72,7 +72,8 @@ namespace Kitverse_backend_01.Services
                 cart.ItemLists.Add(newItem);
             }
 
-            await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+                await UpdateTotal(cart.CartId);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -92,6 +93,7 @@ namespace Kitverse_backend_01.Services
                 _context.ItemLists.Remove(itemList);
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
@@ -138,6 +140,7 @@ namespace Kitverse_backend_01.Services
                 }
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
