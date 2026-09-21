@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
@@ -34,7 +34,10 @@ namespace Kitverse_backend_01.Controllers
                 throw new ArgumentException("Cart not found.");
             }
 
-            var secretKey = _config["Paystack:SecretKey"];//this one comes from dotnet user secrets that i set up earlier
+            var secretKey = (_config["Paystack:SecretKey"] ?? "").Trim();
+            // Guard: remove accidental "Bearer " prefix if the env var was set with it
+            if (secretKey.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                secretKey = secretKey.Substring(7).Trim();
             var amountInCents = cart.TotalCost * 100; // Paystack expects the smallest currency unit
 
             var payload = new
@@ -81,7 +84,9 @@ namespace Kitverse_backend_01.Controllers
             var cart = await _context.ShoppingCarts.FirstOrDefaultAsync(c => c.CartId == cartId);
             if (cart == null) return false;
 
-            var secretKey = _config["Paystack:SecretKey"];
+            var secretKey = (_config["Paystack:SecretKey"] ?? "").Trim();
+            if (secretKey.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                secretKey = secretKey.Substring(7).Trim();
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"https://api.paystack.co/transaction/verify/{reference}");
             httpRequest.Headers.Add("Authorization", $"Bearer {secretKey}");
 
