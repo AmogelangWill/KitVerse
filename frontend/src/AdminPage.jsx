@@ -42,13 +42,33 @@ function AdminPage() {
                 const cRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
                 if (cRes.ok) setCompetitions(await cRes.json());
             } else if (activeTab === "dashboard") {
-                const res = await fetch("https://kitverse-production.up.railway.app/api/admin/dashboard");
-                if (res.ok) setDashboardData(await res.json());
-                else throw new Error("Failed to load dashboard data");
+                const res = await fetch("https://kitverse-production.up.railway.app/api/admin/dashboard", {
+                    headers: {
+                        "Authorization": `Bearer ${user?.token}`
+                    }
+                });
+                if (res.ok) {
+                    setDashboardData(await res.json());
+                } else if (res.status === 401 || res.status === 403) {
+                    showToast("Your admin session has expired. Please sign in again.", "error");
+                    logout();
+                } else {
+                    throw new Error("Failed to load dashboard data");
+                }
             } else if (activeTab === "users") {
-                const res = await fetch("https://kitverse-production.up.railway.app/api/admin/users");
-                if (res.ok) setUsers(await res.json());
-                else throw new Error("Failed to load users data");
+                const res = await fetch("https://kitverse-production.up.railway.app/api/admin/users", {
+                    headers: {
+                        "Authorization": `Bearer ${user?.token}`
+                    }
+                });
+                if (res.ok) {
+                    setUsers(await res.json());
+                } else if (res.status === 401 || res.status === 403) {
+                    showToast("Your admin session has expired. Please sign in again.", "error");
+                    logout();
+                } else {
+                    throw new Error("Failed to load users data");
+                }
             } else if (activeTab === "banners") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners");
                 const tshirtRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
@@ -83,12 +103,18 @@ function AdminPage() {
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/users/${userId}/role`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user?.token}`
+                },
                 body: JSON.stringify(newRole)
             });
             if (res.ok) {
                 showToast("Role changed successfully!", "success");
                 fetchData();
+            } else if (res.status === 401 || res.status === 403) {
+                showToast("Your admin session has expired. Please sign in again.", "error");
+                logout();
             } else {
                 showToast("Failed to change user role.", "error");
             }
@@ -108,10 +134,16 @@ function AdminPage() {
         if (!isConfirmed) return;
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/users/${userId}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user?.token}`
+                }
             });
             if (res.ok) {
                 fetchData(); 
+            } else if (res.status === 401 || res.status === 403) {
+                showToast("Your admin session has expired. Please sign in again.", "error");
+                logout();
             } else {
                 showToast("Failed to delete user.", "error");
             }
@@ -194,10 +226,20 @@ function AdminPage() {
         if (!isConfirmed) return;
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/banners/${bannerId}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user?.token}`
+                }
             });
-            if (res.ok) fetchData();
-            else showToast("Failed to delete banner.", "error");
+            if (res.ok) {
+                showToast("Banner deleted successfully!", "success");
+                fetchData();
+            } else if (res.status === 401 || res.status === 403) {
+                showToast("Your admin session has expired. Please sign in again.", "error");
+                logout();
+            } else {
+                showToast("Failed to delete banner.", "error");
+            }
         } catch (err) {
             console.error("Delete banner error:", err);
         }
