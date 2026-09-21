@@ -106,6 +106,8 @@ namespace Kitverse_backend_01.Services
         private static byte[] GeneratePdf(Invoice invoice, User user, Order? order)
         {
             QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.UseSystemFonts = true;
+            QuestPDF.Settings.ThrowOnMissingFontFamilies = false;
 
             return Document.Create(container =>
             {
