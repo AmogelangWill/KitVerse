@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import "./CartDrawer.css";
 
+import { useCart } from "./CartContext.jsx";
+
 function WishlistDrawer({ isOpen, onClose }) {
     const { user } = useAuth();
+    const { fetchWishlistCount } = useCart();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -45,6 +48,7 @@ function WishlistDrawer({ isOpen, onClose }) {
 
             if (response.ok) {
                 setProducts(prev => prev.filter(tshirt => tshirt.tShirtId !== tshirtId));
+                fetchWishlistCount();
             }
         } catch (error) {
             console.error("Could not remove an item:", error);

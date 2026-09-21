@@ -8,6 +8,7 @@ export const CartProvider = ({ children }) => {
     const { user } = useAuth();
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [cartCount, setCartCount] = useState(0);
+    const [wishlistCount, setWishlistCount] = useState(0);
 
     // Retrieves total item quantity in user cart from the server
     const fetchCartCount = async () => {
@@ -27,13 +28,36 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    // Retrieves total items in wishlist
+    const fetchWishlistCount = async () => {
+        if (!user) {
+            setWishlistCount(0);
+            return;
+        }
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/wishlist/${user.userId}`, {
+                headers: { "Authorization": `Bearer ${user.token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setWishlistCount(data.length || 0);
+            }
+        } catch (err) {
+            console.error("Error fetching wishlist count:", err);
+        }
+    };
+
     // Keep badge count updated whenever the logged-in user changes
     useEffect(() => {
         fetchCartCount();
+        fetchWishlistCount();
     }, [user]);
 
     return (
-        <CartContext.Provider value={{ cartCount, fetchCartCount, isCartOpen, setIsCartOpen }}>
+        <CartContext.Provider value={{ 
+            cartCount, fetchCartCount, isCartOpen, setIsCartOpen,
+            wishlistCount, fetchWishlistCount
+        }}>
             {children}
         </CartContext.Provider>
     );

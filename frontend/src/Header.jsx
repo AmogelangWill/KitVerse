@@ -15,7 +15,7 @@ function Header() {
     const [isWishlistOpen, setIsWishlistOpen] = useState(false);
     
     const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
-    const { cartCount, setIsCartOpen } = useCart();
+    const { cartCount, setIsCartOpen, wishlistCount } = useCart();
     const navigate = useNavigate();
 
     // Navigates to collection filtered by specific competition or category
@@ -121,11 +121,16 @@ function Header() {
                         <path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" fill="currentColor"/>
                     </svg>
                 </button>
-                <button className="IconBtn HideOnMobile" aria-label="Wishlist" onClick={() => setIsWishlistOpen(true)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                </button>
+                <div style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button className="IconBtn HideOnMobile" aria-label="Wishlist" onClick={() => setIsWishlistOpen(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </button>
+                    {wishlistCount > 0 && (
+                        <span className="CartBadge">{wishlistCount}</span>
+                    )}
+                </div>
                 
                 {/* Cart badge and trigger */}
                 <div style={{ position: 'relative', display: 'inline-flex' }}>

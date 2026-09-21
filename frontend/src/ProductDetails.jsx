@@ -18,7 +18,7 @@ function ProductDetails() {
     const [isReviewsOpen, setIsReviewsOpen] = useState(false);
     const { user, setIsAuthOpen } = useAuth();
     const { showToast } = useToast();
-    const { setIsCartOpen, fetchCartCount } = useCart();
+    const { setIsCartOpen, fetchCartCount, fetchWishlistCount } = useCart();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
     const [wishlistActive, setWishlistActive] = useState(false);
@@ -163,6 +163,7 @@ function ProductDetails() {
                     showToast("Added to wishlist! Click the heart icon in the menu to view it.", "success");
                 }
                 setWishlistActive(!wishlistActive);
+                fetchWishlistCount();
             } else {
                 const errorData = await res.json();
                 showToast(errorData.message || "Failed to update wishlist.", "error");
