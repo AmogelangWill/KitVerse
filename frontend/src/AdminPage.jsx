@@ -50,15 +50,11 @@ function AdminPage() {
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        // Format data for Recharts
-                        const formatted = data.map(d => {
-                            const date = new Date(d.year, d.month - 1);
-                            return {
-                                name: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
-                                sales: d.revenue,
-                                orders: d.orderCount
-                            };
-                        });
+                        const formatted = data.map(d => ({
+                                name: `${d.month} ${String(d.year).slice(-2)}`,
+                                sales: d.sales,
+                                orders: d.orders
+                            }));
                         setChartData(formatted);
                     }
                 } catch (e) {
