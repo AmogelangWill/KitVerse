@@ -4,6 +4,7 @@ import { useToast } from "./ToastContext.jsx";
 import { useConfirm } from "./ConfirmContext.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import { Link, useNavigate } from "react-router-dom";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import "./AdminPage.css";
 
 // Admin dashboard for managing user permissions, competitions, promotional banners, and viewing platform metrics
@@ -15,6 +16,8 @@ function AdminPage() {
     const [activeTab, setActiveTab] = useState("dashboard");
     
     const [dashboardData, setDashboardData] = useState(null);
+    const [chartData, setChartData] = useState([]);
+    const [chartMonths, setChartMonths] = useState(12);
     const [users, setUsers] = useState([]);
     const [banners, setBanners] = useState([]);
     const [competitions, setCompetitions] = useState([]);
@@ -37,6 +40,34 @@ function AdminPage() {
             fetchData();
         }
     }, [activeTab, user]);
+
+    useEffect(() => {
+        const fetchChart = async () => {
+            if (activeTab === "dashboard" && user && user.role === "Admin") {
+                try {
+                    const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/sales-over-time?months=${chartMonths}`, {
+                        headers: { "Authorization": `Bearer ${user.token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        // Format data for Recharts
+                        const formatted = data.map(d => {
+                            const date = new Date(d.year, d.month - 1);
+                            return {
+                                name: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
+                                sales: d.revenue,
+                                orders: d.orderCount
+                            };
+                        });
+                        setChartData(formatted);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch chart data", e);
+                }
+            }
+        };
+        fetchChart();
+    }, [activeTab, user, chartMonths]);
 
     // Loads metrics, users, banners, competitions, or invoices depending on active tab
     const fetchData = async () => {
@@ -440,6 +471,49 @@ function AdminPage() {
                                     <div className="DashboardCard">
                                         <span className="DashboardCardTitle">Avg Monthly Sales</span>
                                         <span className="DashboardCardValue">R {dashboardData.avgsales ? dashboardData.avgsales.toFixed(2) : '0.00'}</span>
+                                    </div>
+                                    <div className="DashboardCard" style={{border: '2px solid #040404'}}>
+                                        <span className="DashboardCardTitle">Avg Users/Day</span>
+                                        <span className="DashboardCardValue">{dashboardData.avgdailyUsers ? dashboardData.avgdailyUsers.toFixed(1) : '0'}</span>
+                                    </div>
+                                    <div className="DashboardCard" style={{border: '2px solid #040404'}}>
+                                        <span className="DashboardCardTitle">Products Sold</span>
+                                        <span className="DashboardCardValue">{dashboardData.totalProductsSold !== undefined ? dashboardData.totalProductsSold : 'N/A'}</span>
+                                    </div>
+                                    <div className="DashboardCard" style={{border: '2px solid #040404'}}>
+                                        <span className="DashboardCardTitle">Stock On Hand</span>
+                                        <span className="DashboardCardValue">{dashboardData.totalStockOnHand !== undefined ? dashboardData.totalStockOnHand : 'N/A'}</span>
+                                    </div>
+                                </div>
+                                
+                                <div style={{marginTop: '40px', background: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+                                        <h2 style={{margin: 0, fontSize: '18px'}}>Sales Over Time</h2>
+                                        <select 
+                                            value={chartMonths} 
+                                            onChange={(e) => setChartMonths(parseInt(e.target.value))}
+                                            style={{padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', cursor: 'pointer'}}
+                                        >
+                                            <option value={3}>Last 3 Months</option>
+                                            <option value={6}>Last 6 Months</option>
+                                            <option value={12}>Last 12 Months</option>
+                                            <option value={24}>Last 24 Months</option>
+                                        </select>
+                                    </div>
+                                    <div style={{height: '300px', width: '100%'}}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6b7280', fontSize: 12}} dy={10} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#6b7280', fontSize: 12}} dx={-10} tickFormatter={(val) => `R ${val}`} />
+                                                <Tooltip 
+                                                    cursor={{fill: '#f3f4f6'}}
+                                                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}}
+                                                    formatter={(value) => [`R ${value.toFixed(2)}`, 'Revenue']}
+                                                />
+                                                <Bar dataKey="sales" fill="#040404" radius={[4, 4, 0, 0]} barSize={40} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </div>
                                 </div>
                             </div>
