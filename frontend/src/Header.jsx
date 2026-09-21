@@ -88,6 +88,9 @@ function Header() {
                     {user ? (
                         <>
                             <span className="NavBtn" style={{fontWeight: 800, color: '#111'}}>Hi, {user.userName}</span>
+                            <Link to="/my-orders" style={{textDecoration: 'none'}}>
+                                <button className="NavBtn" onClick={() => setIsMobileMenuOpen(false)}>My Orders</button>
+                            </Link>
                             <button className="NavBtn" onClick={logout}>Sign Out</button>
                         </>
                     ) : (
@@ -138,13 +141,24 @@ function Header() {
 
                 {/* Account session controls */}
                 {user ? (
-                    <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </button>
+                    <>
+                        <Link to="/my-orders" className="IconBtn HideOnMobile" title="My Orders">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </Link>
+                        <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </button>
+                    </>
                 ) : (
                     <button className="IconBtn HideOnMobile" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
