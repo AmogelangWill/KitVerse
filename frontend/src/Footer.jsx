@@ -81,10 +81,10 @@ function Footer() {
 
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Shop</h4>
-          <a href="/collections" className="FooterLink">All Collections</a>
-          <a href="/collections" className="FooterLink">Premier League</a>
-          <a href="/collections" className="FooterLink">La Liga</a>
-          <a href="/collections" className="FooterLink">National Teams</a>
+          <a href="/collections" className="FooterLink">All Jerseys</a>
+          <a href="/collections?filter=new" className="FooterLink">New Arrivals</a>
+          <a href="/collections?competitionName=Nedbank" className="FooterLink">Nedbank Cup</a>
+          <a href="/collections?competitionName=CAF" className="FooterLink">CAF</a>
         </div>
 
         <div className="FooterColumn">
