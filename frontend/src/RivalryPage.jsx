@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "./ProductsPage.css"; // Reuse the standard landing page CSS
+import "./ProductsPage.css";
 
+// Page displaying two featured kits side-by-side from a promotional derby or rivalry banner
 function RivalryPage() {
     const { id1, id2 } = useParams();
     const navigate = useNavigate();
     const [shirts, setShirts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Fetches the pair of kits associated with the banner click
     useEffect(() => {
         const fetchRivalryShirts = async () => {
             try {
@@ -15,14 +17,13 @@ function RivalryPage() {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.length === 2) {
-                        // Order them as id1 then id2
                         const s1 = data.find(s => s.tShirtId.toString() === id1) || data[0];
                         const s2 = data.find(s => s.tShirtId.toString() === id2) || data[1];
                         setShirts([s1, s2]);
                     }
                 }
             } catch (err) {
-                console.error("Failed to fetch rivalry shirts", err);
+                console.error("Failed to fetch rivalry shirts:", err);
             } finally {
                 setLoading(false);
             }
@@ -33,6 +34,7 @@ function RivalryPage() {
         }
     }, [id1, id2]);
 
+    // Formats numeric price into South African Rand currency representation
     const formatPrice = (price) => {
         return `R${price.toFixed(2)}`;
     };
@@ -56,7 +58,7 @@ function RivalryPage() {
                     FEATURED COLLECTION
                 </h2>
                 <div className="FilterDiv">
-                    <button className="BtnFilter">
+                    <button className="BtnFilter" onClick={() => navigate('/collections')}>
                         <span className="FilterText">All Collections</span>
                         <svg className="ChevronRightSVG" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -73,7 +75,7 @@ function RivalryPage() {
                             <img
                                 className="ProductImg"
                                 src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
-                                alt={`${product.team?.teamName || product.shirtName.replace(/_/g, ' ')} Jersey`}
+                                alt={`${product.team?.teamName || product.shirtName} Jersey`}
                                 loading="lazy"
                             />
                             <div className="ShopNowOverlay">

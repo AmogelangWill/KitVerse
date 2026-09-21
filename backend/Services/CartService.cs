@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
@@ -72,7 +72,8 @@ namespace Kitverse_backend_01.Services
                 cart.ItemLists.Add(newItem);
             }
 
-            await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+                await UpdateTotal(cart.CartId);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -92,6 +93,7 @@ namespace Kitverse_backend_01.Services
                 _context.ItemLists.Remove(itemList);
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
@@ -138,6 +140,7 @@ namespace Kitverse_backend_01.Services
                 }
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
@@ -158,9 +161,24 @@ namespace Kitverse_backend_01.Services
 
             if (cart != null)
             {
-                cart.TotalCost = (int)cart.ItemLists.Sum(il => il.UnitPurchaseAtTime * il.Quantity);
+                int subtotal = (int)cart.ItemLists.Sum(il => il.UnitPurchaseAtTime * il.Quantity);
+                
+                if (subtotal > 0)
+                {
+                    // Rule 2: Free Shipping if subtotal > R1500. Otherwise R150 flat shipping fee.
+                    int shipping = subtotal >= 1500 ? 0 : 150;
+                    
+                    // Rule 3: 10% Volume Discount if buying 3 or more items
+                    int totalItems = cart.ItemLists.Sum(il => il.Quantity);
+                    int discount = totalItems >= 3 ? (int)(subtotal * 0.10) : 0;
+                    
+                    cart.TotalCost = subtotal + shipping - discount;
+                }
+                else
+                {
+                    cart.TotalCost = 0;
+                }
             }
-
         }
 
         public async Task<bool> ClearCart(int userId)

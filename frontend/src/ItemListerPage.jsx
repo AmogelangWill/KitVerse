@@ -3,9 +3,10 @@ import { useAuth } from "./AuthContext.jsx";
 import { useToast } from "./ToastContext.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import { Link } from "react-router-dom";
-import "./AdminPage.css"; // Reuse table styles
+import "./AdminPage.css";
 import "./ItemListerPage.css";
 
+// Portal page enabling Item Listers and Admins to manage and add catalog kits
 function ItemListerPage() {
     const { user, loading: authLoading, logout } = useAuth();
     const { showToast } = useToast();
@@ -16,7 +17,7 @@ function ItemListerPage() {
     const [loading, setLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
 
-    // Form State
+    // Form inputs state
     const [formData, setFormData] = useState({
         tShirtId: 0,
         shirtName: "",
@@ -34,12 +35,14 @@ function ItemListerPage() {
 
     const isAuthorized = user && (user.role === "Admin" || user.role === "Item Lister");
 
+    // Fetch existing shirts and competition tags when accessing inventory
     useEffect(() => {
         if (isAuthorized && activeTab === "inventory") {
             fetchInventory();
         }
     }, [isAuthorized, activeTab]);
 
+    // Loads current inventory and available competitions from the API
     const fetchInventory = async () => {
         setLoading(true);
         try {
@@ -49,28 +52,32 @@ function ItemListerPage() {
             const compRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
             if (compRes.ok) setCompetitions(await compRes.json());
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching inventory:", err);
         } finally {
             setLoading(false);
         }
     };
 
+    // Synchronizes form input changes with state
     const handleFormChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Updates image URL at a specific index
     const handleImageChange = (index, value) => {
         const newImages = [...imageUrls];
         newImages[index] = value;
         setImageUrls(newImages);
     };
 
+    // Updates size name or available stock count in the sizes array
     const handleSizeChange = (index, field, value) => {
         const newSizes = [...sizes];
         newSizes[index][field] = field === "amountAvailable" ? parseInt(value) || 0 : value;
         setSizes(newSizes);
     };
 
+    // Resets form inputs, image slots, and size selections back to defaults
     const resetForm = () => {
         setFormData({
             tShirtId: 0, shirtName: "", shirtSeason: "", shirtPrice: "", shirtAffiliate: "",
@@ -82,6 +89,38 @@ function ItemListerPage() {
         setSelectedCompetitions([]);
     };
 
+    // Deletes a product from the catalog
+    const handleDeleteProduct = async (id) => {
+        const isConfirmed = await confirm({
+            title: "Delete Product",
+            message: "Are you sure you want to permanently delete this jersey? This will wipe it from the storefront and cannot be undone.",
+            confirmText: "Yes, Delete It",
+            danger: true
+        });
+        if (!isConfirmed) return;
+
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user?.token}`
+                }
+            });
+            if (res.ok) {
+                showToast("Product successfully deleted!", "success");
+                fetchInventory();
+            } else if (res.status === 405 || res.status === 404) {
+                showToast("Backend endpoint missing: Phathu needs to add HttpDelete to TShirtController.", "error");
+            } else {
+                showToast("Failed to delete product.", "error");
+            }
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            showToast("Network error deleting product.", "error");
+        }
+    };
+
+    // Opens edit view and pre-populates fields with existing item values
     const openEditForm = (item) => {
         setFormData({
             tShirtId: item.tShirtId,
@@ -94,21 +133,20 @@ function ItemListerPage() {
             shirtStatus: item.shirtStatus || "Available",
             teamId: item.teamId || ""
         });
-        // We just map the imageUrls array back 
+        
         if (item.shirtLinks && item.shirtLinks.length > 0) {
             setImageUrls(item.shirtLinks.map(link => link.shirtLinkUrl));
         } else {
             setImageUrls([""]);
         }
         
-        // Note: The backend GET doesn't easily expose sizes in the main payload without calling inventory endpoint,
-        // so we'll just populate a default size block if it's missing. (Update doesn't seem to natively handle sizes in TShirt object directly based on C# model, but we'll include it just in case).
         setSizes([{ shirtSize: "M", amountAvailable: 10 }]);
         setStockAdjustments([{ shirtSize: "M", amount: 0 }]);
         setSelectedCompetitions([]);
         setActiveTab("edit");
     };
 
+    // Submits product creation or updates, applies stock adjustments, and links competitions
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitLoading(true);
@@ -125,13 +163,11 @@ function ItemListerPage() {
             shirtDescription: formData.shirtDescription,
             shirtStatus: formData.shirtStatus,
             teamId: parseInt(formData.teamId),
-            // The backend Update endpoint expects TShirt object which has ShirtLinks array
-            imageUrls: imageUrls.filter(url => url.trim() !== ""), // Fixed to match CreateTShirt DTO
+            imageUrls: imageUrls.filter(url => url.trim() !== ""),
             team: { teamId: parseInt(formData.teamId), teamName: "Bypass", teamLeague: "Bypass" },
             tShirtCompetitions: [],
             reviews: []
         } : {
-            // Create uses CreateTShirt DTO
             shirtName: formData.shirtName,
             shirtSeason: formData.shirtSeason,
             shirtPrice: parseFloat(formData.shirtPrice),
@@ -158,12 +194,39 @@ function ItemListerPage() {
                 body: JSON.stringify(payload)
             });
 
-            
             if (res.ok) {
                 const data = await res.json();
                 const createdShirtId = isEdit ? formData.tShirtId : (data.tShirtId || data.id);
-                
-                // Link to competitions
+
+                // Apply relative stock adjustments when editing an existing product
+                if (isEdit) {
+                    const validAdjustments = stockAdjustments
+                        .filter(adj => adj.amount !== 0)
+                        .map(adj => ({
+                            shirtId: createdShirtId,
+                            shirtSize: adj.shirtSize,
+                            amount: adj.amount
+                        }));
+                    
+                    if (validAdjustments.length > 0) {
+                        const stockRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/StockUpdate", {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${user.token}`
+                            },
+                            body: JSON.stringify(validAdjustments)
+                        });
+                        if (stockRes.ok) {
+                            const stockData = await stockRes.json();
+                            if (Array.isArray(stockData) && stockData.length > 0) {
+                                showToast("Some stock sizes could not be adjusted because they do not exist.", "warning");
+                            }
+                        }
+                    }
+                }
+
+                // Link shirt to selected competitions
                 if (createdShirtId && selectedCompetitions.length > 0) {
                     for (const compId of selectedCompetitions) {
                         try {
@@ -175,7 +238,9 @@ function ItemListerPage() {
                                 },
                                 body: JSON.stringify({ tShirtId: createdShirtId, competitionId: compId })
                             });
-                        } catch(err) { console.error("Failed to link competition", err); }
+                        } catch (err) {
+                            console.error("Failed to link competition:", err);
+                        }
                     }
                 }
 
@@ -210,13 +275,14 @@ function ItemListerPage() {
             <div className="AdminDenied">
                 <h2>Access Denied</h2>
                 <p>You do not have permission to view the Inventory Portal.</p>
-                <Link to="/" className="AdminPrimaryBtn" style={{textDecoration: 'none'}}>Return Home</Link>
+                <Link to="/" className="AdminPrimaryBtn" style={{ textDecoration: 'none' }}>Return Home</Link>
             </div>
         );
     }
 
     return (
         <div className="ListerContainer">
+            {/* Sidebar navigation */}
             <aside className="ListerSidebar">
                 <h2>Lister Portal</h2>
                 <nav className="AdminNav">
@@ -230,36 +296,36 @@ function ItemListerPage() {
                         className={`AdminNavBtn ${activeTab === 'add' ? 'active' : ''}`}
                         onClick={() => { resetForm(); setActiveTab('add'); }}
                     >
-                        Add New Product
+                        + Add New Item
                     </button>
-                    {activeTab === 'edit' && (
-                        <button className="AdminNavBtn active">Edit Product</button>
-                    )}
                 </nav>
             </aside>
 
+            {/* Main view area */}
             <main className="ListerContent">
                 {activeTab === "inventory" && (
                     <div>
                         <div className="SectionHeader">
                             <div className="AdminHeader" style={{marginBottom: 0}}>
                                 <h1>Inventory Management</h1>
-                                <p>View all products currently listed in the store.</p>
+                                <p>View and manage kit catalog records.</p>
                             </div>
                             <button className="AdminPrimaryBtn" onClick={() => { resetForm(); setActiveTab("add"); }}>
                                 + Add Product
                             </button>
                         </div>
 
-                        {loading ? <div className="AdminLoading">Loading inventory...</div> : (
+                        {loading ? (
+                            <div className="AdminLoading">Loading inventory...</div>
+                        ) : inventory.length === 0 ? (
+                            <div style={{padding: '40px', textAlign: 'center', color: '#6b7280'}}>No items found.</div>
+                        ) : (
                             <div className="AdminTableWrapper">
                                 <table className="AdminTable">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
                                             <th>Image</th>
                                             <th>Name</th>
-                                            <th>Team ID</th>
                                             <th>Season</th>
                                             <th>Price</th>
                                             <th>Status</th>
@@ -267,29 +333,36 @@ function ItemListerPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {inventory.map(item => (
+                                        {inventory.map((item) => (
                                             <tr key={item.tShirtId}>
-                                                <td>{item.tShirtId}</td>
                                                 <td>
                                                     <img 
-                                                        src={item.shirtLinks?.[0]?.shirtLinkUrl || "/placeholder.png"} 
-                                                        alt="thumbnail" 
-                                                        style={{width: '40px', height: '50px', objectFit: 'contain'}} 
+                                                        src={item.shirtLinks && item.shirtLinks.length > 0 ? item.shirtLinks[0].shirtLinkUrl : "/placeholder.png"} 
+                                                        alt={item.shirtName}
+                                                        style={{width: '40px', height: '40px', objectFit: 'contain', borderRadius: '4px'}}
                                                     />
                                                 </td>
-                                                <td style={{fontWeight: 'bold'}}>{item.shirtName}</td>
-                                                <td>{item.teamId}</td>
+                                                <td><strong>{item.shirtName}</strong></td>
                                                 <td>{item.shirtSeason}</td>
                                                 <td>R {item.shirtPrice.toFixed(2)}</td>
                                                 <td>
-                                                    <span className={`RoleBadge ${item.shirtStatus === 'Available' ? 'Admin' : 'Customer'}`}>
+                                                    <span className={`StatusBadge ${item.shirtStatus?.toLowerCase() === 'available' ? 'active' : 'inactive'}`}>
                                                         {item.shirtStatus}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <button className="AdminActionBtn" onClick={() => openEditForm(item)}>
-                                                        Edit
-                                                    </button>
+                                                    <div style={{display: 'flex', gap: '8px'}}>
+                                                        <button className="AdminActionBtn" onClick={() => openEditForm(item)}>
+                                                            Edit
+                                                        </button>
+                                                        <button 
+                                                            className="AdminActionBtn" 
+                                                            style={{background: '#ef4444', color: 'white'}}
+                                                            onClick={() => handleDeleteProduct(item.tShirtId)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -301,67 +374,112 @@ function ItemListerPage() {
                 )}
 
                 {(activeTab === "add" || activeTab === "edit") && (
-                    <div>
+                    <div className="AdminModalForm" style={{maxWidth: '800px', margin: '0 auto'}}>
                         <div className="AdminHeader">
-                            <h1>{activeTab === "edit" ? "Edit Product Details" : "List New Product"}</h1>
-                            <p>{activeTab === "edit" ? "Update the information for this product." : "Fill out the details below to add a new jersey to the storefront."}</p>
+                            <h1>{activeTab === "edit" ? "Edit Product" : "Add New Kit"}</h1>
+                            <p>{activeTab === "edit" ? "Update kit details, images, and inventory." : "Create a new jersey in the catalog."}</p>
                         </div>
-                        
-                        <form className="ListerForm" onSubmit={handleSubmit}>
-                            <h3 className="FormSectionTitle">Basic Details</h3>
-                            <div className="FormGrid">
-                                <div className="FormGroup">
-                                    <label>Product Name (e.g. Pirates_Home)</label>
-                                    <input type="text" name="shirtName" value={formData.shirtName} onChange={handleFormChange} required />
+
+                        <form onSubmit={handleSubmit}>
+                            <h3 className="FormSectionTitle">Basic Information</h3>
+                            
+                            <div className="FormRow">
+                                <div className="InputGroup">
+                                    <label>Jersey Name *</label>
+                                    <input 
+                                        type="text" 
+                                        name="shirtName" 
+                                        value={formData.shirtName} 
+                                        onChange={handleFormChange} 
+                                         
+                                        required 
+                                    />
                                 </div>
-                                <div className="FormGroup">
-                                    <label>Season (e.g. 2024/25)</label>
-                                    <input type="text" name="shirtSeason" value={formData.shirtSeason} onChange={handleFormChange} required />
-                                </div>
-                                <div className="FormGroup">
-                                    <label>Price (R)</label>
-                                    <input type="number" step="0.01" name="shirtPrice" value={formData.shirtPrice} onChange={handleFormChange} required />
-                                </div>
-                                <div className="FormGroup">
-                                    <label>Team</label>
-                                    <select name="teamId" value={formData.teamId} onChange={handleFormChange} required>
-                                        <option value="" disabled>Select a Team</option>
-                                        {Array.from(new Map(inventory.filter(t => t.team).map(t => [t.team.teamId, t.team])).values()).map(team => (
-                                            <option key={team.teamId} value={team.teamId}>{team.teamName}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="FormGroup">
-                                    <label>Gender</label>
-                                    <select name="shirtGender" value={formData.shirtGender} onChange={handleFormChange}>
-                                        <option value="Mens">Mens</option>
-                                        <option value="Womens">Womens</option>
-                                        <option value="Kids">Kids</option>
-                                        <option value="Unisex">Unisex</option>
-                                    </select>
-                                </div>
-                                <div className="FormGroup">
-                                    <label>Status</label>
-                                    <select name="shirtStatus" value={formData.shirtStatus} onChange={handleFormChange}>
-                                        <option value="Available">Available</option>
-                                        <option value="Out of Stock">Out of Stock</option>
-                                        <option value="Discontinued">Discontinued</option>
-                                    </select>
-                                </div>
-                                <div className="FormGroup full-width">
-                                    <label>Description</label>
-                                    <textarea name="shirtDescription" value={formData.shirtDescription} onChange={handleFormChange} required></textarea>
+                                <div className="InputGroup">
+                                    <label>Season *</label>
+                                    <input 
+                                        type="text" 
+                                        name="shirtSeason" 
+                                        value={formData.shirtSeason} 
+                                        onChange={handleFormChange} 
+                                         
+                                        required 
+                                    />
                                 </div>
                             </div>
 
-                            <h3 className="FormSectionTitle">Images</h3>
-                            <p style={{fontSize: '0.85rem', color: '#6b7280', marginBottom: '15px'}}>The first image will be set as the Main image.</p>
-                            
-                            
-                            <h3 className="FormSectionTitle">Competitions (Optional)</h3>
-                            <div className="FormGrid" style={{display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '30px'}}>
+                            <div className="FormRow">
+                                <div className="InputGroup">
+                                    <label>Price (ZAR) *</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        name="shirtPrice" 
+                                        value={formData.shirtPrice} 
+                                        onChange={handleFormChange} 
+                                         
+                                        required 
+                                    />
+                                </div>
+                                <div className="InputGroup">
+                                    <label>Team ID *</label>
+                                    <input 
+                                        type="number" 
+                                        name="teamId" 
+                                        value={formData.teamId} 
+                                        onChange={handleFormChange} 
+                                         
+                                        required 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="FormRow">
+                                <div className="InputGroup">
+                                    <label>Gender *</label>
+                                    <select name="shirtGender" value={formData.shirtGender} onChange={handleFormChange}>
+                                        <option value="Unisex">Unisex</option>
+                                        <option value="Men">Men</option>
+                                        <option value="Women">Women</option>
+                                        <option value="Kids">Kids</option>
+                                    </select>
+                                </div>
+                                <div className="InputGroup">
+                                    <label>Status *</label>
+                                    <select name="shirtStatus" value={formData.shirtStatus} onChange={handleFormChange}>
+                                        <option value="Available">Available</option>
+                                        <option value="Out of Stock">Out of Stock</option>
+                                        <option value="Pre-order">Pre-order</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="InputGroup">
+                                <label>Affiliate / Brand Tag</label>
+                                <input 
+                                    type="text" 
+                                    name="shirtAffiliate" 
+                                    value={formData.shirtAffiliate} 
+                                    onChange={handleFormChange} 
+                                     
+                                />
+                            </div>
+
+                            <div className="InputGroup">
+                                <label>Description</label>
+                                <textarea 
+                                    rows="4" 
+                                    name="shirtDescription" 
+                                    value={formData.shirtDescription} 
+                                    onChange={handleFormChange} 
+                                    
+                                />
+                            </div>
+
+                            <h3 className="FormSectionTitle">Competitions</h3>
+                            <div style={{display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px'}}>
                                 {competitions.map(comp => (
-                                    <label key={comp.competitionId} style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600}}>
+                                    <label key={comp.competitionId} style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
                                         <input 
                                             type="checkbox" 
                                             checked={selectedCompetitions.includes(comp.competitionId)}
@@ -382,7 +500,6 @@ function ItemListerPage() {
                                 endpoint="/api/Upload/jersey" 
                                 multiple={true} 
                                 onUploadSuccess={(url) => {
-                                    // If first slot is empty, replace it. Else append.
                                     if (imageUrls.length === 1 && imageUrls[0] === "") {
                                         setImageUrls([url]);
                                     } else {
@@ -400,7 +517,7 @@ function ItemListerPage() {
                                     )}
                                     <input 
                                         type="text" 
-                                        placeholder="Or paste image URL"
+                                        
                                         value={url}
                                         onChange={(e) => {
                                             const newUrls = [...imageUrls];
@@ -408,9 +525,8 @@ function ItemListerPage() {
                                             setImageUrls(newUrls);
                                         }}
                                         required 
-                                        style={{flexGrow: 1}}
                                     />
-                                    {imageUrls.length > 1 && (
+                                    {i > 0 && (
                                         <button type="button" className="AdminActionBtn danger" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))}>
                                             Remove
                                         </button>
@@ -421,6 +537,7 @@ function ItemListerPage() {
                                 + Add Another Image
                             </button>
 
+                            {/* Stock Adjustment Controls for Existing Items */}
                             {activeTab === "edit" && (
                                 <>
                                     <h3 className="FormSectionTitle">Adjust Stock Levels (Optional)</h3>
@@ -446,7 +563,7 @@ function ItemListerPage() {
                                             </select>
                                             <input 
                                                 type="number" 
-                                                placeholder="e.g. 5 or -2"
+                                                
                                                 value={adj.amount} 
                                                 onChange={(e) => {
                                                     const newAdj = [...stockAdjustments];
@@ -468,6 +585,7 @@ function ItemListerPage() {
                                 </>
                             )}
 
+                            {/* Initial Stock Configuration for New Items */}
                             {activeTab === "add" && (
                                 <>
                                     <h3 className="FormSectionTitle">Sizes & Stock</h3>
@@ -486,11 +604,10 @@ function ItemListerPage() {
                                             </select>
                                             <input 
                                                 type="number" 
-                                                placeholder="Amount Available" 
+                                                 
                                                 value={sizeObj.amountAvailable} 
                                                 onChange={(e) => handleSizeChange(i, 'amountAvailable', e.target.value)} 
-                                                min="0"
-                                                required
+                                                required 
                                             />
                                             {i > 0 && (
                                                 <button type="button" className="AdminActionBtn danger" onClick={() => setSizes(sizes.filter((_, idx) => idx !== i))}>
@@ -510,7 +627,7 @@ function ItemListerPage() {
                                     CANCEL
                                 </button>
                                 <button type="submit" className="AdminPrimaryBtn" disabled={submitLoading}>
-                                    {submitLoading ? "SAVING..." : (activeTab === "edit" ? "SAVE CHANGES" : "PUBLISH PRODUCT")}
+                                    {submitLoading ? "SAVING..." : activeTab === "edit" ? "SAVE CHANGES" : "ADD PRODUCT"}
                                 </button>
                             </div>
                         </form>

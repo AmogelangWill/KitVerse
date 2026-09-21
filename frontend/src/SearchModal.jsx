@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SearchModal.css";
 
+// Search overlay modal offering debounced live kit searching and quick search tags
 function SearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -9,20 +10,19 @@ function SearchModal({ isOpen, onClose }) {
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Auto-focus the input when the modal opens
+  // Focus search input on open, reset search query on close
   useEffect(() => {
     if (isOpen) {
       if (inputRef.current) {
         setTimeout(() => inputRef.current.focus(), 100);
       }
     } else {
-      // Clear on close
       setQuery("");
       setResults([]);
     }
   }, [isOpen]);
 
-  // Debounced search API call
+  // Debounced API call to retrieve matching shirts based on search query
   useEffect(() => {
     const fetchResults = async () => {
       if (!query.trim()) {
@@ -40,30 +40,29 @@ function SearchModal({ isOpen, onClose }) {
           setResults([]);
         }
       } catch (err) {
-        console.error("Search error", err);
+        console.error("Search error:", err);
         setResults([]);
       } finally {
         setLoading(false);
       }
     };
 
+    // Wait 300ms after user stops typing before making request
     const debounceTimer = setTimeout(fetchResults, 300);
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
+  // Prevents standard form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-       // Optional: Navigate to a dedicated search page or just rely on the live dropdown results
-       // navigate(`/collections?search=${encodeURIComponent(query)}`);
-       // onClose();
-    }
   };
 
+  // Populates search query using a predefined tag suggestion
   const handleSuggestionClick = (term) => {
     setQuery(term);
   };
 
+  // Navigates to selected product detail page and closes modal
   const handleResultClick = (id) => {
     navigate(`/product/${id}`);
     onClose();
@@ -112,7 +111,7 @@ function SearchModal({ isOpen, onClose }) {
                       key={shirt.tShirtId} 
                       className="SearchResultItem" 
                       onClick={() => handleResultClick(shirt.tShirtId)}
-                      style={{cursor: 'pointer'}}
+                      style={{ cursor: 'pointer' }}
                     >
                       {imageUrl && <img src={imageUrl} alt={shirt.shirtName} className="SearchResultImage" />}
                       <div className="SearchResultInfo">

@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +50,11 @@ namespace Kitverse_backend_01.Services
 
                 avgmonthlyUsers = await GetAvgUserPerMonth(),
 
-                avgsales = await GetAvgSales()
+                avgsales = await GetAvgSales(),
+                
+                totalProductsSold = await _context.OrderItems.SumAsync(oi => (int?)oi.Quantity) ?? 0,
+                
+                totalStockOnHand = await _context.Inventory.SumAsync(i => (int?)i.AmountAvailable) ?? 0
             };
         }
 

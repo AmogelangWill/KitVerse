@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.DTOs;
+using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 
 namespace Kitverse_backend_01.Controllers
@@ -35,5 +35,6 @@ namespace Kitverse_backend_01.Controllers
 
         Task<List<string>> UpdateStockSizesBulk(List<StockUpdate> updates);
 
+        Task<bool> DeleteShirt(int id);
     }
 }

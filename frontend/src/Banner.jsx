@@ -2,12 +2,14 @@ import "./Banner.css"
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Promotional hero carousel component displayed at the top of the homepage
 function Banner() {
     const [banners, setBanners] = useState([]);
     const [CurrentBanner, setCurrentBanner] = useState(0);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    // Fetch promotional banners on component mount
     useEffect(() => {
         const fetchBanners = async () => {
             try {
@@ -27,22 +29,23 @@ function Banner() {
         fetchBanners();
     }, []);
 
+    // Rotate carousel to the next slide every 5 seconds
     useEffect(() => {
         if (banners.length === 0) return;
         const interval = setInterval(() => {
             setCurrentBanner((current) =>
                 (current + 1) % banners.length
             );
-        }, 5000); // 5 seconds is standard for ecommerce banners
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [banners.length]);
 
+    // Handles banner clicks by redirecting to single product or rivalry comparison page
     const handleBannerClick = async (banner) => {
-        if (!banner.team1ID && !banner.team2ID) return; // Unclickable banner
+        if (!banner.team1ID && !banner.team2ID) return;
 
         try {
-            // team1ID and team2ID in the banner model are actually TShirt IDs based on backend logic
             const id1 = banner.team1ID || 0;
             const id2 = banner.team2ID || 0;
             
@@ -52,7 +55,6 @@ function Banner() {
                 if (shirts.length === 1) {
                     navigate(`/product/${shirts[0].tShirtId}`);
                 } else if (shirts.length === 2) {
-                    // Send to rivalry page with both shirt IDs
                     navigate(`/rivalry/${shirts[0].tShirtId}/${shirts[1].tShirtId}`);
                 }
             }
@@ -66,7 +68,6 @@ function Banner() {
     }
 
     if (banners.length === 0) {
-        // Fallback to default if database is empty
         return (
             <div className="BannerContainer">
                 <img 
@@ -82,6 +83,7 @@ function Banner() {
 
     return (
         <div className="BannerContainer">
+            {/* Active banner image */}
             <img 
                 className="BannerImg" 
                 src={currentData.bannerUrl} 
@@ -90,6 +92,7 @@ function Banner() {
                 style={{ cursor: (currentData.team1ID || currentData.team2ID) ? 'pointer' : 'default' }}
             />
             
+            {/* Pagination indicator dots */}
             {banners.length > 1 && (
                 <div className="Indicators">
                     {banners.map((_, index) => (

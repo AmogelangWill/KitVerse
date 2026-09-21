@@ -1,22 +1,23 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./CollectionPage.css";
-import "./ProductsPage.css"; // Reuse product card styling
+import "./ProductsPage.css";
 
+// Store catalog page with multi-facet filtering for teams, competitions, and new arrivals
 function CollectionPage() {
     const location = useLocation();
     const navigate = useNavigate();
     
-    // Data State
+    // Catalog data state
     const [allShirts, setAllShirts] = useState([]);
     const [filteredShirts, setFilteredShirts] = useState([]);
     const [competitions, setCompetitions] = useState([]);
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Filter State
+    // Filter query parameters
     const searchParams = new URLSearchParams(location.search);
-    const initialFilter = searchParams.get('filter'); // e.g. "new"
+    const initialFilter = searchParams.get('filter');
     const initialCompetition = searchParams.get('competition');
     const initialTeam = searchParams.get('team');
 
@@ -25,8 +26,7 @@ function CollectionPage() {
     const [isNewArrivals, setIsNewArrivals] = useState(initialFilter === 'new');
     const [sortOrder, setSortOrder] = useState("");
 
-    
-    // Listen for URL changes (e.g., clicking Header links while already on the page)
+    // Synchronizes component filter state with URL parameters
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         
@@ -43,34 +43,32 @@ function CollectionPage() {
             }
         }
         
-        // We don't reset to [] if comp is missing here to allow sidebar checkboxes to work independently of the URL.
-        // However, if the user explicitly clicked "Jerseys" (which has NO search params), we should reset everything.
-        // Let's check if there are NO search params at all:
+        // Reset filters when navigating to base collections without query params
         if (!location.search) {
             setSelectedCompetitions([]);
             setSelectedTeams([]);
             setIsNewArrivals(false);
         }
-    }, [location.search]);
+    }, [location.search, competitions]);
 
-    // Fetch initial data
+    // Loads catalog shirts and competition list on mount
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
             try {
-                // Fetch all shirts (baseline)
+                // Fetch catalog inventory
                 const shirtRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
                 let shirtsData = [];
                 if (shirtRes.ok) {
                     shirtsData = await shirtRes.json();
                     setAllShirts(shirtsData);
                     
-                    // Extract unique teams
+                    // Deduplicate teams from returned shirts
                     const uniqueTeams = Array.from(new Map(shirtsData.filter(t => t.team).map(t => [t.team.teamId, t.team])).values());
                     setTeams(uniqueTeams);
                 }
 
-                // Fetch all competitions
+                // Fetch available competitions
                 let compsData = [];
                 const compRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/competitions");
                 if (compRes.ok) {
@@ -78,7 +76,7 @@ function CollectionPage() {
                     setCompetitions(compsData);
                 }
 
-                // If navigation used a named competition, pre-select it now that we have the IDs
+                // Pre-select competition if specified by name in query string
                 const params = new URLSearchParams(window.location.search);
                 const compName = params.get('competitionName');
                 if (compName && compsData.length > 0) {
@@ -98,7 +96,7 @@ function CollectionPage() {
         fetchInitialData();
     }, []);
 
-    // Apply filters whenever state changes
+    // Recomputes filtered shirt list whenever active filters or sort criteria change
     useEffect(() => {
         if (allShirts.length === 0) return;
 
@@ -107,7 +105,7 @@ function CollectionPage() {
             let result = [...allShirts];
 
             try {
-                // 1. New Arrivals Filter
+                // Filter by new arrivals
                 if (isNewArrivals) {
                     const newRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt/new");
                     if (newRes.ok) {
@@ -117,12 +115,12 @@ function CollectionPage() {
                     }
                 }
 
-                // 2. Team Filter (Client side since we already have the Team object on allShirts)
+                // Filter by selected teams
                 if (selectedTeams.length > 0) {
                     result = result.filter(s => selectedTeams.includes(s.teamId));
                 }
 
-                // 3. Competition Filter (Fetch specific competition shirts and intersect)
+                // Filter by selected competitions
                 if (selectedCompetitions.length > 0) {
                     let compValidIds = new Set();
                     for (const compId of selectedCompetitions) {
@@ -135,16 +133,20 @@ function CollectionPage() {
                     result = result.filter(s => compValidIds.has(s.tShirtId));
                 }
 
-                // 4. Sorting
+                // Apply sorting
                 if (sortOrder === "price_asc") {
                     result.sort((a, b) => a.shirtPrice - b.shirtPrice);
                 } else if (sortOrder === "price_desc") {
                     result.sort((a, b) => b.shirtPrice - a.shirtPrice);
+                } else if (sortOrder === "name_asc") {
+                    result.sort((a, b) => (a.shirtName || "").localeCompare(b.shirtName || ""));
+                } else if (sortOrder === "name_desc") {
+                    result.sort((a, b) => (b.shirtName || "").localeCompare(a.shirtName || ""));
                 }
 
                 setFilteredShirts(result);
             } catch (err) {
-                console.error("Filtering error", err);
+                console.error("Filtering error:", err);
             } finally {
                 setLoading(false);
             }
@@ -153,22 +155,26 @@ function CollectionPage() {
         applyFilters();
     }, [allShirts, selectedCompetitions, selectedTeams, isNewArrivals, sortOrder]);
 
+    // Toggles a team checkbox filter
     const handleTeamToggle = (teamId) => {
         setSelectedTeams(prev => 
             prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId]
         );
     };
 
+    // Toggles a competition checkbox filter
     const handleCompToggle = (compId) => {
         setSelectedCompetitions(prev => 
             prev.includes(compId) ? prev.filter(id => id !== compId) : [...prev, compId]
         );
     };
 
+    // Formats a numeric price into South African Rand currency string
     const formatPrice = (price) => {
         return `R${price.toFixed(2)}`;
     };
 
+    // Clears all active filters and resets query parameters
     const clearFilters = () => {
         setSelectedTeams([]);
         setSelectedCompetitions([]);
@@ -178,7 +184,7 @@ function CollectionPage() {
 
     return (
         <div className="CollectionPageContainer">
-            {/* SUPERBALIST STYLE SIDEBAR */}
+            {/* Filter sidebar */}
             <aside className="CollectionSidebar">
                 <div className="SidebarHeader">Filters</div>
                 
@@ -225,7 +231,7 @@ function CollectionPage() {
                 </div>
             </aside>
 
-            {/* MAIN CONTENT AREA */}
+            {/* Main products grid and active filter pills */}
             <main className="CollectionContent">
                 <div className="CollectionTopBar">
                     <div className="ActiveFilters">
@@ -265,6 +271,8 @@ function CollectionPage() {
                             <option value="">Sort By: Default</option>
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
+                            <option value="name_asc">Name: A to Z</option>
+                            <option value="name_desc">Name: Z to A</option>
                         </select>
                     </div>
                 </div>
