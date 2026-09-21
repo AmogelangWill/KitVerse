@@ -165,7 +165,7 @@ namespace Kitverse_backend_01.Services
             }).GeneratePdf();
         }
 
-        public async Task<List<Models.Invoice>> GetUserInvoicesAsync(int userId)
+        public async Task<List<Invoice>> GetUserInvoicesAsync(int userId)
         {
             return await _context.Invoices
                 .Where(i => i.user_id == userId)
