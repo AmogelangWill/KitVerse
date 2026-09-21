@@ -175,11 +175,39 @@ namespace Kitverse_backend_01.Services
             return GeneratePdf(invoice, user, order);
         }
 
-        public async Task<List<Invoice>> GetUserInvoicesAsync(int userId)
+        public async Task<List<object>> GetUserInvoicesAsync(int userId)
         {
-            return await _context.Invoices
+            var invoices = await _context.Invoices
                 .Where(i => i.user_id == userId)
                 .OrderByDescending(i => i.invoiceDate)
                 .ToListAsync();
+
+            var result = new List<object>();
+
+            foreach (var inv in invoices)
+            {
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.ShirtLinks)
+                    .FirstOrDefaultAsync(o => o.PaymentId == inv.pay_id);
+
+                var imageUrl = order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault(l => l.IsMain)?.ShirtLinkUrl 
+                            ?? order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault()?.ShirtLinkUrl 
+                            ?? "";
+
+                result.Add(new {
+                    id = inv.Id,
+                    invoiceNumber = inv.invoiceNumber,
+                    invoiceDate = inv.invoiceDate,
+                    subtotal = inv.subtotal,
+                    tax = inv.tax,
+                    total = inv.total,
+                    status = inv.status,
+                    imageUrl = imageUrl
+                });
+            }
+
+            return result;
         }
     }
