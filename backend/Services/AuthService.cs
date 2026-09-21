@@ -21,11 +21,29 @@ namespace Kitverse_backend_01.Controllers
         private readonly IConfiguration _config; //used to read the JWT signing key from User Secrets
 
         private readonly IEmailService _emailService; // Inject the email service
-        public AuthService(KitverseDbContext context, IConfiguration config, IEmailService emailService) //getting a ready to use DbContext from ASP.net
+
+        private readonly ILogger<AuthService> _logger;
+        public AuthService(KitverseDbContext context, IConfiguration config,
+                           IEmailService emailService, ILogger<AuthService> logger)
         {
             _context = context;
             _config = config;
             _emailService = emailService;
+            _logger = logger;
+        }
+
+
+        // a failed email must never make a successful registration look like a failure
+        private async Task TrySendWelcomeEmail(User user)
+        {
+            try
+            {
+                await _emailService.SendWelcomeEmail(user.UserEmail, user.UserName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Welcome email failed for user {UserId}", user.UserId);
+            }
         }
         public async Task<User> Register(User user)
         {
@@ -67,6 +85,8 @@ namespace Kitverse_backend_01.Controllers
                         _context.Customers.Add(customer);
                         await _context.SaveChangesAsync();
                     }
+
+                    await TrySendWelcomeEmail(user);
                 }
             }
             catch (Exception ex)
@@ -147,6 +167,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         private async Task<bool> VerifyPassword(string email, string password)
+
         {
 
             var user = await GetByEmail(email);
@@ -172,12 +193,20 @@ namespace Kitverse_backend_01.Controllers
                 throw new ArgumentException("Invalid Google token.");
             }
 
+            // only trust emails that Google has verified
+            if (!payload.EmailVerified)
+            {
+                throw new ArgumentException("Google account email is not verified.");
+            }
+
+            // returning user: sign them in, no second welcome email
             var existingUser = await GetByEmail(payload.Email);
             if (existingUser != null)
             {
                 return existingUser;
             }
 
+            // first-time Google sign-in: create the account
             var newUser = new User
             {
                 UserName = payload.GivenName ?? payload.Email.Split('@')[0],
@@ -194,16 +223,21 @@ namespace Kitverse_backend_01.Controllers
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
+            // a failed email is logged, never breaks the sign-in
+            await TrySendWelcomeEmail(newUser);
+
             return newUser;
         }
 
-        public async Task<bool> SetPassword(string email, string newPassword)
+        public async Task<bool> SetPassword(int userId, string newPassword)
         {
-            var user = await GetByEmail(email);
-            if (user == null)
-            {
-                return false;
-            }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return false;
+
+            // only for accounts with no password yet (Google sign-ups);
+            // changing an existing password goes through "forgot password"
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+                throw new InvalidOperationException("This account already has a password. Use 'Forgot password' to change it.");
 
             user.PasswordHash = HashPassword(newPassword);
             await _context.SaveChangesAsync();
@@ -243,9 +277,9 @@ namespace Kitverse_backend_01.Controllers
 
            _context.PasswordResetTokens.Add(resetTokenEntity);
             await _context.SaveChangesAsync();
-            
-            var resetlink = $"http://localhost:3000/reset-password?token={Uri.EscapeDataString(tokenString)}"; // this is the link that will be sent to the user's email. it will contain the token as a query parameter.
-             //generate QR code for the reset link
+
+            var baseUrl = (_config["Frontend:BaseUrl"] ?? "https://kitverse.pages.dev").TrimEnd('/');
+            var resetlink = $"{baseUrl}/reset-password?token={Uri.EscapeDataString(tokenString)}";             //generate QR code for the reset link
             using var qrGenerator = new QRCoder.QRCodeGenerator();
 
             using var qrCodeData = qrGenerator.CreateQrCode(resetlink, QRCoder.QRCodeGenerator.ECCLevel.Q);
@@ -255,7 +289,7 @@ namespace Kitverse_backend_01.Controllers
             byte[] qrCodeImage = qrCode.GetGraphic(20);
 
             //send the email with the reset link and QR code
-            await _emailService.SendPasswordResetEmail(user.UserEmail, tokenString, qrCodeImage);
+            await _emailService.SendPasswordResetEmail(user.UserEmail, resetlink, qrCodeImage);
             return true;
 
         }
@@ -285,5 +319,12 @@ namespace Kitverse_backend_01.Controllers
 
             return true;
         }
+
+        Task<bool> IAuthService.VerifyPassword(string email, string password)
+        {
+            return VerifyPassword(email, password);
+        }
+
+        
     }
 }

@@ -20,13 +20,17 @@ namespace Kitverse_backend_01.Services
         private readonly IConfiguration _config;
         private readonly ILogger<AdminService> _logger;
 
+        private readonly IInvoiceService _invoiceService;
+
         public AdminService(KitverseDbContext context, IEmailService emailservice,
-                            IConfiguration config, ILogger<AdminService> logger)
+                            IConfiguration config, ILogger<AdminService> logger,
+                            IInvoiceService invoiceService)
         {
             _context = context;
             _emailservice = emailservice;
             _config = config;
             _logger = logger;
+            _invoiceService = invoiceService;
         }
         //get stats for admin dashboard
         public async Task<AdminDashboard> GetAdminDashboard()
@@ -421,26 +425,9 @@ namespace Kitverse_backend_01.Services
         }
 
 
-        public async Task<bool> SendInvoice(int invoiceid)
-        {
-            var invoice = await _context.Invoices
-                        .Include(i => i.User)
-                        .FirstOrDefaultAsync(i => i.Id == invoiceid);
-            if(invoice == null)
-            {
-                return false;
-            }
-            //invoice pdf 
-            byte[] invoicePdf = GenInvPdf(invoice);
-
-            await _emailservice.SendInvoiceEmail(
-                invoice.User.UserEmail,
-                invoice.User.UserName,
-                invoicePdf);
-            return true;
-        }
+        public Task<bool> SendInvoice(int invoiceid) => _invoiceService.SendInvoiceAsync(invoiceid);
         //helper method to generate invoice pdf using QuestPDF
-        private byte[] GenInvPdf(Invoice invoice)
+      /*  private byte[] GenInvPdf(Invoice invoice)
         {
             QuestPDF.Settings.License = LicenseType.Community;
 
@@ -494,7 +481,7 @@ namespace Kitverse_backend_01.Services
             return document.GeneratePdf();
         }
 
-
+        */
         public async Task<int> SendNewsletter(string subject, string htmlBody)
         {
             var subscribers = await _context.NewsletterSubscribers

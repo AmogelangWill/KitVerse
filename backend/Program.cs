@@ -37,6 +37,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 // JWT authentication - lets the API verify who's logged in on protected requests
 var jwtKey = builder.Configuration["Jwt:Key"];

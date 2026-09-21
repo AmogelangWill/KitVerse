@@ -71,12 +71,14 @@ namespace Kitverse_backend_01.Controllers
             return Ok(banners);
         }
         // POST: api/admin/banners
+        [Authorize(Roles ="Admin")]
         [HttpPost("banners")]
         public async Task<IActionResult> AddBanner([FromBody] Banner banner) { 
             await _adminService.AddBanner(banner);
             return Ok(banner);
         }
         // PUT: api/admin/banners/{id}
+        [Authorize(Roles ="Admin")]
         [HttpPut("banners/{id}")]
         public async Task<IActionResult> UpdateBanner(int id, [FromBody] Banner bannerUpdate)
         {
@@ -86,6 +88,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(updatedBanner);
         }
         // DELETE: api/admin/banners/{id}
+        [Authorize(Roles ="Admin")]
         [HttpDelete("banners/{id}")]
         public async Task<IActionResult> DeleteBanner(int id)
         {
@@ -113,6 +116,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(invoices);
         }
         // GET: api/admin/invoices/{id}
+        [Authorize (Roles ="Admin")]
         [HttpGet("invoices/{id}")]
         public async Task<IActionResult> GetInvoice(int id)
         {
@@ -174,6 +178,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         //POST: api/admin/send-invoice
+
         
         [HttpPost("send-invoice/{invoiceId}")]
         public async Task<IActionResult> SendInvoice(int invoiceId)
