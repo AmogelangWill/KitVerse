@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Kitverse_backend_01.Data;
+﻿using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,10 +15,12 @@ namespace Kitverse_backend_01.Services
         {
             // Retrieve the shopping cart for the given user id from the database
             var cart = await _context.ShoppingCarts
-                .Include(c => c.ItemLists)
+                .Include(c => c.ItemLists
+                  .Where(il => il.TShirt.ShirtStatus == "Available"))
                     .ThenInclude(il => il.TShirt)
                         .ThenInclude(t => t.ShirtLinks)
-                .Include(c => c.ItemLists)
+                .Include(c => c.ItemLists
+                .Where(il => il.TShirt.ShirtStatus == "Available"))
                     .ThenInclude(il => il.TShirt)
                         .ThenInclude(t => t.Team)
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.CartStatus == "Active");
@@ -201,27 +202,27 @@ namespace Kitverse_backend_01.Services
 
         public async Task<bool> addToWishList(int userId, int t_shirt_id)
         {
-           
-                //code to execute if the userId and The Tshirt ID are valid  and no duplicate is entered 
-                if ( await _context.Users.AnyAsync(t => t.UserId == userId) && await _context.TShirts.AnyAsync(t => t.TShirtId == t_shirt_id) &&  !await _context.Wishlists.AnyAsync(t=> t.UserId==userId && t.TShirtId==t_shirt_id))
-                {
-                    Wishlist list = new Wishlist
-                    {
-                        UserId = userId,
-                        TShirtId = t_shirt_id,
-                        DateAdded = DateTime.UtcNow,
-                    };
-                    await _context.Wishlists.AddAsync(list);
-                    await _context.SaveChangesAsync();
 
-                    return true;
-                }
-                else
+            //code to execute if the userId and The Tshirt ID are valid  and no duplicate is entered 
+            if (await _context.Users.AnyAsync(t => t.UserId == userId) && await _context.TShirts.AnyAsync(t => t.TShirtId == t_shirt_id) && !await _context.Wishlists.AnyAsync(t => t.UserId == userId && t.TShirtId == t_shirt_id))
+            {
+                Wishlist list = new Wishlist
                 {
-                    return false;
-                }
-            
-            
+                    UserId = userId,
+                    TShirtId = t_shirt_id,
+                    DateAdded = DateTime.UtcNow,
+                };
+                await _context.Wishlists.AddAsync(list);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+
         }
 
 
@@ -233,11 +234,11 @@ namespace Kitverse_backend_01.Services
             {
                 return null;
             }
-          
+
             return await _context.Wishlists //From the wishList ...
                 .Where(w => w.UserId == userId)//Trim it down to the wishlist of that specifc user
                 .Include(w => w.TShirt) //load the users tshirt
-                .ThenInclude(t => t.ShirtLinks.Where(t=> t.IsMain ==true)) //load their ShirtLink
+                .ThenInclude(t => t.ShirtLinks.Where(t => t.IsMain == true)) //load their ShirtLink
                 .Select(w => w.TShirt) //bring back the Tshirt which satisfies the conditions above
                 .ToListAsync(); //send it to the list 
         }
@@ -245,20 +246,20 @@ namespace Kitverse_backend_01.Services
         public async Task<bool> RemoveFromWishList(int userId, int t_shirtId)
         {
 
-            Wishlist List = await _context.Wishlists.FirstOrDefaultAsync(u => u.UserId == userId && u.TShirtId ==t_shirtId );
+            Wishlist List = await _context.Wishlists.FirstOrDefaultAsync(u => u.UserId == userId && u.TShirtId == t_shirtId);
 
-                if( List == null)
-                {
-                    return false;
-                }
-                else
-                {
-                     _context.Wishlists.Remove(List);
-                    await _context.SaveChangesAsync();
+            if (List == null)
+            {
+                return false;
+            }
+            else
+            {
+                _context.Wishlists.Remove(List);
+                await _context.SaveChangesAsync();
                 return true;
-                }    
+            }
         }
 
-     
+
     }
 }

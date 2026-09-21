@@ -123,7 +123,7 @@ namespace Kitverse_backend_01.Services
 
             // Only allow valid KitVerse roles
             if (newRole != "Customer" &&
-                newRole != "ItemLister" &&
+                newRole != "Item Lister" &&
                 newRole != "Admin")
             {
                 return false;
