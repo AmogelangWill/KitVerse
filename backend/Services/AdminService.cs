@@ -1,13 +1,14 @@
-﻿using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Kitverse_backend_01.Data;
-using Kitverse_backend_01.Models;
+﻿using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
+using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 
 namespace Kitverse_backend_01.Services
@@ -65,35 +66,127 @@ namespace Kitverse_backend_01.Services
             }).ToListAsync();
         }
         //get user by id
-        public async Task<User> GetUserById(int userId)
+        public async Task<User?> GetUserById(int userId)
         {
-            return await _context.Users.
-                Where(u => u.UserId == userId).
-                Select(u => new User
+            return await _context.Users
+                .Where(u => u.UserId == userId)
+                .Select(u => new User
                 {
                     UserId = u.UserId,
                     UserName = u.UserName,
                     UserSurname = u.UserSurname,
                     UserEmail = u.UserEmail,
                     Role = u.Role,
-                    DateAdded = u.DateAdded,
-
-                }).FirstOrDefaultAsync();
-
+                    DateAdded = u.DateAdded
+                })
+                .FirstOrDefaultAsync();
         }
         //update user
+        private static readonly string[] ValidRoles = { "Customer", "ItemLister", "Admin" };
+
+        // Stages the role change (subtype rows + Role column) WITHOUT saving,
+        // so callers can save everything in one atomic SaveChangesAsync.
+        private async Task<bool> ApplyRoleChange(User user, string newRole)
+        {
+            if (!ValidRoles.Contains(newRole)) return false;
+            if (user.Role == newRole) return true;
+
+            if (user.Role == "Admin")
+            {
+                var adminCount = await _context.Users.CountAsync(u => u.Role == "Admin");
+                if (adminCount <= 1)
+                    throw new InvalidOperationException("Cannot change the role of the last remaining admin.");
+            }
+
+            await RemoveRoleProfile(user.UserId, user.Role);
+            await EnsureRoleProfile(user.UserId, newRole);
+            user.Role = newRole;
+            return true;
+        }
+
+        private async Task EnsureRoleProfile(int userId, string role)
+        {
+            switch (role)
+            {
+                case "Admin":
+                    if (await _context.Admins.FindAsync(userId) == null)
+                        _context.Admins.Add(new Admin { UserId = userId, LastEditDate = DateTime.UtcNow });
+                    break;
+                case "ItemLister":
+                    if (await _context.ItemListers.FindAsync(userId) == null)
+                        _context.ItemListers.Add(new ItemLister { UserId = userId, LastEditDate = DateTime.UtcNow });
+                    break;
+                case "Customer":
+                    if (await _context.Customers.FindAsync(userId) == null)
+                        _context.Customers.Add(new Customer { UserId = userId });
+                    break;
+            }
+        }
+
+        private async Task RemoveRoleProfile(int userId, string oldRole)
+        {
+            switch (oldRole)
+            {
+                case "Admin":
+                    {
+                        var admin = await _context.Admins.FindAsync(userId);
+                        if (admin != null) _context.Admins.Remove(admin);
+                        break;
+                    }
+                case "ItemLister":
+                    {
+                        var lister = await _context.ItemListers.FindAsync(userId);
+                        if (lister != null) _context.ItemListers.Remove(lister);
+                        break;
+                    }
+                case "Customer":
+                    {
+                        // carts/wishlists (and through carts, payments and orders) point at this row: keep it
+                        var hasHistory = await _context.ShoppingCarts.AnyAsync(c => c.UserId == userId)
+                                      || await _context.Wishlists.AnyAsync(w => w.UserId == userId);
+                        if (hasHistory) break;
+
+                        var customer = await _context.Customers.FindAsync(userId);
+                        if (customer != null) _context.Customers.Remove(customer);
+                        break;
+                    }
+            }
+        }
+
+        public async Task<bool> ChangeUserRole(int userId, string newRole)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return false;
+
+            if (!await ApplyRoleChange(user, newRole)) return false;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<User?> UpdateUser(int userID, UpdateUser userUpdate)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userID);
-            if (user == null)
-                return null;
+            if (user == null) return null;
+
+            // login finds users by email, and the database has no unique constraint on it
+            var emailTaken = await _context.Users
+                .AnyAsync(u => u.UserEmail == userUpdate.UserEmail && u.UserId != userID);
+            if (emailTaken)
+                throw new InvalidOperationException("Another user already uses this email.");
 
             user.UserName = userUpdate.UserName;
             user.UserSurname = userUpdate.UserSurname;
             user.UserEmail = userUpdate.UserEmail;
-            user.Role = userUpdate.Role;
 
-            await _context.SaveChangesAsync();
+            if (!string.IsNullOrWhiteSpace(userUpdate.Role) && userUpdate.Role != user.Role)
+            {
+                if (!await ApplyRoleChange(user, userUpdate.Role))
+                    throw new ArgumentException("Invalid role.");
+            }
+
+            await _context.SaveChangesAsync();   // name/email + role + subtype rows, all or nothing
+
             return new User
             {
                 UserId = user.UserId,
@@ -101,18 +194,18 @@ namespace Kitverse_backend_01.Services
                 UserSurname = user.UserSurname,
                 UserEmail = user.UserEmail,
                 Role = user.Role,
-                DateAdded = user.DateAdded,
-
+                DateAdded = user.DateAdded
             };
         }
-
-
 
         public async Task<bool> DeleteUser(int userId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null)
-                return false;
+            if (user == null) return false;
+
+            if (user.Role == "Admin" && await _context.Users.CountAsync(u => u.Role == "Admin") <= 1)
+                throw new InvalidOperationException("Cannot delete the last remaining admin.");
+
             try
             {
                 _context.Users.Remove(user);
@@ -123,26 +216,6 @@ namespace Kitverse_backend_01.Services
             {
                 return false; // user has orders/invoices that must be kept
             }
-        }
-
-
-        public async Task<bool> ChangeUserRole(int userId, string newRole)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null)
-                return false;
-
-            // Only allow valid KitVerse roles
-            if (newRole != "Customer" &&
-                newRole != "ItemLister" &&
-                newRole != "Admin")
-            {
-                return false;
-            }
-
-            user.Role = newRole;
-            await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<List<Banner>> GetBanners()
@@ -251,6 +324,82 @@ namespace Kitverse_backend_01.Services
             }
 
             return (double)users.Count / numberOfDays;
+        }
+        // same definition of "a real sale" everywhere: not cancelled, not pending
+        private IQueryable<Order> CountedOrders() =>
+            _context.Orders.Where(o => o.OrderStatus != "Cancelled" && o.OrderStatus != "Pending");
+
+        public async Task<List<MonthlySales>> GetSalesOverTime(int months = 12)
+        {
+            months = Math.Clamp(months, 1, 24);
+
+            var now = DateTime.UtcNow;
+            var start = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+                            .AddMonths(-(months - 1));
+
+            // revenue and order count per month
+            var orderTotals = await CountedOrders()
+                .Where(o => o.OrderDate >= start)
+                .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    Total = g.Sum(o => o.TotalAmount),
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            // shirts sold per month (separate query keeps the SQL simple)
+            var itemTotals = await _context.OrderItems
+                .Where(oi => oi.Order.OrderDate >= start
+                          && oi.Order.OrderStatus != "Cancelled"
+                          && oi.Order.OrderStatus != "Pending")
+                .GroupBy(oi => new { oi.Order.OrderDate.Year, oi.Order.OrderDate.Month })
+                .Select(g => new { g.Key.Year, g.Key.Month, Qty = g.Sum(oi => oi.Quantity) })
+                .ToListAsync();
+
+            // new user sign-ups per month
+            var userTotals = await _context.Users
+                .Where(u => u.DateAdded != null && u.DateAdded >= start)
+                .GroupBy(u => new { u.DateAdded!.Value.Year, u.DateAdded!.Value.Month })
+                .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+                .ToListAsync();
+
+            // new newsletter sign-ups per month
+            var subTotals = await _context.NewsletterSubscribers
+                .Where(s => s.SubscribedAt >= start)
+                .GroupBy(s => new { s.SubscribedAt.Year, s.SubscribedAt.Month })
+                .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+                .ToListAsync();
+
+            // build one row per month, filling gaps with zeros
+            var result = new List<MonthlySales>();
+            for (int i = 0; i < months; i++)
+            {
+                var d = start.AddMonths(i);
+
+                var o = orderTotals.FirstOrDefault(x => x.Year == d.Year && x.Month == d.Month);
+                var it = itemTotals.FirstOrDefault(x => x.Year == d.Year && x.Month == d.Month);
+                var u = userTotals.FirstOrDefault(x => x.Year == d.Year && x.Month == d.Month);
+                var s = subTotals.FirstOrDefault(x => x.Year == d.Year && x.Month == d.Month);
+
+                var sales = o?.Total ?? 0m;
+                var orders = o?.Count ?? 0;
+
+                result.Add(new MonthlySales
+                {
+                    Month = CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(d.Month),
+                    Year = d.Year,
+                    Sales = sales,
+                    Orders = orders,
+                    ItemsSold = it?.Qty ?? 0,
+                    AvgOrderValue = orders > 0 ? Math.Round(sales / orders, 2) : 0m,
+                    NewUsers = u?.Count ?? 0,
+                    NewSubscribers = s?.Count ?? 0
+                });
+            }
+            return result;
         }
         public async Task<List<Invoice>> GetInvoices()
         {
