@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthModal from "./AuthModal.jsx";
 import SearchModal from "./SearchModal.jsx";
 import CartDrawer from "./CartDrawer.jsx";
+import WishlistDrawer from "./WishlistDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { useCart } from "./CartContext.jsx";
 
@@ -11,6 +12,7 @@ import { useCart } from "./CartContext.jsx";
 function Header() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isWishlistOpen, setIsWishlistOpen] = useState(false);
     
     const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
     const { cartCount, setIsCartOpen } = useCart();
@@ -98,7 +100,7 @@ function Header() {
                             Sign In / Register
                         </button>
                     )}
-                    <button className="NavBtn">Wishlist</button>
+                    <button className="NavBtn" onClick={() => { setIsWishlistOpen(true); setIsMobileMenuOpen(false); }}>Wishlist</button>
                     {user?.role === "Admin" && (
                         <Link to="/admin" style={{textDecoration: 'none'}}>
                             <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
@@ -119,7 +121,7 @@ function Header() {
                         <path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z" fill="currentColor"/>
                     </svg>
                 </button>
-                <button className="IconBtn HideOnMobile" aria-label="Wishlist">
+                <button className="IconBtn HideOnMobile" aria-label="Wishlist" onClick={() => setIsWishlistOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -173,6 +175,7 @@ function Header() {
        {/* Modals and drawers controlled by top-level state */}
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+       <WishlistDrawer isOpen={isWishlistOpen} onClose={() => setIsWishlistOpen(false)} />
        <CartDrawer />
      </>
     );
