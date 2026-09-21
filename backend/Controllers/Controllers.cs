@@ -42,6 +42,7 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Registration failed");
                 return BadRequest(new { message = ex.Message });
             }
         }

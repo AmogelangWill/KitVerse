@@ -427,61 +427,61 @@ namespace Kitverse_backend_01.Services
 
         public Task<bool> SendInvoice(int invoiceid) => _invoiceService.SendInvoiceAsync(invoiceid);
         //helper method to generate invoice pdf using QuestPDF
-      /*  private byte[] GenInvPdf(Invoice invoice)
-        {
-            QuestPDF.Settings.License = LicenseType.Community;
+        /*  private byte[] GenInvPdf(Invoice invoice)
+          {
+              QuestPDF.Settings.License = LicenseType.Community;
 
-            var document = Document.Create(container =>
-            {
-                container.Page(page =>
+              var document = Document.Create(container =>
+              {
+                  container.Page(page =>
 
-                {
-                    page.Margin(40);
+                  {
+                      page.Margin(40);
 
-                    page.Header()
-                        .Text("KitVerse Invoice")
-                        .FontSize(24)
-                        .Bold();
+                      page.Header()
+                          .Text("KitVerse Invoice")
+                          .FontSize(24)
+                          .Bold();
 
-                    page.Content()
-                        .PaddingVertical(20)
-                        .Column(column =>
-                        {
-                            column.Item()
-                                  .Text($"Invoice Number: {invoice.invoiceNumber}");
+                      page.Content()
+                          .PaddingVertical(20)
+                          .Column(column =>
+                          {
+                              column.Item()
+                                    .Text($"Invoice Number: {invoice.invoiceNumber}");
 
-                            column.Item()
-                                  .Text($"Invoice Date: {invoice.invoiceDate}");
-                            column.Item()
-                                   .Text($"Customer: {invoice.User.UserName} {invoice.User.UserSurname}");
-                            column.Item()
-                                   .Text($"Email: {invoice.User.UserEmail}");
-                            column.Item()
-                                   .PaddingTop(20)
-                                   .LineHorizontal(1);
-                            column.Item()
-                                   .PaddingTop(15)
-                                   .Text($"Subtotal: R{invoice.subtotal:F2}");
-                            column.Item()
-                                     .Text($"Total: R{invoice.total:F2}")
-                                     .Bold()
-                                     .FontSize(16);
+                              column.Item()
+                                    .Text($"Invoice Date: {invoice.invoiceDate}");
+                              column.Item()
+                                     .Text($"Customer: {invoice.User.UserName} {invoice.User.UserSurname}");
+                              column.Item()
+                                     .Text($"Email: {invoice.User.UserEmail}");
+                              column.Item()
+                                     .PaddingTop(20)
+                                     .LineHorizontal(1);
+                              column.Item()
+                                     .PaddingTop(15)
+                                     .Text($"Subtotal: R{invoice.subtotal:F2}");
+                              column.Item()
+                                       .Text($"Total: R{invoice.total:F2}")
+                                       .Bold()
+                                       .FontSize(16);
 
-                            column.Item()
-                                .PaddingTop(15)
-                                .Text($"Status: {invoice.status}");
-                        });
-                    page.Footer()
-                        .AlignLeft()
-                        .Text("Thank you for shopping with KitVerse!");
+                              column.Item()
+                                  .PaddingTop(15)
+                                  .Text($"Status: {invoice.status}");
+                          });
+                      page.Footer()
+                          .AlignLeft()
+                          .Text("Thank you for shopping with KitVerse!");
 
-                });
+                  });
 
-            });
-            return document.GeneratePdf();
-        }
+              });
+              return document.GeneratePdf();
+          }
 
-        */
+          */
         public async Task<int> SendNewsletter(string subject, string htmlBody)
         {
             var subscribers = await _context.NewsletterSubscribers
@@ -506,10 +506,24 @@ namespace Kitverse_backend_01.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Newsletter send failed for subscriber {Id}", sub.Id);
+                    _logger.LogError(ex, "Newsletter send failed for subscriber {Id}", sub.Id);
                 }
             }
+
+            // if there were subscribers but nothing went out, tell the admin instead of reporting success
+            if (subscribers.Count > 0 && sentCount == 0)
+                throw new InvalidOperationException(
+                    "No newsletter emails could be sent. Check the server logs for the email error.");
+
             return sentCount;
+        }
+
+        public async Task<List<string>> GetSubscribers()
+        {
+            return await _context.NewsletterSubscribers
+                .Where(s => s.IsActive)
+                .Select(s => s.Email)
+                .ToListAsync();
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Welcome email failed for user {UserId}", user.UserId);
+                _logger.LogError(ex, "Welcome email failed for user {UserId}", user.UserId);
             }
         }
         public async Task<User> Register(User user)
@@ -71,7 +71,7 @@ namespace Kitverse_backend_01.Controllers
                     }
 
                     user.PasswordHash = HashPassword(user.PasswordHash); // hashing the password before saving it to the database.
-                    
+
                     _context.Users.Add(user); // adding user to the database...
                     await _context.SaveChangesAsync();
 
@@ -91,8 +91,7 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
-                throw new ArgumentException("An error occurred while registering the user: " + ex.Message);
-
+                throw new ArgumentException("An error occurred while registering the user: " + ex.Message, ex);
             }
             return user;
         }

@@ -40,6 +40,7 @@ namespace Kitverse_backend_01.Services
         //Email management
         Task<bool> SendInvoice(int invoiceid);
 
+        Task<List<string>> GetSubscribers();
         Task<int> SendNewsletter(string subject, string htmlBody);
     }
 }
