@@ -44,7 +44,7 @@ namespace Kitverse_backend_01.Controllers
             {
                 email = request.Email,
                 amount = amountInCents,
-                callback_url = $"https://kitverse-production-7bce.up.railway.app/payment-success?cartId={request.CartId}",
+                callback_url = $"http://localhost:5173/payment-success?cartId={request.CartId}",
                 metadata = new { cart_id = request.CartId }
             };
 
