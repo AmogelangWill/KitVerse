@@ -40,7 +40,7 @@ function PaymentSuccessPage() {
         }}>
             {status === 'verifying' && (
                 <div>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                    
                     <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Verifying your payment...</h2>
                     <p style={{ color: '#6b7280' }}>Please wait while we confirm your order.</p>
                 </div>
@@ -48,7 +48,7 @@ function PaymentSuccessPage() {
 
             {status === 'success' && (
                 <div>
-                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
+                    
                     <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '12px' }}>Order Confirmed!</h1>
                     <p style={{ fontSize: '16px', color: '#4b5563', marginBottom: '8px' }}>
                         Your payment was successful. A PDF invoice has been emailed to you.
@@ -78,7 +78,7 @@ function PaymentSuccessPage() {
 
             {status === 'failed' && (
                 <div>
-                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>❌</div>
+                    
                     <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '12px' }}>Payment Not Confirmed</h1>
                     <p style={{ fontSize: '16px', color: '#4b5563', marginBottom: '32px' }}>
                         Something went wrong verifying your payment. If money was deducted, please contact support.

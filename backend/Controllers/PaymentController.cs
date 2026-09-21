@@ -63,5 +63,18 @@ namespace Kitverse_backend_01.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize(Roles = "Customer,Admin")]
+        [HttpGet("invoice/{invoiceId}/download")]
+        public async Task<IActionResult> DownloadInvoice(int invoiceId)
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+            var pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoiceId, userId);
+            if (pdfBytes == null) return NotFound("Invoice not found or access denied.");
+
+            return File(pdfBytes, "application/pdf", $"KitVerse_Invoice_{invoiceId}.pdf");
+        }
     }
 }

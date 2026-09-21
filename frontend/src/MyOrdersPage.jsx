@@ -110,7 +110,26 @@ function MyOrdersPage() {
 
                             <div style={{marginTop: '16px'}}>
                                 <button 
-                                    onClick={() => showToast("Invoice PDF downloaded!", "success")}
+                                    onClick={async () => {
+                                        try {
+                                            const res = await fetch(`https://kitverse-production.up.railway.app/api/Payment/invoice/${invoice.id}/download`, {
+                                                headers: { "Authorization": `Bearer ${user.token}` }
+                                            });
+                                            if (!res.ok) throw new Error("Download failed");
+                                            const blob = await res.blob();
+                                            const url = window.URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = `KitVerse_Invoice_${invoice.invoiceNumber}.pdf`;
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+                                            a.remove();
+                                            showToast("Invoice downloaded successfully!", "success");
+                                        } catch (err) {
+                                            showToast("Failed to download invoice.", "error");
+                                        }
+                                    }}
                                     style={{
                                         background: '#040404', 
                                         color: 'white', 

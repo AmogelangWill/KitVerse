@@ -165,6 +165,16 @@ namespace Kitverse_backend_01.Services
             }).GeneratePdf();
         }
 
+        public async Task<byte[]> GenerateInvoicePdfAsync(int invoiceId, int userId)
+        {
+            var invoice = await _context.Invoices.AsNoTracking().FirstOrDefaultAsync(i => i.Id == invoiceId && i.user_id == userId);
+            if (invoice == null) return null;
+
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == invoice.user_id);
+            var order = await LoadOrderAsync(invoice.pay_id);
+            return GeneratePdf(invoice, user, order);
+        }
+
         public async Task<List<Invoice>> GetUserInvoicesAsync(int userId)
         {
             return await _context.Invoices
