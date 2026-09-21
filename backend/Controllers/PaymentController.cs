@@ -68,13 +68,20 @@ namespace Kitverse_backend_01.Controllers
         [HttpGet("invoice/{invoiceId}/download")]
         public async Task<IActionResult> DownloadInvoice(int invoiceId)
         {
-            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+            try
+            {
+                var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
 
-            var pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoiceId, userId);
-            if (pdfBytes == null) return NotFound("Invoice not found or access denied.");
+                var pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoiceId, userId);
+                if (pdfBytes == null) return NotFound("Invoice not found or access denied.");
 
-            return File(pdfBytes, "application/pdf", $"KitVerse_Invoice_{invoiceId}.pdf");
+                return File(pdfBytes, "application/pdf", $"KitVerse_Invoice_{invoiceId}.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"PDF Generation failed: {ex.Message} - {ex.InnerException?.Message}");
+            }
         }
     }
 }

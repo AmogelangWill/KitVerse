@@ -121,10 +121,15 @@ function MyOrdersPage() {
                                 <button 
                                     onClick={async () => {
                                         try {
+                                            console.log("Downloading invoice ID:", invoice.id);
                                             const res = await fetch(`https://kitverse-production.up.railway.app/api/Payment/invoice/${invoice.id}/download`, {
                                                 headers: { "Authorization": `Bearer ${user.token}` }
                                             });
-                                            if (!res.ok) throw new Error("Download failed");
+                                            if (!res.ok) {
+                                                const text = await res.text();
+                                                console.error("Download failed:", res.status, text);
+                                                throw new Error(`Download failed: ${res.status} ${text}`);
+                                            }
                                             const blob = await res.blob();
                                             const url = window.URL.createObjectURL(blob);
                                             const a = document.createElement('a');
@@ -136,7 +141,8 @@ function MyOrdersPage() {
                                             a.remove();
                                             showToast("Invoice downloaded successfully!", "success");
                                         } catch (err) {
-                                            showToast("Failed to download invoice.", "error");
+                                            console.error(err);
+                                            showToast(err.message || "Failed to download invoice.", "error");
                                         }
                                     }}
                                     style={{
