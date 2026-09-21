@@ -111,6 +111,22 @@ function CartDrawer() {
 
     if (!isCartOpen) return null;
 
+    // Transaction Rules Calculation for UI Breakdown
+    let rawSubtotal = 0;
+    let shipping = 0;
+    let discount = 0;
+    let totalItems = 0;
+
+    if (cart && cart.itemLists) {
+        rawSubtotal = cart.itemLists.reduce((sum, item) => sum + (item.unitPurchaseAtTime * item.quantity), 0);
+        totalItems = cart.itemLists.reduce((sum, item) => sum + item.quantity, 0);
+        
+        if (rawSubtotal > 0) {
+            shipping = rawSubtotal >= 1500 ? 0 : 150;
+            discount = totalItems >= 3 ? (rawSubtotal * 0.10) : 0;
+        }
+    }
+
     return (
         <>
             <div className={`CartOverlay ${isCartOpen ? 'open' : ''}`} onClick={() => setIsCartOpen(false)}></div>
@@ -173,11 +189,28 @@ function CartDrawer() {
 
                 {user && cart?.itemLists?.length > 0 && (
                     <div className="CartFooter">
-                        <div className="CartTotal">
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>
                             <span>Subtotal</span>
+                            <span>R {rawSubtotal.toFixed(2)}</span>
+                        </div>
+                        
+                        {discount > 0 && (
+                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#16a34a', fontWeight: 'bold'}}>
+                                <span>Volume Discount (3+ items)</span>
+                                <span>- R {discount.toFixed(2)}</span>
+                            </div>
+                        )}
+                        
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '14px', color: '#4b5563'}}>
+                            <span>Shipping</span>
+                            <span>{shipping === 0 ? "Free" : `R ${shipping.toFixed(2)}`}</span>
+                        </div>
+
+                        <div className="CartTotal" style={{borderTop: '1px solid #e5e7eb', paddingTop: '16px'}}>
+                            <span>Total</span>
                             <span>R {cart.totalCost?.toFixed(2) || "0.00"}</span>
                         </div>
-                        <p className="CartTaxNote">Taxes and shipping calculated at checkout</p>
+                        <p className="CartTaxNote">Includes 15% VAT calculation.</p>
                         <button className="CartCheckoutBtn" onClick={handleCheckout} disabled={loading}>
                             {loading ? "PROCESSING..." : "PROCEED TO CHECKOUT"}
                         </button>
