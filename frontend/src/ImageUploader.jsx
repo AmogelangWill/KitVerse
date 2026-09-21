@@ -1,37 +1,46 @@
 import React, { useState, useRef } from 'react';
+import { useAuth } from './AuthContext.jsx';
+import { useToast } from './ToastContext.jsx';
 import './ImageUploader.css';
-import { useToast } from './ToastContext';
-import { useAuth } from './AuthContext';
 
-function ImageUploader({ endpoint, onUploadSuccess, multiple = false, currentImages = [] }) {
+// Reusable drag-and-drop image uploader posting files to Supabase via backend endpoint
+function ImageUploader({ endpoint, onUploadSuccess, multiple = false }) {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
-    const { showToast } = useToast();
     const { user } = useAuth();
+    const { showToast } = useToast();
 
+    // Sets drag-active style when file enters drop zone
     const handleDragEnter = (e) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(true);
     };
 
+    // Maintains drag-active state while hovering
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    // Removes drag-active style when file leaves drop zone
     const handleDragLeave = (e) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
     };
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
+    // Uploads selected image files sequentially to the upload API
     const uploadFiles = async (files) => {
-        if (!files || files.length === 0) return;
-        
-        setIsUploading(true);
         const token = user?.token;
+        if (!token) {
+            showToast("You must be logged in to upload images.", "error");
+            return;
+        }
+
+        setIsUploading(true);
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -61,10 +70,11 @@ function ImageUploader({ endpoint, onUploadSuccess, multiple = false, currentIma
         }
         
         setIsUploading(false);
-        // Reset file input so same file can be selected again if needed
+        // Clear input value so the same file can be uploaded again if needed
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    // Handles files dropped onto the upload area
     const handleDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -84,6 +94,7 @@ function ImageUploader({ endpoint, onUploadSuccess, multiple = false, currentIma
         }
     };
 
+    // Handles files selected through standard OS file dialog
     const handleFileInput = (e) => {
         const files = Array.from(e.target.files);
         uploadFiles(files);
@@ -127,8 +138,6 @@ function ImageUploader({ endpoint, onUploadSuccess, multiple = false, currentIma
                     </div>
                 )}
             </div>
-            
-            {/* We let the parent component render the actual currentImages array so they can handle removals */}
         </div>
     );
 }

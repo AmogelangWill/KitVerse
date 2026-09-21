@@ -1,21 +1,24 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import './Toast.css';
 
+// Context for displaying global notification toast messages
 const ToastContext = createContext();
 
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
 
+    // Shows a notification toast that automatically dismisses after a timeout
     const showToast = useCallback((message, type = 'info') => {
         const id = Date.now() + Math.random().toString();
         setToasts(prev => [...prev, { id, message, type }]);
 
-        // Auto remove after 4 seconds
+        // Automatically dismiss after 4 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(toast => toast.id !== id));
         }, 4000);
     }, []);
 
+    // Dismisses a specific toast manually
     const removeToast = (id) => {
         setToasts(prev => prev.filter(toast => toast.id !== id));
     };
@@ -40,4 +43,5 @@ export const ToastProvider = ({ children }) => {
     );
 };
 
+// Hook to trigger toast notifications anywhere in the app
 export const useToast = () => useContext(ToastContext);

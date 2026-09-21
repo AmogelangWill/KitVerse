@@ -1,5 +1,6 @@
 import "./PreFooterBanner.css";
 
+// Store value proposition banner displaying delivery promises, warranty, and security perks
 function PreFooterBanner() {
   return (
     <div className="PreFooterContainer">
@@ -14,6 +15,7 @@ function PreFooterBanner() {
         </div>
       </div>
       
+      {/* Key customer assurance guarantees */}
       <div className="PreFooterFeatures">
         <div className="FeatureItem">
           <svg className="FeatureIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

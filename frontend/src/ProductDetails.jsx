@@ -6,6 +6,7 @@ import { useToast } from "./ToastContext.jsx";
 import { useCart } from "./CartContext.jsx";
 import "./ProductDetails.css";
 
+// Displays individual product details, size selection, image gallery, and cart actions
 function ProductDetails() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
@@ -20,36 +21,35 @@ function ProductDetails() {
     const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
     const [wishlistActive, setWishlistActive] = useState(false);
     
-    // New state for Inventory
     const [inventoryInfo, setInventoryInfo] = useState({});
     const [inventoryLoading, setInventoryLoading] = useState(true);
 
     const availableSizes = ["S", "M", "L", "XL", "XXL"];
 
+    // Loads product information and stock availability for each size on mount
     useEffect(() => {
         const fetchProductAndInventory = async () => {
             try {
-                // 1. Fetch main product details
+                // Fetch product details
                 const response = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/${id}`);
                 if (!response.ok) throw new Error("Product not found");
                 const data = await response.json();
                 setProduct(data);
                 
+                // Identify default main image if available
                 if (data.shirtLinks && data.shirtLinks.length > 0) {
                     const mainIndex = data.shirtLinks.findIndex(link => link.isMain);
                     setCurrentIndex(mainIndex !== -1 ? mainIndex : 0);
                 }
 
-                // 2. Fetch inventory for each size simultaneously
+                // Query inventory levels across all available sizes
                 const inventoryData = {};
                 await Promise.all(
                     availableSizes.map(async (size) => {
                         try {
-                            // Note: Using the exact space in "Inventory " as coded in the backend route
                             const invRes = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/Inventory%20/${size}/${id}/AmountPerSize`);
                             if (invRes.ok) {
                                 const amountArray = await invRes.json();
-                                // API returns an array (e.g. [15] or [0] or [])
                                 inventoryData[size] = amountArray.length > 0 ? amountArray[0] : 0;
                             } else {
                                 inventoryData[size] = 0;
@@ -74,7 +74,7 @@ function ProductDetails() {
         window.scrollTo(0, 0);
     }, [id]);
 
-
+    // Adds current product in selected size to user cart
     const handleAddToCart = async () => {
         if (!selectedSize) return;
         if (!user) {
@@ -85,14 +85,20 @@ function ProductDetails() {
         setIsAddingToCart(true);
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${id}?quantity=1`, {
-                method: "POST"
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                }
             });
+
             if (res.ok) {
+                showToast(`Added ${product.shirtName} (${selectedSize}) to bag!`, "success");
+                await fetchCartCount();
                 setIsCartOpen(true);
-                fetchCartCount();
             } else {
                 const errorData = await res.json();
-                showToast(errorData.message || "Failed to add item to cart.", "error");
+                showToast(errorData.message || "Failed to add item to bag.", "error");
             }
         } catch (error) {
             console.error("Add to cart error:", error);
@@ -101,6 +107,7 @@ function ProductDetails() {
         }
     };
 
+    // Toggles the product in user wishlist
     const handleWishlist = async () => {
         if (!user) {
             setIsAuthOpen(true);
@@ -130,6 +137,16 @@ function ProductDetails() {
         }
     };
 
+    // Cycles to the previous product image in the gallery
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev - 1 + product.shirtLinks.length) % product.shirtLinks.length);
+    };
+
+    // Cycles to the next product image in the gallery
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev + 1) % product.shirtLinks.length);
+    };
+
     if (loading) {
         return <div className="PDP-Loading">Loading product details...</div>;
     }
@@ -143,18 +160,10 @@ function ProductDetails() {
         ? product.shirtLinks[currentIndex].shirtLinkUrl 
         : "/placeholder.png";
 
-    const handlePrev = () => {
-        setCurrentIndex((prev) => (prev - 1 + product.shirtLinks.length) % product.shirtLinks.length);
-    };
-
-    const handleNext = () => {
-        setCurrentIndex((prev) => (prev + 1) % product.shirtLinks.length);
-    };
-
     return (
         <>
             <div className="PDP-Container">
-                {/* LEFT SIDE: Image Gallery */}
+                {/* Product Image Gallery */}
                 <div className="PDP-Gallery">
                     <div className="PDP-MainImageContainer" style={{ position: 'relative' }}>
                         {hasMultipleImages && (
@@ -183,7 +192,7 @@ function ProductDetails() {
                     )}
                 </div>
 
-                {/* RIGHT SIDE: Product Info */}
+                {/* Product Purchasing Information */}
                 <div className="PDP-Info">
                     <div className="PDP-Header">
                         <span className="PDP-Brand">{product.shirtAffiliate || "Premium Kit"}</span>
@@ -214,7 +223,7 @@ function ProductDetails() {
                         </div>
                     </div>
 
-                    {/* ACTIONS: Add to Cart + Wishlist */}
+                    {/* Cart and Wishlist actions */}
                     <div className="PDP-Actions">
                         <button className="PDP-AddToCartBtn" onClick={handleAddToCart} disabled={!selectedSize || isAddingToCart}>
                             {isAddingToCart ? "ADDING..." : selectedSize ? "ADD TO CART" : "SELECT A SIZE"}
@@ -226,7 +235,7 @@ function ProductDetails() {
                         </button>
                     </div>
 
-                    {/* PRODUCT INFORMATION TABLE */}
+                    {/* Detailed Specifications and Garment Care */}
                     <div className="PDP-ProductInformation">
                         <h3 className="PDP-InfoTitle">Product Information</h3>
                         <div className="PDP-InfoTable">
@@ -251,7 +260,7 @@ function ProductDetails() {
                 </div>
             </div>
 
-            {/* Slide Out Drawer */}
+            {/* Sizing Information Drawer */}
             <SizeGuideDrawer isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
         </>
     );

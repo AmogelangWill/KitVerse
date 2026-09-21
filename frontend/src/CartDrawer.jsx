@@ -3,19 +3,21 @@ import { useAuth } from "./AuthContext.jsx";
 import { useCart } from "./CartContext.jsx";
 import "./CartDrawer.css";
 
+// Side drawer component presenting items currently in user shopping bag
 function CartDrawer() {
     const { user } = useAuth();
     const { isCartOpen, setIsCartOpen, fetchCartCount } = useCart();
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Fetch the cart whenever the drawer opens or the user changes
+    // Refresh cart items whenever drawer opens or authenticated user changes
     useEffect(() => {
         if (isCartOpen && user) {
             fetchCart();
         }
     }, [isCartOpen, user]);
 
+    // Loads current cart items and total amount for user
     const fetchCart = async () => {
         setLoading(true);
         try {
@@ -23,7 +25,7 @@ function CartDrawer() {
             if (res.ok) {
                 const data = await res.json();
                 setCart(data);
-                fetchCartCount(); // Keep the global badge count perfectly in sync
+                fetchCartCount();
             }
         } catch (error) {
             console.error("Error fetching cart:", error);
@@ -32,6 +34,7 @@ function CartDrawer() {
         }
     };
 
+    // Modifies quantity of an item in the cart
     const updateQuantity = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -46,6 +49,7 @@ function CartDrawer() {
         }
     };
 
+    // Removes a line item completely from the cart
     const removeItem = async (itemId) => {
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}`, {
@@ -59,6 +63,7 @@ function CartDrawer() {
         }
     };
 
+    // Clears all items currently in user cart
     const clearCart = async () => {
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/clear`, {

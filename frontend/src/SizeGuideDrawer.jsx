@@ -1,5 +1,6 @@
 import "./SizeGuideDrawer.css";
 
+// Drawer modal presenting apparel measurement charts to help customers select appropriate sizing
 function SizeGuideDrawer({ isOpen, onClose }) {
     if (!isOpen) return null;
 

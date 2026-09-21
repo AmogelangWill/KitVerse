@@ -7,20 +7,30 @@ import CartDrawer from "./CartDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { useCart } from "./CartContext.jsx";
 
-function Header(){
+// Main site navigation header displaying brand logo, category routes, and action icons
+function Header() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
-    // Use our beautiful global contexts instead of hacky event listeners!
     const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
-    const { cartCount, isCartOpen, setIsCartOpen } = useCart();
+    const { cartCount, setIsCartOpen } = useCart();
     const navigate = useNavigate();
 
-    return(
+    // Navigates to collection filtered by specific competition or category
+    const handleNavigation = (path) => {
+        navigate(path);
+        setIsMobileMenuOpen(false);
+    };
+
+    return (
       <>    
        <div className="HeaderContainer">
-            
-            <button className="HamburgerBtn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Menu">
+            {/* Mobile menu toggle */}
+            <button 
+                className="HamburgerBtn" 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                aria-label="Menu"
+            >
                 {isMobileMenuOpen ? (
                     <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -35,6 +45,7 @@ function Header(){
                 )}
             </button>
 
+            {/* Brand Logo */}
             <div className="Logo">
                 <Link to="/" style={{ textDecoration: 'none' }}>
                     <h1 className="BrandName">
@@ -43,21 +54,24 @@ function Header(){
                 </Link>
             </div>
             
+            {/* Navigation links */}
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
-                <button className="NavBtn" onClick={() => navigate('/collections')}>Jerseys</button>
-                <button className="NavBtn" onClick={() => navigate('/collections?filter=new')}>New Arrival</button>
-                <button className="NavBtn" onClick={() => navigate('/collections?competitionName=Nedbank')}>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections')}>Jerseys</button>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?filter=new')}>New Arrival</button>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?competitionName=Nedbank')}>
                     Nedbank Cup
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="NavBtn" onClick={() => navigate('/collections?competitionName=CAF')}>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?competitionName=CAF')}>
                     CAF
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
+
+                {/* Role-based portal shortcuts */}
                 {user?.role === "Admin" && (
                     <Link to="/admin" className="HideOnMobile" style={{textDecoration: 'none'}}>
                         <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
@@ -69,7 +83,7 @@ function Header(){
                     </Link>
                 )}
 
-                {/* On mobile, we can also show the secondary links inside the menu */}
+                {/* Mobile specific drawer links */}
                 <div className="MobileSecondaryLinks">
                     {user ? (
                         <>
@@ -95,6 +109,7 @@ function Header(){
                 </div>
             </nav>
 
+            {/* Utility action icons */}
             <div className="Icons">
                 <button className="IconBtn" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="22" height="22">
@@ -107,6 +122,7 @@ function Header(){
                     </svg>
                 </button>
                 
+                {/* Cart badge and trigger */}
                 <div style={{ position: 'relative', display: 'inline-flex' }}>
                     <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -120,6 +136,7 @@ function Header(){
                     )}
                 </div>
 
+                {/* Account session controls */}
                 {user ? (
                     <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -139,10 +156,12 @@ function Header(){
              </div>  
        </div>
        
+       {/* Modals and drawers controlled by top-level state */}
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
        <CartDrawer />
      </>
     );
 }
+
 export default Header;

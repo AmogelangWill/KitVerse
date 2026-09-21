@@ -1,9 +1,11 @@
 import "./Footer.css";
 import { VisaIcon, MastercardIcon, ApplePayIcon, PayPalIcon } from "./PaymentIcons.jsx";
 
+// Global site footer containing newsletter subscription, customer support links, and accepted payment badges
 function Footer() {
   return (
     <footer className="FooterContainer">
+      {/* Newsletter signup banner */}
       <div className="FooterTop">
         <div className="NewsletterSection">
           <h3 className="NewsletterTitle">Subscribe to Newsletter</h3>
@@ -17,6 +19,7 @@ function Footer() {
         </div>
       </div>
 
+      {/* Navigation links and social icons */}
       <div className="FooterMain">
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Customers</h4>
@@ -58,6 +61,7 @@ function Footer() {
           </div>
         </div>
 
+        {/* Accepted Payment Methods */}
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Payment Methods</h4>
           <div className="PaymentMethods">

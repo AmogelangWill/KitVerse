@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import './ConfirmModal.css';
 
+// Context for rendering asynchronous modal confirmation dialogs
 const ConfirmContext = createContext();
 
 export const ConfirmProvider = ({ children }) => {
@@ -8,6 +9,7 @@ export const ConfirmProvider = ({ children }) => {
     const [config, setConfig] = useState({});
     const [resolveCallback, setResolveCallback] = useState(null);
 
+    // Prompts the user with a confirmation modal and returns a promise resolving to a boolean
     const confirm = useCallback((options) => {
         return new Promise((resolve) => {
             setConfig(options);
@@ -16,11 +18,13 @@ export const ConfirmProvider = ({ children }) => {
         });
     }, []);
 
+    // Handles user approval
     const handleConfirm = () => {
         setIsOpen(false);
         if (resolveCallback) resolveCallback(true);
     };
 
+    // Handles user cancellation or dismissing the modal
     const handleCancel = () => {
         setIsOpen(false);
         if (resolveCallback) resolveCallback(false);
@@ -56,4 +60,5 @@ export const ConfirmProvider = ({ children }) => {
     );
 };
 
+// Hook to trigger confirmation dialogs
 export const useConfirm = () => useContext(ConfirmContext);

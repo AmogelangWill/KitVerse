@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext.jsx";
 import "./AuthModal.css";
 import { GoogleLogin } from "@react-oauth/google";
 
+// Modal dialogue for handling user authentication (Sign In and Registration)
 function AuthModal({ isOpen, onClose }) {
   const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
@@ -17,10 +18,12 @@ function AuthModal({ isOpen, onClose }) {
     password: "",
   });
 
+  // Updates controlled input state on field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Submits email/password credentials to login or registration endpoints
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,7 +38,7 @@ function AuthModal({ isOpen, onClose }) {
       ? { 
           email: formData.email, 
           password: formData.password,
-          username: formData.email // Backend DTO has this
+          username: formData.email
         }
       : { 
           userName: formData.firstName, 
@@ -62,19 +65,18 @@ function AuthModal({ isOpen, onClose }) {
       setSuccessMsg(isLogin ? "Login successful!" : "Account created successfully! You can now sign in.");
       
       if (isLogin) {
-        // Save the JWT token and user info into our AuthContext!
         login(data);
         
-        // Close modal after a short delay on successful login
+        // Allow user to read success message before closing modal
         setTimeout(() => {
           onClose();
-        }, 1500);
+        }, 1200);
       } else {
-        // Switch to login view after successful registration
+        // Transition to login view after successful registration
         setTimeout(() => {
           setIsLogin(true);
           setSuccessMsg("");
-        }, 2000);
+        }, 1500);
       }
       
     } catch (err) {
@@ -84,6 +86,7 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
+  // Authenticates user with backend via Google OAuth credential token
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setLoading(true);
@@ -97,10 +100,6 @@ function AuthModal({ isOpen, onClose }) {
       if (res.ok) {
         login(data);
         onClose();
-        if (data.needsPassword) {
-          // Ideally we prompt for a password here, but the backend set-password is unprotected
-          // For now, they are fully logged in and can use the app normally!
-        }
       } else {
         setErrorMsg(data.message || "Google Login failed");
       }
@@ -111,7 +110,7 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  // Reset states when switching between login/register
+  // Toggles between Sign In and Sign Up views and resets notifications
   const toggleMode = (loginMode) => {
     setIsLogin(loginMode);
     setErrorMsg("");
@@ -142,6 +141,7 @@ function AuthModal({ isOpen, onClose }) {
         {errorMsg && <div className="AuthError">{errorMsg}</div>}
         {successMsg && <div className="AuthSuccess">{successMsg}</div>}
 
+        {/* Google OAuth Login Button */}
         <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '10px' }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
@@ -159,6 +159,7 @@ function AuthModal({ isOpen, onClose }) {
           <span>Or {isLogin ? "sign in" : "sign up"} with your email</span>
         </div>
 
+        {/* Email & Password Form */}
         <form className="AuthForm" onSubmit={handleSubmit}>
           {!isLogin && (
             <div className="FormRow">
