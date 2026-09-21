@@ -13,6 +13,7 @@ import ItemListerPage from "./ItemListerPage.jsx";
 import CollectionPage from "./CollectionPage.jsx";
 import ResetPasswordPage from "./ResetPasswordPage.jsx";
 import MyOrdersPage from "./MyOrdersPage.jsx";
+import PaymentSuccessPage from "./PaymentSuccessPage.jsx";
 
 // Root application component configuring global providers and page routes
 function App() {
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/rivalry/:id1/:id2" element={<RivalryPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/my-orders" element={<MyOrdersPage />} />
+                <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
                 {/* Management and administration routes */}
                 <Route path="/admin" element={<AdminPage />} />
