@@ -77,6 +77,38 @@ function CartDrawer() {
         }
     };
 
+    // Initiates payment process with the backend and redirects to Paystack
+    const handleCheckout = async () => {
+        if (!cart || !user) return;
+        setLoading(true);
+        try {
+            const res = await fetch("https://kitverse-production.up.railway.app/api/Payment/initialize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({
+                    cartId: cart.cartId,
+                    email: user.userEmail
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.authorizationUrl) {
+                // Redirect user directly to Paystack's secure checkout URL
+                window.location.href = data.authorizationUrl;
+            } else {
+                alert(data.message || "Failed to initialize checkout.");
+            }
+        } catch (error) {
+            console.error("Checkout error:", error);
+            alert("Network error during checkout.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (!isCartOpen) return null;
 
     return (
@@ -146,8 +178,10 @@ function CartDrawer() {
                             <span>R {cart.totalCost?.toFixed(2) || "0.00"}</span>
                         </div>
                         <p className="CartTaxNote">Taxes and shipping calculated at checkout</p>
-                        <button className="CartCheckoutBtn">PROCEED TO CHECKOUT</button>
-                        <button className="CartClearBtn" onClick={clearCart}>Clear Cart</button>
+                        <button className="CartCheckoutBtn" onClick={handleCheckout} disabled={loading}>
+                            {loading ? "PROCESSING..." : "PROCEED TO CHECKOUT"}
+                        </button>
+                        <button className="CartClearBtn" onClick={clearCart} disabled={loading}>Clear Cart</button>
                     </div>
                 )}
             </div>

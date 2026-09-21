@@ -18,10 +18,15 @@ function AdminPage() {
     const [users, setUsers] = useState([]);
     const [banners, setBanners] = useState([]);
     const [competitions, setCompetitions] = useState([]);
+    const [invoices, setInvoices] = useState([]);
     const [newCompetitionName, setNewCompetitionName] = useState("");
     const [tshirts, setTshirts] = useState([]);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const [newBanner, setNewBanner] = useState({ bannerName: "", bannerDescription: "", bannerUrl: "", team1ID: "", team2ID: "" });
+    
+    const [newsletterSubject, setNewsletterSubject] = useState("");
+    const [newsletterBody, setNewsletterBody] = useState("");
+    const [isSendingNewsletter, setIsSendingNewsletter] = useState(false);
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -33,7 +38,7 @@ function AdminPage() {
         }
     }, [activeTab, user]);
 
-    // Loads metrics, users, banners, or competitions depending on active tab
+    // Loads metrics, users, banners, competitions, or invoices depending on active tab
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -69,6 +74,20 @@ function AdminPage() {
                 } else {
                     throw new Error("Failed to load users data");
                 }
+            } else if (activeTab === "invoices") {
+                const res = await fetch("https://kitverse-production.up.railway.app/api/admin/invoices", {
+                    headers: {
+                        "Authorization": `Bearer ${user?.token}`
+                    }
+                });
+                if (res.ok) {
+                    setInvoices(await res.json());
+                } else if (res.status === 401 || res.status === 403) {
+                    showToast("Your admin session has expired. Please sign in again.", "error");
+                    logout();
+                } else {
+                    throw new Error("Failed to load invoices data");
+                }
             } else if (activeTab === "banners") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners");
                 const tshirtRes = await fetch("https://kitverse-production.up.railway.app/api/TShirt");
@@ -89,6 +108,75 @@ function AdminPage() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Broadcasts a newsletter email to all active subscribers
+    const handleSendNewsletter = async (e) => {
+        e.preventDefault();
+        const isConfirmed = await confirm({
+            title: "Send Newsletter",
+            message: "Are you sure you want to blast this email out to ALL active subscribers? This action cannot be undone.",
+            confirmText: "Yes, Send Blast"
+        });
+        if (!isConfirmed) return;
+        
+        setIsSendingNewsletter(true);
+        try {
+            const res = await fetch("https://kitverse-production.up.railway.app/api/admin/emails/send-newsletter", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user?.token}`
+                },
+                body: JSON.stringify({ 
+                    subject: newsletterSubject, 
+                    htmlBody: newsletterBody 
+                })
+            });
+            
+            const data = await res.json().catch(() => ({}));
+            
+            if (res.ok) {
+                showToast(`Newsletter sent successfully to ${data.emailsSent || 'all'} subscribers!`, "success");
+                setNewsletterSubject("");
+                setNewsletterBody("");
+            } else if (res.status === 401 || res.status === 403) {
+                showToast("Your admin session has expired.", "error");
+                logout();
+            } else {
+                showToast(data.msg || "Failed to send newsletter. Check SMTP settings.", "error");
+            }
+        } catch (err) {
+            console.error("Newsletter error:", err);
+            showToast("Network error while sending newsletter.", "error");
+        } finally {
+            setIsSendingNewsletter(false);
+        }
+    };
+
+    // Sends a PDF invoice to the customer
+    const handleSendInvoice = async (invoiceId) => {
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/admin/send-invoice/${invoiceId}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${user?.token}`
+                }
+            });
+            const data = await res.json().catch(() => ({}));
+            
+            if (res.ok) {
+                showToast(data.message || "Invoice sent successfully!", "success");
+            } else if (res.status === 401 || res.status === 403) {
+                showToast("Your admin session has expired. Please sign in again.", "error");
+                logout();
+            } else {
+                showToast(data.message || "Failed to send invoice.", "error");
+            }
+        } catch (err) {
+            console.error("Send invoice error:", err);
+            showToast("Network error while sending invoice.", "error");
         }
     };
 
@@ -286,6 +374,18 @@ function AdminPage() {
                         onClick={() => setActiveTab('competitions')}
                     >
                         Competitions
+                    </button>
+                    <button 
+                        className={`AdminNavBtn ${activeTab === 'invoices' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('invoices')}
+                    >
+                        Invoices
+                    </button>
+                    <button 
+                        className={`AdminNavBtn ${activeTab === 'newsletter' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('newsletter')}
+                    >
+                        Newsletter
                     </button>
                 </nav>
             </aside>
@@ -499,6 +599,116 @@ function AdminPage() {
                                                     <td><strong>{c.competitionName}</strong></td>
                                                 </tr>
                                             ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Newsletter Broadcast Tab */}
+                        {activeTab === 'newsletter' && (
+                            <div>
+                                <div className="SectionHeader">
+                                    <div className="AdminHeader" style={{marginBottom: 0}}>
+                                        <h1>Email Newsletter</h1>
+                                        <p>Draft and broadcast an email to all active newsletter subscribers.</p>
+                                    </div>
+                                </div>
+
+                                <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb', maxWidth: '800px'}}>
+                                    <form onSubmit={handleSendNewsletter}>
+                                        <div className="InputGroup">
+                                            <label>Subject Line *</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="e.g. New Arrivals: 2026 Season Kits!" 
+                                                value={newsletterSubject}
+                                                onChange={(e) => setNewsletterSubject(e.target.value)}
+                                                required
+                                                disabled={isSendingNewsletter}
+                                                style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
+                                            />
+                                        </div>
+                                        <div className="InputGroup" style={{marginTop: '20px'}}>
+                                            <label>Email Body (HTML Supported) *</label>
+                                            <p style={{fontSize: '13px', color: '#6b7280', margin: '4px 0 8px 0'}}>
+                                                You can use standard HTML tags like &lt;h1&gt;, &lt;p&gt;, &lt;strong&gt;, and &lt;a&gt;.
+                                            </p>
+                                            <textarea 
+                                                rows="12" 
+                                                placeholder="<h1>Check out our new kits!</h1><p>We just dropped the latest...</p>" 
+                                                value={newsletterBody}
+                                                onChange={(e) => setNewsletterBody(e.target.value)}
+                                                required
+                                                disabled={isSendingNewsletter}
+                                                style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontFamily: 'monospace'}}
+                                            />
+                                        </div>
+                                        <div style={{marginTop: '20px', display: 'flex', justifyContent: 'flex-end'}}>
+                                            <button 
+                                                type="submit" 
+                                                className="AdminPrimaryBtn" 
+                                                disabled={isSendingNewsletter || !newsletterSubject || !newsletterBody}
+                                            >
+                                                {isSendingNewsletter ? "Sending Blast..." : "Send to All Subscribers"}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Invoices Management Tab */}
+                        {activeTab === 'invoices' && (
+                            <div>
+                                <div className="SectionHeader">
+                                    <div className="AdminHeader" style={{marginBottom: 0}}>
+                                        <h1>Customer Invoices</h1>
+                                        <p>View and manage auto-generated PDF invoices for recent orders.</p>
+                                    </div>
+                                </div>
+
+                                <div className="AdminTableWrapper">
+                                    <table className="AdminTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Invoice ID</th>
+                                                <th>Date Issued</th>
+                                                <th>Customer Email</th>
+                                                <th>Total Amount</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {invoices.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>No invoices found.</td>
+                                                </tr>
+                                            ) : (
+                                                invoices.map(inv => (
+                                                    <tr key={inv.invoiceId}>
+                                                        <td><strong>#{inv.invoiceId}</strong></td>
+                                                        <td>{new Date(inv.dateIssued || inv.createdDate).toLocaleDateString()}</td>
+                                                        <td>{inv.customerEmail || inv.email || "N/A"}</td>
+                                                        <td>R {(inv.totalAmount || inv.total || 0).toFixed(2)}</td>
+                                                        <td>
+                                                            <span className={`StatusBadge ${inv.isPaid || inv.status === 'Paid' ? 'active' : 'inactive'}`}>
+                                                                {inv.isPaid || inv.status === 'Paid' ? 'Paid' : 'Pending'}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button 
+                                                                className="AdminActionBtn"
+                                                                style={{background: '#10b981', color: 'white'}}
+                                                                onClick={() => handleSendInvoice(inv.invoiceId)}
+                                                            >
+                                                                Email Invoice
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

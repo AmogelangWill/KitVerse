@@ -133,11 +133,15 @@ function CollectionPage() {
                     result = result.filter(s => compValidIds.has(s.tShirtId));
                 }
 
-                // Apply price sorting
+                // Apply sorting
                 if (sortOrder === "price_asc") {
                     result.sort((a, b) => a.shirtPrice - b.shirtPrice);
                 } else if (sortOrder === "price_desc") {
                     result.sort((a, b) => b.shirtPrice - a.shirtPrice);
+                } else if (sortOrder === "name_asc") {
+                    result.sort((a, b) => (a.shirtName || "").localeCompare(b.shirtName || ""));
+                } else if (sortOrder === "name_desc") {
+                    result.sort((a, b) => (b.shirtName || "").localeCompare(a.shirtName || ""));
                 }
 
                 setFilteredShirts(result);
@@ -267,6 +271,8 @@ function CollectionPage() {
                             <option value="">Sort By: Default</option>
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
+                            <option value="name_asc">Name: A to Z</option>
+                            <option value="name_desc">Name: Z to A</option>
                         </select>
                     </div>
                 </div>

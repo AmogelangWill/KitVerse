@@ -89,6 +89,37 @@ function ItemListerPage() {
         setSelectedCompetitions([]);
     };
 
+    // Deletes a product from the catalog
+    const handleDeleteProduct = async (id) => {
+        const isConfirmed = await confirm({
+            title: "Delete Product",
+            message: "Are you sure you want to permanently delete this jersey? This will wipe it from the storefront and cannot be undone.",
+            confirmText: "Yes, Delete It",
+            danger: true
+        });
+        if (!isConfirmed) return;
+
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/TShirt/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user?.token}`
+                }
+            });
+            if (res.ok) {
+                showToast("Product successfully deleted!", "success");
+                fetchInventory();
+            } else if (res.status === 405 || res.status === 404) {
+                showToast("Backend endpoint missing: Phathu needs to add HttpDelete to TShirtController.", "error");
+            } else {
+                showToast("Failed to delete product.", "error");
+            }
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            showToast("Network error deleting product.", "error");
+        }
+    };
+
     // Opens edit view and pre-populates fields with existing item values
     const openEditForm = (item) => {
         setFormData({
@@ -320,9 +351,18 @@ function ItemListerPage() {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <button className="AdminActionBtn" onClick={() => openEditForm(item)}>
-                                                        Edit
-                                                    </button>
+                                                    <div style={{display: 'flex', gap: '8px'}}>
+                                                        <button className="AdminActionBtn" onClick={() => openEditForm(item)}>
+                                                            Edit
+                                                        </button>
+                                                        <button 
+                                                            className="AdminActionBtn" 
+                                                            style={{background: '#ef4444', color: 'white'}}
+                                                            onClick={() => handleDeleteProduct(item.tShirtId)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

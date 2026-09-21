@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Models;
+using Kitverse_backend_01.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Kitverse_backend_01.DTOs;
@@ -236,6 +236,22 @@ namespace Kitverse_backend_01.Controllers
                  return BadRequest(new {message = ex.Message});
             }
             
+        }
+
+        [Authorize(Roles = "Admin,Item Lister")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteShirt(int id)
+        {
+            try
+            {
+                var success = await _tshirtService.DeleteShirt(id);
+                if (!success) return NotFound(new { message = "Shirt not found." });
+                return Ok(new { message = "Shirt successfully deleted." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
     }

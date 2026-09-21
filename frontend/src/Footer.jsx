@@ -1,8 +1,47 @@
+import { useState } from "react";
 import "./Footer.css";
 import { VisaIcon, MastercardIcon, ApplePayIcon, PayPalIcon } from "./PaymentIcons.jsx";
+import { useToast } from "./ToastContext.jsx";
 
 // Global site footer containing newsletter subscription, customer support links, and accepted payment badges
 function Footer() {
+  const { showToast } = useToast();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Handles the newsletter form submission to the backend API
+  const handleSubscribe = async () => {
+    if (!email) {
+      showToast("Please enter an email address", "error");
+      return;
+    }
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "https://kitverse-production.up.railway.app";
+      const response = await fetch(`${apiUrl}/api/Newsletter/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+      });
+      
+      if (response.ok) {
+        showToast("Successfully subscribed to newsletter!", "success");
+        setEmail("");
+      } else {
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || await response.text() || "Failed to subscribe";
+        showToast(errorMessage, "error");
+      }
+    } catch (error) {
+      console.error("Newsletter error:", error);
+      showToast("Network error. Please try again later.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="FooterContainer">
       {/* Newsletter signup banner */}
@@ -13,8 +52,18 @@ function Footer() {
             Get early access to new arrivals, exclusive discounts, and seasonal style updates.
           </p>
           <div className="NewsletterForm">
-            <input type="email" placeholder="Enter your email" className="NewsletterInput" />
-            <button className="NewsletterBtn">Subscribe</button>
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="NewsletterInput" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSubscribe(); }}
+            />
+            <button className="NewsletterBtn" onClick={handleSubscribe} disabled={loading}>
+              {loading ? "..." : "Subscribe"}
+            </button>
           </div>
         </div>
       </div>

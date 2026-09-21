@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.Services;
 using Kitverse_backend_01.DTOs;
@@ -207,6 +207,17 @@ namespace Kitverse_backend_01.Controllers
                     message = ex.Message
                 });
             }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("emails/subscribers")]
+        public async Task<IActionResult> GetSubscribers()
+        {
+            var subs = await _context.NewsletterSubscribers
+                .Where(s => s.IsActive)
+                .Select(s => s.Email)
+                .ToListAsync();
+            return Ok(subs);
         }
 
     }

@@ -11,6 +11,7 @@ import RivalryPage from "./RivalryPage.jsx";
 import AdminPage from "./AdminPage.jsx";
 import ItemListerPage from "./ItemListerPage.jsx";
 import CollectionPage from "./CollectionPage.jsx";
+import ResetPasswordPage from "./ResetPasswordPage.jsx";
 
 // Root application component configuring global providers and page routes
 function App() {
@@ -27,6 +28,7 @@ function App() {
                 <Route path="/collections" element={<CollectionPage />} />
                 <Route path="/product/:id" element={<ProductDetails />} />
                 <Route path="/rivalry/:id1/:id2" element={<RivalryPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 {/* Management and administration routes */}
                 <Route path="/admin" element={<AdminPage />} />

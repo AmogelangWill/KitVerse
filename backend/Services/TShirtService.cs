@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
@@ -279,6 +279,16 @@ namespace Kitverse_backend_01.Controllers
                     EF.Functions.ILike(t.ShirtDescription, $"%{query}%") ||
                     EF.Functions.ILike(t.ShirtSeason, $"%{query}%"))
                 .ToListAsync();
+        }
+
+        public async Task<bool> DeleteShirt(int id)
+        {
+            var shirt = await _context.TShirts.FindAsync(id);
+            if (shirt == null) return false;
+
+            _context.TShirts.Remove(shirt);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
     }
