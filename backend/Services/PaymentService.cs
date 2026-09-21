@@ -15,14 +15,15 @@ namespace Kitverse_backend_01.Controllers
         private readonly IConfiguration _config;
         private readonly IInvoiceService _invoiceService;
 
-        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config,IInvoiceService invoiceService)
+        private readonly IPromoCodeService _promoCodeService;
+
+        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config,IInvoiceService invoiceService, IPromoCodeService promoCodeService)
         {
             _context = context;
             _httpClient = httpClient;
             _config = config;
             _invoiceService = invoiceService;
-
-
+            _promoCodeService = promoCodeService;
         }
 
         // Step 1: ask Paystack to create a transaction, get back a checkout URL
@@ -136,12 +137,18 @@ namespace Kitverse_backend_01.Controllers
             cart.CartStatus = "Paid";
 
             if (!await _context.Orders.AnyAsync(o => o.PaymentId == payment.PaymentId))
-                await CreateOrderFromCart(cart, payment.PaymentId);   // this also saves the cart status
+                await CreateOrderFromCart(cart, payment.PaymentId);
             else
                 await _context.SaveChangesAsync();
 
-            // idempotent; a failed email is logged inside and never fails the payment
             await _invoiceService.IssueInvoiceForPaymentAsync(payment.PaymentId);
+
+            if (!string.IsNullOrEmpty(cart.PromoCode))
+            {
+                await _promoCodeService.RecordUsage(cart.PromoCode);
+                cart.PromoCode = null;
+                await _context.SaveChangesAsync();
+            }
         }
 
         // reads the cart_id that InitializeTransaction put in Paystack's metadata

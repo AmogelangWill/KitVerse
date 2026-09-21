@@ -38,6 +38,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddHttpClient<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPromoCodeService, PromoCodeService>();
 
 // JWT authentication - lets the API verify who's logged in on protected requests
 var jwtKey = builder.Configuration["Jwt:Key"];

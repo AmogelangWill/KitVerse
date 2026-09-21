@@ -1,17 +1,20 @@
 ﻿using Kitverse_backend_01.Data;
-using System.Threading.Tasks;
-using Kitverse_backend_01.Data;
+using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Kitverse_backend_01.Services
 {
     public class CartService : ICartService
     {
         private readonly KitverseDbContext _context;
-        public CartService(KitverseDbContext context)
+        private readonly IPromoCodeService _promoCodeService;
+
+        public CartService(KitverseDbContext context, IPromoCodeService promoCodeService)
         {
             _context = context;
+            _promoCodeService = promoCodeService;
         }
         public async Task<ShoppingCart?> GetCart(int userId)
         {
@@ -165,17 +168,24 @@ namespace Kitverse_backend_01.Services
             if (cart != null)
             {
                 int subtotal = (int)cart.ItemLists.Sum(il => il.UnitPurchaseAtTime * il.Quantity);
-                
+
                 if (subtotal > 0)
                 {
                     // Rule 2: Free Shipping if subtotal > R1500. Otherwise R150 flat shipping fee.
                     int shipping = subtotal >= 1500 ? 0 : 150;
-                    
+
                     // Rule 3: 10% Volume Discount if buying 3 or more items
                     int totalItems = cart.ItemLists.Sum(il => il.Quantity);
-                    int discount = totalItems >= 3 ? (int)(subtotal * 0.10) : 0;
-                    
-                    cart.TotalCost = subtotal + shipping - discount;
+                    int volumeDiscount = totalItems >= 3 ? (int)(subtotal * 0.10) : 0;
+
+                    int afterVolumeDiscount = subtotal + shipping - volumeDiscount;
+
+                    // promo code discount applies last, on top of the volume discount
+                    int promoDiscount = 0;
+                    if (cart.PromoDiscountPercent is int pct && pct > 0 && pct <= 100)
+                        promoDiscount = (int)(afterVolumeDiscount * pct / 100m);
+
+                    cart.TotalCost = afterVolumeDiscount - promoDiscount;
                 }
                 else
                 {
@@ -183,7 +193,6 @@ namespace Kitverse_backend_01.Services
                 }
             }
         }
-
         public async Task<bool> ClearCart(int userId)
         {
             try
@@ -273,6 +282,40 @@ namespace Kitverse_backend_01.Services
             }
         }
 
+        public async Task<PromoCodeResult> ApplyPromoCode(int userId, string code)
+        {
+            var cart = await GetCart(userId);
+
+            var result = await _promoCodeService.ValidatePromoCode(code);
+            if (!result.Valid)
+            {
+                cart.PromoCode = null;
+                cart.PromoDiscountPercent = null;
+                await _context.SaveChangesAsync();
+                await UpdateTotal(cart.CartId);
+                await _context.SaveChangesAsync();
+                return result;
+            }
+
+            cart.PromoCode = code.Trim().ToUpperInvariant();
+            cart.PromoDiscountPercent = result.DiscountPercent;
+            await _context.SaveChangesAsync();
+            await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+
+            return result;
+        }
+
+        public async Task<bool> RemovePromoCode(int userId)
+        {
+            var cart = await GetCart(userId);
+            cart.PromoCode = null;
+            cart.PromoDiscountPercent = null;
+            await _context.SaveChangesAsync();
+            await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
     }
 }
