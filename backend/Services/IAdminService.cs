@@ -15,11 +15,13 @@ namespace Kitverse_backend_01.Services
         Task<Double> GetAvgUserPerMonth();
         Task<Double> GetAvgUserPerDay();
 
+        Task<List<MonthlySales>> GetSalesOverTime(int months = 12);
+
         //invoice 
         Task<List<Invoice>> GetInvoices();
 
         Task<Invoice?> GetInvoiceById(int invoiceId);
-        Task<User> GetUserById(int userId);
+        Task<User ?> GetUserById(int userId);
 
         Task<User?> UpdateUser(int userID, UpdateUser userUpdate);
 

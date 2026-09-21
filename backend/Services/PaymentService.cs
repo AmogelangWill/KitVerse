@@ -3,6 +3,7 @@ using System.Text.Json;
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
+using Kitverse_backend_01.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kitverse_backend_01.Controllers
@@ -12,12 +13,16 @@ namespace Kitverse_backend_01.Controllers
         private readonly KitverseDbContext _context;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
+        private readonly IInvoiceService _invoiceService;
 
-        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config)
+        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config,IInvoiceService invoiceService)
         {
             _context = context;
             _httpClient = httpClient;
             _config = config;
+            _invoiceService = invoiceService;
+
+
         }
 
         // Step 1: ask Paystack to create a transaction, get back a checkout URL
@@ -59,61 +64,90 @@ namespace Kitverse_backend_01.Controllers
 
             return authorizationUrl!;
         }
-
-        //Step 2: after the customer pays, confirm with Paystack directly -never trust the frontend alone
+        //Step 2: after the customer pays, confirm with Paystack directly - never trust the frontend alone
         public async Task<bool> VerifyTransaction(string reference, int cartId)
         {
-            var secretKey = _config["Paystack:SecretKey"];
+            // Already processed this reference? Then don't create a second payment/order/invoice
+            // (a callback + webhook, or a page refresh, can both call this).
+            var already = await _context.Payments
+                .FirstOrDefaultAsync(p => p.PayStackReference == reference && p.PaymentStatus == "Success");
+            if (already != null)
+            {
+                if (already.CartId != cartId) return false;   // this reference paid for a different cart
+                await FinalizePaidCartAsync(already);         // safe to repeat: fills in anything missing
+                return true;
+            }
 
+            var cart = await _context.ShoppingCarts.FirstOrDefaultAsync(c => c.CartId == cartId);
+            if (cart == null) return false;
+
+            var secretKey = _config["Paystack:SecretKey"];
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"https://api.paystack.co/transaction/verify/{reference}");
             httpRequest.Headers.Add("Authorization", $"Bearer {secretKey}");
 
             var response = await _httpClient.SendAsync(httpRequest);
             var responseBody = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode) return false;   // unknown reference, etc.
 
             using var doc = JsonDocument.Parse(responseBody);
-            var status = doc.RootElement.GetProperty("data").GetProperty("status").GetString();
-            var amount = doc.RootElement.GetProperty("data").GetProperty("amount").GetDecimal() / 100;
+            var data = doc.RootElement.GetProperty("data");
+            var status = data.GetProperty("status").GetString();
+            var amount = data.GetProperty("amount").GetDecimal() / 100;
 
-            var wasSuccessful = status == "success";
+            var paystackSaysPaid = status == "success";
 
-            // record this attempt, whatever the outcome - keeps a real history, not just the final result
-            _context.Payments.Add(new Payment
+            // the cart id must match what Paystack recorded at initialize, and the amount must match the cart
+            var genuine = paystackSaysPaid && ReadCartId(data) == cartId && amount == cart.TotalCost;
+
+            // record this attempt whatever the outcome; "Mismatch" = paid, but not for this cart/amount
+            var payment = new Payment
             {
                 CartId = cartId,
                 PayStackReference = reference,
                 Amount = amount,
-                PaymentStatus = wasSuccessful ? "Success" : "Failed",
+                PaymentStatus = genuine ? "Success" : paystackSaysPaid ? "Mismatch" : "Failed",
                 TransactionDate = DateTime.UtcNow
-            });
+            };
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();   // payment.PaymentId now exists
 
-            if (wasSuccessful)
+            if (genuine)
             {
-                var cart = await _context.ShoppingCarts
-                    .Include(c => c.ItemLists)
-                    .FirstOrDefaultAsync(c => c.CartId == cartId);
-
-                if (cart != null)
-                {
-                    cart.CartStatus = "Paid";
-                    await _context.SaveChangesAsync(); // save the payment row + status first, so payment.PaymentId exists
-
-                    var payment = await _context.Payments
-                        .Where(p => p.CartId == cartId && p.PaymentStatus == "Success")
-                        .OrderByDescending(p => p.TransactionDate)
-                        .FirstOrDefaultAsync();
-
-                    if (payment != null)
-                    {
-                        await CreateOrderFromCart(cart, payment.PaymentId);
-                    }
-                }
+                await FinalizePaidCartAsync(payment);
             }
 
-            await _context.SaveChangesAsync();
-            return wasSuccessful;
+            return genuine;
         }
 
+        // marks the cart paid, creates the order once, issues the invoice once
+        private async Task FinalizePaidCartAsync(Payment payment)
+        {
+            var cart = await _context.ShoppingCarts
+                .Include(c => c.ItemLists)
+                .FirstOrDefaultAsync(c => c.CartId == payment.CartId);
+            if (cart == null) return;
+
+            cart.CartStatus = "Paid";
+
+            if (!await _context.Orders.AnyAsync(o => o.PaymentId == payment.PaymentId))
+                await CreateOrderFromCart(cart, payment.PaymentId);   // this also saves the cart status
+            else
+                await _context.SaveChangesAsync();
+
+            // idempotent; a failed email is logged inside and never fails the payment
+            await _invoiceService.IssueInvoiceForPaymentAsync(payment.PaymentId);
+        }
+
+        // reads the cart_id that InitializeTransaction put in Paystack's metadata
+        private static int? ReadCartId(JsonElement data)
+        {
+            if (!data.TryGetProperty("metadata", out var meta) || meta.ValueKind != JsonValueKind.Object) return null;
+            if (!meta.TryGetProperty("cart_id", out var id)) return null;
+
+            if (id.ValueKind == JsonValueKind.Number && id.TryGetInt32(out var n)) return n;
+            if (id.ValueKind == JsonValueKind.String && int.TryParse(id.GetString(), out var s)) return s;
+            return null;
+        }
 
         private async Task CreateOrderFromCart(ShoppingCart cart, int paymentId)
         {
