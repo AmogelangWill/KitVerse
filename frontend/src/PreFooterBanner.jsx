@@ -24,7 +24,7 @@ function PreFooterBanner() {
             <circle cx="5.5" cy="18.5" r="2.5"></circle>
             <circle cx="18.5" cy="18.5" r="2.5"></circle>
           </svg>
-          <span className="FeatureText">Free shipping over R3 000</span>
+          <span className="FeatureText">Free shipping over R1 500</span>
         </div>
         <div className="FeatureItem">
           <svg className="FeatureIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
