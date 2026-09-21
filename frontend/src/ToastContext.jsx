@@ -11,11 +11,6 @@ export const ToastProvider = ({ children }) => {
     const showToast = useCallback((message, type = 'info') => {
         const id = Date.now() + Math.random().toString();
         setToasts(prev => [...prev, { id, message, type }]);
-
-        // Automatically dismiss after 4 seconds
-        setTimeout(() => {
-            setToasts(prev => prev.filter(toast => toast.id !== id));
-        }, 4000);
     }, []);
 
     // Dismisses a specific toast manually
@@ -26,19 +21,23 @@ export const ToastProvider = ({ children }) => {
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <div className="ToastContainer">
-                {toasts.map(toast => (
-                    <div key={toast.id} className={`Toast Toast--${toast.type}`}>
-                        <div className="Toast-icon">
-                            {toast.type === 'success' && '✓'}
-                            {toast.type === 'error' && '✕'}
-                            {toast.type === 'info' && 'i'}
-                        </div>
-                        <div className="Toast-message">{toast.message}</div>
-                        <button className="Toast-close" onClick={() => removeToast(toast.id)}>×</button>
+            {toasts.length > 0 && (
+                <div className="ToastOverlay">
+                    <div className="ToastContainer">
+                        {toasts.map(toast => (
+                            <div key={toast.id} className={`Toast Toast--${toast.type}`}>
+                                <div className="Toast-icon">
+                                    {toast.type === 'success' && '✓'}
+                                    {toast.type === 'error' && '✕'}
+                                    {toast.type === 'info' && 'i'}
+                                </div>
+                                <div className="Toast-message">{toast.message}</div>
+                                <button className="Toast-btn" onClick={() => removeToast(toast.id)}>Continue</button>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </div>
+            )}
         </ToastContext.Provider>
     );
 };

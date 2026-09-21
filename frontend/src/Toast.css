@@ -1,101 +1,92 @@
-.ToastContainer {
+.ToastOverlay {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeInOverlay 0.2s ease;
+}
+
+.ToastContainer {
     z-index: 9999;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    pointer-events: none;
 }
 
 .Toast {
-    pointer-events: auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    text-align: center;
     background: #ffffff;
     color: #111;
-    min-width: 300px;
-    max-width: 450px;
-    padding: 16px 20px;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.05);
+    min-width: 320px;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     font-family: 'Archivo', sans-serif;
-    transform: translateX(120%);
-    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: popModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     position: relative;
-    overflow: hidden;
+    border-top: 5px solid #111;
 }
 
-.Toast::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-}
-
-.Toast--success::before {
-    background: #10b981;
-}
-
-.Toast--error::before {
-    background: #ef4444;
-}
-
-.Toast--info::before {
-    background: #3b82f6;
-}
+.Toast--success { border-top-color: #10b981; }
+.Toast--error { border-top-color: #ef4444; }
+.Toast--info { border-top-color: #3b82f6; }
 
 .Toast-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-bottom: 20px;
     font-weight: bold;
     color: white;
-    font-size: 12px;
+    font-size: 24px;
 }
 
-.Toast--success .Toast-icon {
-    background: #10b981;
-}
-
-.Toast--error .Toast-icon {
-    background: #ef4444;
-}
-
-.Toast--info .Toast-icon {
-    background: #3b82f6;
-}
+.Toast--success .Toast-icon { background: #10b981; }
+.Toast--error .Toast-icon { background: #ef4444; }
+.Toast--info .Toast-icon { background: #3b82f6; }
 
 .Toast-message {
-    flex: 1;
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1.1rem;
+    font-weight: 700;
     line-height: 1.4;
+    margin-bottom: 24px;
 }
 
-.Toast-close {
-    background: none;
+.Toast-btn {
+    width: 100%;
+    padding: 14px;
+    background: #111;
+    color: white;
     border: none;
-    color: #9ca3af;
-    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
     cursor: pointer;
-    padding: 0 0 0 15px;
-    transition: color 0.2s;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+    letter-spacing: 1px;
 }
 
-.Toast-close:hover {
-    color: #111;
+.Toast-btn:hover {
+    background: #333;
 }
 
-@keyframes slideIn {
-    to {
-        transform: translateX(0);
-    }
+@keyframes popModal {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
