@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.Services;
@@ -163,5 +163,13 @@ namespace Kitverse_backend_01.Services
                     page.Footer().AlignLeft().Text("Thank you for shopping with KitVerse!");
                 });
             }).GeneratePdf();
+        }
+
+        public async Task<List<Models.Invoice>> GetUserInvoicesAsync(int userId)
+        {
+            return await _context.Invoices
+                .Where(i => i.user_id == userId)
+                .OrderByDescending(i => i.invoiceDate)
+                .ToListAsync();
         }
     }

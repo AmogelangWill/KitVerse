@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Kitverse_backend_01.DTOs;
 
@@ -9,10 +9,12 @@ namespace Kitverse_backend_01.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
+        private readonly Kitverse_backend_01.Services.IInvoiceService _invoiceService;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, Kitverse_backend_01.Services.IInvoiceService invoiceService)
         {
             _paymentService = paymentService;
+            _invoiceService = invoiceService;
         }
 
         // POST: api/Payment/initialize
@@ -42,6 +44,24 @@ namespace Kitverse_backend_01.Controllers
                 return Ok(new { message = "Payment verified successfully." });
             }
             return BadRequest(new { message = "Payment verification failed." });
+        }
+
+        [Authorize(Roles = "Customer,Admin")]
+        [HttpGet("my-invoices")]
+        public async Task<IActionResult> GetMyInvoices()
+        {
+            try 
+            {
+                var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdString, out int userId)) return Unauthorized(new { message = "Invalid token" });
+
+                var invoices = await _invoiceService.GetUserInvoicesAsync(userId);
+                return Ok(invoices);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
