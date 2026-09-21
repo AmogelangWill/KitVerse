@@ -106,13 +106,21 @@ namespace Kitverse_backend_01.Services
         private static byte[] GeneratePdf(Invoice invoice, User user, Order? order)
         {
             QuestPDF.Settings.License = LicenseType.Community;
-            QuestPDF.Settings.UseSystemFonts = true;
-            QuestPDF.Settings.ThrowOnMissingFontFamilies = false;
+            
+            // Register bundled fonts so Railway doesn't crash
+            try 
+            {
+                var basePath = AppContext.BaseDirectory;
+                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(System.IO.Path.Combine(basePath, "Roboto-Regular.ttf")));
+                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(System.IO.Path.Combine(basePath, "Roboto-Bold.ttf")));
+            }
+            catch (Exception) { /* fallback */ }
 
             return Document.Create(container =>
             {
                 container.Page(page =>
                 {
+                    page.DefaultTextStyle(x => x.FontFamily("Roboto"));
                     page.Margin(40);
                     page.Header().Text("KitVerse Invoice").FontSize(24).Bold();
 
