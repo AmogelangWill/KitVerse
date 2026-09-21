@@ -73,11 +73,26 @@ function Footer() {
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Customers</h4>
           <a href="/my-orders" className="FooterLink">My Orders</a>
+          <a href="#" className="FooterLink">Track Order</a>
+          <a href="#" className="FooterLink">Size Guide</a>
+          <a href="#" className="FooterLink">FAQ</a>
+          <a href="#" className="FooterLink">Contact Us</a>
         </div>
 
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Shop</h4>
           <a href="/collections" className="FooterLink">All Collections</a>
+          <a href="/collections" className="FooterLink">Premier League</a>
+          <a href="/collections" className="FooterLink">La Liga</a>
+          <a href="/collections" className="FooterLink">National Teams</a>
+        </div>
+
+        <div className="FooterColumn">
+          <h4 className="ColumnTitle">Policies</h4>
+          <a href="#" className="FooterLink">Refund Policy</a>
+          <a href="#" className="FooterLink">Shipping Info</a>
+          <a href="#" className="FooterLink">Privacy Policy</a>
+          <a href="#" className="FooterLink">Terms of Service</a>
         </div>
 
         <div className="FooterColumn">
