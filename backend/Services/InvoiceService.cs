@@ -121,10 +121,10 @@ namespace Kitverse_backend_01.Services
                 : "Roboto-Bold.ttf";
             
             if (System.IO.File.Exists(regPath)) {
-                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(regPath));
+                QuestPDF.Drawing.FontManager.RegisterFontFromStream(System.IO.File.OpenRead(regPath));
             }
             if (System.IO.File.Exists(boldPath)) {
-                QuestPDF.Drawing.FontManager.RegisterFont(System.IO.File.OpenRead(boldPath));
+                QuestPDF.Drawing.FontManager.RegisterFontFromStream(System.IO.File.OpenRead(boldPath));
             }
 
             return Document.Create(container =>
