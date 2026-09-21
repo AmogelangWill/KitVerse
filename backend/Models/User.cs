@@ -14,11 +14,7 @@
         public string Role { get; set; } = string.Empty;
 
         public DateTime? DateAdded { get; set; }
-        public bool NewsLetterSub { get; set; }
-
-
-
-       
+ 
 
     }
 }

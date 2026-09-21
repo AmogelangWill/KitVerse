@@ -1,4 +1,6 @@
 ﻿using Kitverse_backend_01.Data;
+using System.Threading.Tasks;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,22 +48,20 @@ namespace Kitverse_backend_01.Services
         {
             if (quantity <= 0)
                 return false;
+
             var cart = await GetCart(userId);
 
             var tshirt = await _context.TShirts.FindAsync(itemId);
 
             if (tshirt == null)
-
                 return false;
 
+            var existingItem = cart.ItemLists.FirstOrDefault(i => i.TShirtId == itemId);
 
-            var existingItem = cart.ItemLists.
-                FirstOrDefault(i => i.TShirtId == itemId);
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
                 existingItem.UnitPurchaseAtTime = tshirt.ShirtPrice;
-
             }
             else
             {
@@ -71,20 +71,16 @@ namespace Kitverse_backend_01.Services
                     TShirtId = itemId,
                     Quantity = quantity,
                     UnitPurchaseAtTime = tshirt.ShirtPrice
-
-
                 };
                 cart.ItemLists.Add(newItem);
-                await UpdateTotal(cart.CartId);
-
-                await _context.SaveChangesAsync();
-
-                return true;
-
-
             }
-            return false;
+
+            await _context.SaveChangesAsync();
+                await UpdateTotal(cart.CartId);
+            await _context.SaveChangesAsync();
+            return true;
         }
+
 
         public async Task<bool> RemoveItem(int userId, int tShirtId)
         {
@@ -100,6 +96,7 @@ namespace Kitverse_backend_01.Services
                 _context.ItemLists.Remove(itemList);
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
@@ -146,6 +143,7 @@ namespace Kitverse_backend_01.Services
                 }
 
                 // Update cart total
+                await _context.SaveChangesAsync();
                 await UpdateTotal(cart.CartId);
 
                 await _context.SaveChangesAsync();
@@ -166,9 +164,24 @@ namespace Kitverse_backend_01.Services
 
             if (cart != null)
             {
-                cart.TotalCost = (int)cart.ItemLists.Sum(il => il.UnitPurchaseAtTime * il.Quantity);
+                int subtotal = (int)cart.ItemLists.Sum(il => il.UnitPurchaseAtTime * il.Quantity);
+                
+                if (subtotal > 0)
+                {
+                    // Rule 2: Free Shipping if subtotal > R1500. Otherwise R150 flat shipping fee.
+                    int shipping = subtotal >= 1500 ? 0 : 150;
+                    
+                    // Rule 3: 10% Volume Discount if buying 3 or more items
+                    int totalItems = cart.ItemLists.Sum(il => il.Quantity);
+                    int discount = totalItems >= 3 ? (int)(subtotal * 0.10) : 0;
+                    
+                    cart.TotalCost = subtotal + shipping - discount;
+                }
+                else
+                {
+                    cart.TotalCost = 0;
+                }
             }
-
         }
 
         public async Task<bool> ClearCart(int userId)

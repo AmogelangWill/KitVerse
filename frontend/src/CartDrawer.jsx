@@ -3,19 +3,21 @@ import { useAuth } from "./AuthContext.jsx";
 import { useCart } from "./CartContext.jsx";
 import "./CartDrawer.css";
 
+// Side drawer component presenting items currently in user shopping bag
 function CartDrawer() {
     const { user } = useAuth();
     const { isCartOpen, setIsCartOpen, fetchCartCount } = useCart();
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Fetch the cart whenever the drawer opens or the user changes
+    // Refresh cart items whenever drawer opens or authenticated user changes
     useEffect(() => {
         if (isCartOpen && user) {
             fetchCart();
         }
     }, [isCartOpen, user]);
 
+    // Loads current cart items and total amount for user
     const fetchCart = async () => {
         setLoading(true);
         try {
@@ -23,7 +25,7 @@ function CartDrawer() {
             if (res.ok) {
                 const data = await res.json();
                 setCart(data);
-                fetchCartCount(); // Keep the global badge count perfectly in sync
+                fetchCartCount();
             }
         } catch (error) {
             console.error("Error fetching cart:", error);
@@ -32,6 +34,7 @@ function CartDrawer() {
         }
     };
 
+    // Modifies quantity of an item in the cart
     const updateQuantity = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -46,6 +49,7 @@ function CartDrawer() {
         }
     };
 
+    // Removes a line item completely from the cart
     const removeItem = async (itemId) => {
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/items/${itemId}`, {
@@ -59,6 +63,7 @@ function CartDrawer() {
         }
     };
 
+    // Clears all items currently in user cart
     const clearCart = async () => {
         try {
             const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/clear`, {
@@ -72,7 +77,55 @@ function CartDrawer() {
         }
     };
 
+    // Initiates payment process with the backend and redirects to Paystack
+    const handleCheckout = async () => {
+        if (!cart || !user) return;
+        setLoading(true);
+        try {
+            const res = await fetch("https://kitverse-production.up.railway.app/api/Payment/initialize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({
+                    cartId: cart.cartId,
+                    email: user.userEmail
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.authorizationUrl) {
+                // Redirect user directly to Paystack's secure checkout URL
+                window.location.href = data.authorizationUrl;
+            } else {
+                alert(data.message || "Failed to initialize checkout.");
+            }
+        } catch (error) {
+            console.error("Checkout error:", error);
+            alert("Network error during checkout.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (!isCartOpen) return null;
+
+    // Transaction Rules Calculation for UI Breakdown
+    let rawSubtotal = 0;
+    let shipping = 0;
+    let discount = 0;
+    let totalItems = 0;
+
+    if (cart && cart.itemLists) {
+        rawSubtotal = cart.itemLists.reduce((sum, item) => sum + (item.unitPurchaseAtTime * item.quantity), 0);
+        totalItems = cart.itemLists.reduce((sum, item) => sum + item.quantity, 0);
+        
+        if (rawSubtotal > 0) {
+            shipping = rawSubtotal >= 1500 ? 0 : 150;
+            discount = totalItems >= 3 ? (rawSubtotal * 0.10) : 0;
+        }
+    }
 
     return (
         <>
@@ -136,13 +189,32 @@ function CartDrawer() {
 
                 {user && cart?.itemLists?.length > 0 && (
                     <div className="CartFooter">
-                        <div className="CartTotal">
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>
                             <span>Subtotal</span>
+                            <span>R {rawSubtotal.toFixed(2)}</span>
+                        </div>
+                        
+                        {discount > 0 && (
+                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#16a34a', fontWeight: 'bold'}}>
+                                <span>Volume Discount (3+ items)</span>
+                                <span>- R {discount.toFixed(2)}</span>
+                            </div>
+                        )}
+                        
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '14px', color: '#4b5563'}}>
+                            <span>Shipping</span>
+                            <span>{shipping === 0 ? "Free" : `R ${shipping.toFixed(2)}`}</span>
+                        </div>
+
+                        <div className="CartTotal" style={{borderTop: '1px solid #e5e7eb', paddingTop: '16px'}}>
+                            <span>Total</span>
                             <span>R {cart.totalCost?.toFixed(2) || "0.00"}</span>
                         </div>
-                        <p className="CartTaxNote">Taxes and shipping calculated at checkout</p>
-                        <button className="CartCheckoutBtn">PROCEED TO CHECKOUT</button>
-                        <button className="CartClearBtn" onClick={clearCart}>Clear Cart</button>
+                        <p className="CartTaxNote">Includes 15% VAT calculation.</p>
+                        <button className="CartCheckoutBtn" onClick={handleCheckout} disabled={loading}>
+                            {loading ? "PROCESSING..." : "PROCEED TO CHECKOUT"}
+                        </button>
+                        <button className="CartClearBtn" onClick={clearCart} disabled={loading}>Clear Cart</button>
                     </div>
                 )}
             </div>

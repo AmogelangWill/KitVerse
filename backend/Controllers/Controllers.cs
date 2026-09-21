@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.DTOs;
-using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Kitverse_backend_01.Controllers
 {
@@ -10,16 +11,21 @@ namespace Kitverse_backend_01.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         //POST: api/Auth/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] Register register)
         {
+            if (string.IsNullOrEmpty(register.Password) || register.Password.Length < 8)
+                return BadRequest(new { message = "Password must be at least 8 characters." });
+
             try
             {
                 var user = new User
@@ -36,6 +42,7 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Registration failed");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -85,43 +92,55 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // POST: api/Auth/set-password
+        [Authorize]
         [HttpPost("set-password")]
         public async Task<IActionResult> SetPassword([FromBody] SetPassword request)
         {
-            var success = await _authService.SetPassword(request.Email, request.NewPassword);
-            if (!success)
+            if (string.IsNullOrEmpty(request.NewPassword) || request.NewPassword.Length < 8)
+                return BadRequest(new { message = "Password must be at least 8 characters." });
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            try
             {
-                return NotFound(new { message = "User not found." });
+                var success = await _authService.SetPassword(userId, request.NewPassword);
+                if (!success)
+                {
+                    return NotFound(new { message = "User not found." });
+                }
+                return Ok(new { message = "Password set successfully." });
             }
-            return Ok(new { message = "Password set successfully." });
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
+
         //POST: /api/Auth/forgot-password
         [HttpPost("forgot-password")]
-        public async Task <IActionResult> ForgotPassword([FromBody] ForgotPassword request)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPassword request)
         {
             try
             {
                 await _authService.ForgotPassword(request.Email);
-
-                return Ok(new
-                {
-                    message = "Password reset link sent to email, please check your email and spam folder"
-
-                });
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                return BadRequest(new
-                {
-                    message = ex.Message
-
-                });
+                _logger.LogError(ex, "Forgot-password failed");
             }
 
+            return Ok(new
+            {
+                message = "Password reset link sent to email, please check your email and spam folder"
+            });
         }
+
         //POST: /api/Auth/reset-password 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPassword request)
         {
+            if (string.IsNullOrEmpty(request.NewPassword) || request.NewPassword.Length < 8)
+                return BadRequest(new { message = "Password must be at least 8 characters." });
             try
             {
                 var success = await _authService.ResetPassword

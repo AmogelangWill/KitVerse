@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from './AuthContext.jsx';
 
+// Context for managing shopping cart drawer state and item count badge
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
@@ -8,6 +9,7 @@ export const CartProvider = ({ children }) => {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [cartCount, setCartCount] = useState(0);
 
+    // Retrieves total item quantity in user cart from the server
     const fetchCartCount = async () => {
         if (!user) {
             setCartCount(0);
@@ -21,11 +23,11 @@ export const CartProvider = ({ children }) => {
                 setCartCount(count);
             }
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching cart count:", err);
         }
     };
 
-    // Automatically fetch when user logs in
+    // Keep badge count updated whenever the logged-in user changes
     useEffect(() => {
         fetchCartCount();
     }, [user]);
@@ -37,4 +39,5 @@ export const CartProvider = ({ children }) => {
     );
 };
 
+// Hook to access cart state, drawer toggle, and count updater
 export const useCart = () => useContext(CartContext);

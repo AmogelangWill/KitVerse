@@ -1,4 +1,4 @@
-﻿namespace Kitverse_backend_01.Models
+namespace Kitverse_backend_01.DTOs
 {
     public class AdminDashboard
     {
@@ -14,6 +14,8 @@
         public double avgmonthlyUsers { get; set; }
         public double avgsales { get; set; }
         public double avgdailyUsers { get; set; }
+        public int totalProductsSold { get; set; }
+        public int totalStockOnHand { get; set; }
 
     }
 }

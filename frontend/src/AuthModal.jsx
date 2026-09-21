@@ -3,9 +3,11 @@ import { useAuth } from "./AuthContext.jsx";
 import "./AuthModal.css";
 import { GoogleLogin } from "@react-oauth/google";
 
+// Modal dialogue for handling user authentication (Sign In, Registration, and Forgot Password)
 function AuthModal({ isOpen, onClose }) {
   const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgot, setIsForgot] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -17,25 +19,54 @@ function AuthModal({ isOpen, onClose }) {
     password: "",
   });
 
+  const apiUrl = import.meta.env.VITE_API_URL || "https://kitverse-production.up.railway.app";
+
+  // Updates controlled input state on field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Submits email/password credentials to login, registration, or forgot password endpoints
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
     setSuccessMsg("");
 
+    if (isForgot) {
+      try {
+        const res = await fetch(`${apiUrl}/api/Auth/forgot-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setSuccessMsg(data.message || "Password reset link sent! Check your email.");
+          setTimeout(() => {
+            setIsForgot(false);
+            setSuccessMsg("");
+          }, 3000);
+        } else {
+          setErrorMsg(data.message || "Failed to send reset link.");
+        }
+      } catch (err) {
+        setErrorMsg("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     const url = isLogin 
-      ? "https://kitverse-production.up.railway.app/api/Auth/login"
-      : "https://kitverse-production.up.railway.app/api/Auth/register";
+      ? `${apiUrl}/api/Auth/login`
+      : `${apiUrl}/api/Auth/register`;
 
     const payload = isLogin
       ? { 
           email: formData.email, 
           password: formData.password,
-          username: formData.email // Backend DTO has this
+          username: formData.email
         }
       : { 
           userName: formData.firstName, 
@@ -62,19 +93,18 @@ function AuthModal({ isOpen, onClose }) {
       setSuccessMsg(isLogin ? "Login successful!" : "Account created successfully! You can now sign in.");
       
       if (isLogin) {
-        // Save the JWT token and user info into our AuthContext!
         login(data);
         
-        // Close modal after a short delay on successful login
+        // Allow user to read success message before closing modal
         setTimeout(() => {
           onClose();
-        }, 1500);
+        }, 1200);
       } else {
-        // Switch to login view after successful registration
+        // Transition to login view after successful registration
         setTimeout(() => {
           setIsLogin(true);
           setSuccessMsg("");
-        }, 2000);
+        }, 1500);
       }
       
     } catch (err) {
@@ -84,11 +114,12 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
+  // Authenticates user with backend via Google OAuth credential token
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setLoading(true);
       setErrorMsg("");
-      const res = await fetch("https://kitverse-production.up.railway.app/api/Auth/google-login", {
+      const res = await fetch(`${apiUrl}/api/Auth/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken: credentialResponse.credential })
@@ -97,10 +128,6 @@ function AuthModal({ isOpen, onClose }) {
       if (res.ok) {
         login(data);
         onClose();
-        if (data.needsPassword) {
-          // Ideally we prompt for a password here, but the backend set-password is unprotected
-          // For now, they are fully logged in and can use the app normally!
-        }
       } else {
         setErrorMsg(data.message || "Google Login failed");
       }
@@ -111,9 +138,16 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  // Reset states when switching between login/register
+  // Toggles between Sign In, Sign Up, and Forgot Password views
   const toggleMode = (loginMode) => {
     setIsLogin(loginMode);
+    setIsForgot(false);
+    setErrorMsg("");
+    setSuccessMsg("");
+  };
+
+  const toggleForgot = () => {
+    setIsForgot(true);
     setErrorMsg("");
     setSuccessMsg("");
   };
@@ -131,9 +165,13 @@ function AuthModal({ isOpen, onClose }) {
         </button>
 
         <div className="AuthHeader">
-          <h2 className="AuthTitle">{isLogin ? "Sign In" : "Sign Up"}</h2>
+          <h2 className="AuthTitle">
+            {isForgot ? "Reset Password" : isLogin ? "Sign In" : "Sign Up"}
+          </h2>
           <p className="AuthSubtitle">
-            {isLogin 
+            {isForgot
+              ? "Enter your email and we'll send you a link to reset your password."
+              : isLogin 
               ? "Welcome back! Please enter your details." 
               : "Create an account to track orders and save your wishlist."}
           </p>
@@ -142,25 +180,31 @@ function AuthModal({ isOpen, onClose }) {
         {errorMsg && <div className="AuthError">{errorMsg}</div>}
         {successMsg && <div className="AuthSuccess">{successMsg}</div>}
 
-        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '10px' }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setErrorMsg("Google Login was closed or failed.")}
-            useOneTap
-            shape="rectangular"
-            theme="outline"
-            size="large"
-            text={isLogin ? "signin_with" : "signup_with"}
-            width="100%"
-          />
-        </div>
+        {/* Google OAuth Login Button - Hide if Forgot Password mode */}
+        {!isForgot && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '10px' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setErrorMsg("Google Login was closed or failed.")}
+                useOneTap
+                shape="rectangular"
+                theme="outline"
+                size="large"
+                text={isLogin ? "signin_with" : "signup_with"}
+                width="100%"
+              />
+            </div>
 
-        <div className="AuthDivider">
-          <span>Or {isLogin ? "sign in" : "sign up"} with your email</span>
-        </div>
+            <div className="AuthDivider">
+              <span>Or {isLogin ? "sign in" : "sign up"} with your email</span>
+            </div>
+          </>
+        )}
 
+        {/* Email & Password Form */}
         <form className="AuthForm" onSubmit={handleSubmit}>
-          {!isLogin && (
+          {!isLogin && !isForgot && (
             <div className="FormRow">
               <div className="InputGroup">
                 <label>First name *</label>
@@ -169,7 +213,7 @@ function AuthModal({ isOpen, onClose }) {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  required={!isLogin} 
+                  required={!isLogin && !isForgot} 
                 />
               </div>
               <div className="InputGroup">
@@ -179,7 +223,7 @@ function AuthModal({ isOpen, onClose }) {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  required={!isLogin} 
+                  required={!isLogin && !isForgot} 
                 />
               </div>
             </div>
@@ -196,30 +240,36 @@ function AuthModal({ isOpen, onClose }) {
             />
           </div>
 
-          <div className="InputGroup">
-            <label>Password *</label>
-            <input 
-              type="password" 
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required 
-            />
-          </div>
+          {!isForgot && (
+            <div className="InputGroup">
+              <label>Password *</label>
+              <input 
+                type="password" 
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required={!isForgot} 
+              />
+            </div>
+          )}
 
-          {isLogin && (
+          {isLogin && !isForgot && (
             <div className="ForgotPassword">
-              <a href="#">Forgot your password?</a>
+              <button type="button" onClick={toggleForgot} style={{ background: 'none', border: 'none', color: '#2563eb', padding: 0, cursor: 'pointer', textDecoration: 'underline', fontSize: '14px' }}>
+                Forgot your password?
+              </button>
             </div>
           )}
 
           <button type="submit" className="AuthSubmitBtn" disabled={loading}>
-            {loading ? "Processing..." : (isLogin ? "Sign In" : "Sign Up")}
+            {loading ? "Processing..." : (isForgot ? "Send Reset Link" : isLogin ? "Sign In" : "Sign Up")}
           </button>
         </form>
 
         <div className="AuthFooter">
-          {isLogin ? (
+          {isForgot ? (
+            <p>Remembered your password? <button onClick={() => toggleMode(true)} className="ToggleAuthBtn">Sign in</button></p>
+          ) : isLogin ? (
             <p>New here? <button onClick={() => toggleMode(false)} className="ToggleAuthBtn">Create an account</button></p>
           ) : (
             <p>Already have an account? <button onClick={() => toggleMode(true)} className="ToggleAuthBtn">Sign in</button></p>

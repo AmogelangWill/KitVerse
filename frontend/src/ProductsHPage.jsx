@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import "./ProductsPage.css";
 import { useNavigate } from "react-router-dom";
 
+// Homepage sections showcasing CAF Champions League kits and Betway Premiership jerseys
 function ProductHPage() {
     const [cafProducts, setCafProducts] = useState([]);
     const [betwayProducts, setBetwayProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    // Fetches products from catalog and splits into curated homepage sections
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -15,19 +17,14 @@ function ProductHPage() {
                 if (!response.ok) throw new Error("Failed to fetch products");
                 const data = await response.json();
 
-                // 1. Identify specific CAF shirts
-                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home","Sundowns_Away"];
-                
-                // Keep the exact order of the cafNames array
+                // Curate specific showcase kits for the CAF section
+                const cafNames = ["Chiefs_Home", "Pirates_Home", "Sundowns_Home", "Sundowns_Away"];
                 const caf = cafNames
                     .map(name => data.find(item => item.shirtName === name))
                     .filter(item => item !== undefined); 
 
-                // 2. Pick 8 random shirts for the Betway Premiership section
-                // First, exclude the ones already in the CAF section to avoid duplication
+                // Populate Betway Premiership section with remaining catalog items
                 const remaining = data.filter(item => !cafNames.includes(item.shirtName));
-                
-                // Shuffle and pick 8
                 const shuffled = remaining.sort(() => 0.5 - Math.random());
                 const betway = shuffled.slice(0, 8);
 
@@ -43,20 +40,20 @@ function ProductHPage() {
         fetchProducts();
     }, []);
 
-    // Format the database price
+    // Formats numeric price into South African Rand currency representation
     const formatPrice = (price) => {
         return `R${price.toFixed(2)}`;
     };
 
     return (
         <div className="BodyWrapper">
-            {/* CAF SERIES SECTION */}
+            {/* CAF Series Section */}
             <div className="Description">
                 <h2 className="DOutliner">
                     CAF 26/27 series
                 </h2>
                 <div className="FilterDiv">
-                    <button className="BtnFilter" onClick={() => navigate('/collections')}>
+                    <button className="BtnFilter" onClick={() => navigate('/collections?competitionName=CAF')}>
                         <span className="FilterText">All Collections</span>
                         <svg className="ChevronRightSVG" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -76,7 +73,7 @@ function ProductHPage() {
                                 <img
                                     className="ProductImg"
                                     src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
-                                    alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
+                                    alt={`${product.team?.teamName || product.shirtName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />
                                 <div className="ShopNowOverlay">
@@ -86,21 +83,21 @@ function ProductHPage() {
                         </svg>
                                 </div>
                             </div>
-                            <p className="PDescription">{`${product.team.teamName} ${product.shirtSeason} Jersey`}</p>
+                            <p className="PDescription">{`${product.team?.teamName || product.shirtName} ${product.shirtSeason} Jersey`}</p>
                             <p className="PPrice">{formatPrice(product.shirtPrice)}</p>
                         </div>
                     ))
                 )}
             </div>
 
-            {/* BETWAY PREMIERSHIP SERIES SECTION */}
+            {/* Betway Premiership Series Section */}
             <div className="Description" style={{ marginTop: "60px" }}>
                 <h2 className="DOutliner">
                     <span className="DesktopTitle">BETWAY PREMIERSHIP SERIES</span>
                     <span className="MobileTitle">PSL 26/27 SERIES</span>
                 </h2>
                 <div className="FilterDiv">
-                    <button className="BtnFilter" onClick={() => navigate('/collections')}>
+                    <button className="BtnFilter" onClick={() => navigate('/collections?competitionName=Betway')}>
                         <span className="FilterText">All Collections</span>
                         <svg className="ChevronRightSVG" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -119,8 +116,8 @@ function ProductHPage() {
                             <div className="ProductImgWrapper">
                                 <img
                                     className="ProductImg"
-                                   src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
-                                    alt={`${product.team.teamName} ${product.shirtSeason} Jersey`}
+                                    src={product.shirtLinks && product.shirtLinks.length > 0 ? product.shirtLinks[0].shirtLinkUrl : "/placeholder.png"}
+                                    alt={`${product.team?.teamName || product.shirtName} ${product.shirtSeason} Jersey`}
                                     loading="lazy"
                                 />
                                 <div className="ShopNowOverlay">
@@ -130,7 +127,7 @@ function ProductHPage() {
                         </svg>
                                 </div>
                             </div>
-                            <p className="PDescription">{`${product.team.teamName} ${product.shirtSeason} Jersey`}</p>
+                            <p className="PDescription">{`${product.team?.teamName || product.shirtName} ${product.shirtSeason} Jersey`}</p>
                             <p className="PPrice">{formatPrice(product.shirtPrice)}</p>
                         </div>
                     ))

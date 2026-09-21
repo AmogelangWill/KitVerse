@@ -11,29 +11,40 @@ import RivalryPage from "./RivalryPage.jsx";
 import AdminPage from "./AdminPage.jsx";
 import ItemListerPage from "./ItemListerPage.jsx";
 import CollectionPage from "./CollectionPage.jsx";
+import ResetPasswordPage from "./ResetPasswordPage.jsx";
+import MyOrdersPage from "./MyOrdersPage.jsx";
+import PaymentSuccessPage from "./PaymentSuccessPage.jsx";
 
-function App(){
-   return(
+// Root application component configuring global providers and page routes
+function App() {
+  return (
     <AuthProvider>
       <ToastProvider>
         <ConfirmProvider>
-      <CartProvider>
-        <Router>
-           <Header/>
-           <Routes>
-               <Route path="/" element={<HomePage />} />
-               <Route path="/collections" element={<CollectionPage />} />
-               <Route path="/product/:id" element={<ProductDetails />} />
-               <Route path="/rivalry/:id1/:id2" element={<RivalryPage />} />
-               <Route path="/admin" element={<AdminPage />} />
-               <Route path="/inventory" element={<ItemListerPage />} />
-           </Routes>
-           <Footer/>
-        </Router>
-    </CartProvider>
-    </ConfirmProvider>
+          <CartProvider>
+            <Router>
+              <Header />
+              <Routes>
+                {/* Storefront routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/collections" element={<CollectionPage />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/rivalry/:id1/:id2" element={<RivalryPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/my-orders" element={<MyOrdersPage />} />
+                <Route path="/payment-success" element={<PaymentSuccessPage />} />
+
+                {/* Management and administration routes */}
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/inventory" element={<ItemListerPage />} />
+              </Routes>
+              <Footer />
+            </Router>
+          </CartProvider>
+        </ConfirmProvider>
       </ToastProvider>
     </AuthProvider>
-   )
+  );
 }
+
 export default App;

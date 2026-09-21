@@ -1,7 +1,6 @@
-
-
 import "./ProductMetadata.css";
 
+// Product showcase card rendering sample kit preview, brand, and sizing options
 function ProductMetadata() {
     return (
         <div className="ProductDiv">

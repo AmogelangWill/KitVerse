@@ -7,20 +7,30 @@ import CartDrawer from "./CartDrawer.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { useCart } from "./CartContext.jsx";
 
-function Header(){
+// Main site navigation header displaying brand logo, category routes, and action icons
+function Header() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
-    // Use our beautiful global contexts instead of hacky event listeners!
     const { user, logout, isAuthOpen, setIsAuthOpen } = useAuth();
-    const { cartCount, isCartOpen, setIsCartOpen } = useCart();
+    const { cartCount, setIsCartOpen } = useCart();
     const navigate = useNavigate();
 
-    return(
+    // Navigates to collection filtered by specific competition or category
+    const handleNavigation = (path) => {
+        navigate(path);
+        setIsMobileMenuOpen(false);
+    };
+
+    return (
       <>    
        <div className="HeaderContainer">
-            
-            <button className="HamburgerBtn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Menu">
+            {/* Mobile menu toggle */}
+            <button 
+                className="HamburgerBtn" 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                aria-label="Menu"
+            >
                 {isMobileMenuOpen ? (
                     <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -35,6 +45,7 @@ function Header(){
                 )}
             </button>
 
+            {/* Brand Logo */}
             <div className="Logo">
                 <Link to="/" style={{ textDecoration: 'none' }}>
                     <h1 className="BrandName">
@@ -43,21 +54,24 @@ function Header(){
                 </Link>
             </div>
             
+            {/* Navigation links */}
             <nav className={`NavButtons ${isMobileMenuOpen ? 'MobileOpen' : ''}`}>
-                <button className="NavBtn" onClick={() => navigate('/collections')}>Jerseys</button>
-                <button className="NavBtn" onClick={() => navigate('/collections?filter=new')}>New Arrival</button>
-                <button className="NavBtn">
+                <button className="NavBtn" onClick={() => handleNavigation('/collections')}>Jerseys</button>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?filter=new')}>New Arrival</button>
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?competitionName=Nedbank')}>
                     Nedbank Cup
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <button className="NavBtn">
+                <button className="NavBtn" onClick={() => handleNavigation('/collections?competitionName=CAF')}>
                     CAF
                     <svg className="DownArrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
+
+                {/* Role-based portal shortcuts */}
                 {user?.role === "Admin" && (
                     <Link to="/admin" className="HideOnMobile" style={{textDecoration: 'none'}}>
                         <button className="NavBtn" style={{color: '#ef4444', fontWeight: '800'}}>Admin Portal</button>
@@ -69,11 +83,14 @@ function Header(){
                     </Link>
                 )}
 
-                {/* On mobile, we can also show the secondary links inside the menu */}
+                {/* Mobile specific drawer links */}
                 <div className="MobileSecondaryLinks">
                     {user ? (
                         <>
                             <span className="NavBtn" style={{fontWeight: 800, color: '#111'}}>Hi, {user.userName}</span>
+                            <Link to="/my-orders" style={{textDecoration: 'none'}}>
+                                <button className="NavBtn" onClick={() => setIsMobileMenuOpen(false)}>My Orders</button>
+                            </Link>
                             <button className="NavBtn" onClick={logout}>Sign Out</button>
                         </>
                     ) : (
@@ -95,6 +112,7 @@ function Header(){
                 </div>
             </nav>
 
+            {/* Utility action icons */}
             <div className="Icons">
                 <button className="IconBtn" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="22" height="22">
@@ -107,6 +125,7 @@ function Header(){
                     </svg>
                 </button>
                 
+                {/* Cart badge and trigger */}
                 <div style={{ position: 'relative', display: 'inline-flex' }}>
                     <button className="IconBtn" aria-label="Shopping Bag" onClick={() => setIsCartOpen(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -120,14 +139,26 @@ function Header(){
                     )}
                 </div>
 
+                {/* Account session controls */}
                 {user ? (
-                    <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </button>
+                    <>
+                        <Link to="/my-orders" className="IconBtn HideOnMobile" title="My Orders">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </Link>
+                        <button className="IconBtn HideOnMobile" aria-label="Sign Out" onClick={logout} title="Sign Out">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </button>
+                    </>
                 ) : (
                     <button className="IconBtn HideOnMobile" aria-label="Account" onClick={() => setIsAuthOpen(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -139,10 +170,12 @@ function Header(){
              </div>  
        </div>
        
+       {/* Modals and drawers controlled by top-level state */}
        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
        <CartDrawer />
      </>
     );
 }
+
 export default Header;

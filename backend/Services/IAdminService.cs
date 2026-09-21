@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Models;
+using Kitverse_backend_01.Models;
 using Kitverse_backend_01.DTOs;
 namespace Kitverse_backend_01.Services
 {
@@ -15,11 +15,13 @@ namespace Kitverse_backend_01.Services
         Task<Double> GetAvgUserPerMonth();
         Task<Double> GetAvgUserPerDay();
 
+        Task<List<MonthlySales>> GetSalesOverTime(int months = 12);
+
         //invoice 
         Task<List<Invoice>> GetInvoices();
 
         Task<Invoice?> GetInvoiceById(int invoiceId);
-        Task<User> GetUserById(int userId);
+        Task<User ?> GetUserById(int userId);
 
         Task<User?> UpdateUser(int userID, UpdateUser userUpdate);
 
@@ -38,7 +40,9 @@ namespace Kitverse_backend_01.Services
         //Email management
         Task<bool> SendInvoice(int invoiceid);
 
+        Task<List<string>> GetSubscribers();
         Task<int> SendNewsletter(string subject, string htmlBody);
+        
     }
 }
 

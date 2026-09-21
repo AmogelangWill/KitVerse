@@ -1,8 +1,9 @@
-﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.Models;
 using Kitverse_backend_01.Services;
 using Kitverse_backend_01.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 namespace Kitverse_backend_01.Controllers
 {
     [ApiController]
@@ -10,12 +11,15 @@ namespace Kitverse_backend_01.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, ILogger<AdminController> logger)
         {
             _adminService = adminService;
+            _logger = logger;
         }
         // GET: api/admin/dashboard
+        [Authorize(Roles = "Admin")]
         [HttpGet("dashboard")]
         public async Task<IActionResult> GetAdminDashboard()
         {
@@ -23,6 +27,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(dashboard);
         }
         // GET: api/admin/users
+        [Authorize(Roles = "Admin")]
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
@@ -31,6 +36,7 @@ namespace Kitverse_backend_01.Controllers
         }
 
         // GET: api/admin/users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("users/{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
@@ -40,6 +46,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(user);
         }
         // PUT: api/admin/users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("users/{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUser userUpdate)
         {
@@ -49,6 +56,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(updatedUser);
         }
         // PUT: api/admin/users/{id}/role
+        [Authorize(Roles = "Admin")]
         [HttpPut("users/{id}/role")]
         public async Task<IActionResult> ChangeUserRole(int id, [FromBody] string newRole)
         {
@@ -65,12 +73,15 @@ namespace Kitverse_backend_01.Controllers
             return Ok(banners);
         }
         // POST: api/admin/banners
+        [Authorize(Roles = "Admin")]
         [HttpPost("banners")]
-        public async Task<IActionResult> AddBanner([FromBody] Banner banner) { 
+        public async Task<IActionResult> AddBanner([FromBody] Banner banner)
+        {
             await _adminService.AddBanner(banner);
             return Ok(banner);
         }
         // PUT: api/admin/banners/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("banners/{id}")]
         public async Task<IActionResult> UpdateBanner(int id, [FromBody] Banner bannerUpdate)
         {
@@ -80,6 +91,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(updatedBanner);
         }
         // DELETE: api/admin/banners/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("banners/{id}")]
         public async Task<IActionResult> DeleteBanner(int id)
         {
@@ -88,7 +100,8 @@ namespace Kitverse_backend_01.Controllers
                 return NotFound();
             return Ok(new { message = "Banner deleted successfully." });
         }
-        // DELETE: api/admin/users/{id} 
+        // DELETE: api/admin/users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("users/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -97,7 +110,8 @@ namespace Kitverse_backend_01.Controllers
                 return NotFound();
             return Ok(new { message = "User deleted successfully." });
         }
-        // GET: api/admin/invoices
+        // GET: api/admin/invoices]
+        [Authorize(Roles = "Admin")]
         [HttpGet("invoices")]
         public async Task<IActionResult> GetInvoices()
         {
@@ -105,6 +119,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(invoices);
         }
         // GET: api/admin/invoices/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("invoices/{id}")]
         public async Task<IActionResult> GetInvoice(int id)
         {
@@ -114,6 +129,7 @@ namespace Kitverse_backend_01.Controllers
             return Ok(invoice);
         }
         //GET: api/admin/analytics/avg-sales
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/avg-sales")]
         public async Task<IActionResult> GetAvgSales()
         {
@@ -122,14 +138,16 @@ namespace Kitverse_backend_01.Controllers
         }
 
         //GET: api/admin/analytics/avg-users-per-month
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/avg-users")]
         public async Task<IActionResult> GetAvgUsersPerMonth()
         {
             var avgUsers = await _adminService.GetAvgUserPerMonth();
             return Ok(avgUsers);
         }
-   
+
         //POST: api/admin/emails/send-newsletter
+        [Authorize(Roles = "Admin")]
         [HttpPost("emails/send-newsletter")]
         public async Task<IActionResult> SendNewsletter([FromBody] Newsletter request)
         {
@@ -142,18 +160,27 @@ namespace Kitverse_backend_01.Controllers
                     msg = "Newsletter sent successfully",
                     emailsSent = sentCount
                 });
-
-
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Newsletter send failed");
                 return BadRequest(new
                 {
                     msg = ex.Message
                 });
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("sales-over-time")]
+        public async Task<IActionResult> GetSalesOverTime([FromQuery] int months = 12)
+        {
+            var data = await _adminService.GetSalesOverTime(months);
+            return Ok(data);
+        }
+
         //POST: api/admin/send-invoice
+        [Authorize(Roles = "Admin")]
         [HttpPost("send-invoice/{invoiceId}")]
         public async Task<IActionResult> SendInvoice(int invoiceId)
         {
@@ -176,11 +203,20 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Sending invoice {InvoiceId} failed", invoiceId);
                 return BadRequest(new
                 {
                     message = ex.Message
                 });
             }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("emails/subscribers")]
+        public async Task<IActionResult> GetSubscribers()
+        {
+            var subs = await _adminService.GetSubscribers();
+            return Ok(subs);
         }
 
     }

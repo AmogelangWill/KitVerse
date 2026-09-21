@@ -61,7 +61,7 @@ namespace Kitverse_backend_01.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { ex.Message });
+                return BadRequest(new {message= ex.Message });
             }
         }
 
@@ -78,6 +78,24 @@ namespace Kitverse_backend_01.Controllers
         public async Task<IActionResult> DeleteJersey(int ShirtlinkId)
         {
             return await deleteImage(ShirtlinkId, _config["Supabase:JerseyBucket"]!);
+        }
+
+
+        //DELETE: api/Upload/cleanup-images/{bucket}
+        //bucket must be exactly one of:"Football jerseys"or "Banners"
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("cleanup-images/{bucket}")]
+        public async Task<IActionResult> CleanOrphanedImages(string bucket)
+        {
+            try
+            {
+                var deleted = await _storageService.CleanOrphanedImages(bucket);
+                return Ok(new { message = $"Deleted {deleted.Count} orphaned image(s).", deleted });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
