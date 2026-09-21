@@ -102,3 +102,12 @@ frontend/**/pnpm-debug.log*
 Thumbs.db
 *.env
 
+
+# Temporary research files
+Bash_ Online Shopping*
+extract.js
+extract.py
+extracted_orders.html
+output.txt
+package-lock.json
+package.json
