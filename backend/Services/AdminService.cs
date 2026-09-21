@@ -214,6 +214,10 @@ namespace Kitverse_backend_01.Services
             if (user.Role == "Admin" && await _context.Users.CountAsync(u => u.Role == "Admin") <= 1)
                 throw new InvalidOperationException("Cannot delete the last remaining admin.");
 
+            // Only allow valid KitVerse roles
+            if (newRole != "Customer" &&
+                newRole != "Item Lister" &&
+                newRole != "Admin")
             try
             {
                 _context.Users.Remove(user);
