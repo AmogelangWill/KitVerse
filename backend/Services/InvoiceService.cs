@@ -106,6 +106,9 @@ namespace Kitverse_backend_01.Services
         private static byte[] GeneratePdf(Invoice invoice, User user, Order? order)
         {
             QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.UseSystemFonts = true;
+            QuestPDF.Settings.ThrowOnMissingFontFamilies = false;
+            QuestPDF.Settings.ThrowOnMissingTextGlyphs = false;
             
             // Register bundled fonts so Railway doesn't crash
             var basePath = AppContext.BaseDirectory;
@@ -128,7 +131,7 @@ namespace Kitverse_backend_01.Services
             {
                 container.Page(page =>
                 {
-                    page.DefaultTextStyle(x => x.FontFamily("Roboto"));
+                    page.DefaultTextStyle(x => x.FontFamily("DejaVu Sans"));
                     page.Margin(40);
                     page.Header().Text("KitVerse Invoice").FontSize(24).Bold();
 
