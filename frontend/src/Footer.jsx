@@ -54,7 +54,7 @@ function Footer() {
           <div className="NewsletterForm">
             <input 
               type="email" 
-              placeholder="Enter your email" 
+              placeholder="" 
               className="NewsletterInput" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}

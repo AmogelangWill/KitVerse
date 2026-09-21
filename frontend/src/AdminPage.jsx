@@ -646,7 +646,7 @@ function AdminPage() {
                                     <form onSubmit={handleCreateCompetition} style={{display: 'flex', gap: '10px'}}>
                                         <input 
                                             type="text" 
-                                            placeholder="e.g. CAF Champions League" 
+                                             
                                             value={newCompetitionName}
                                             onChange={(e) => setNewCompetitionName(e.target.value)}
                                             required
@@ -695,7 +695,7 @@ function AdminPage() {
                                             <label>Subject Line *</label>
                                             <input 
                                                 type="text" 
-                                                placeholder="e.g. New Arrivals: 2026 Season Kits!" 
+                                                 
                                                 value={newsletterSubject}
                                                 onChange={(e) => setNewsletterSubject(e.target.value)}
                                                 required
@@ -710,7 +710,7 @@ function AdminPage() {
                                             </p>
                                             <textarea 
                                                 rows="12" 
-                                                placeholder="<h1>Check out our new kits!</h1><p>We just dropped the latest...</p>" 
+                                                placeholder="" 
                                                 value={newsletterBody}
                                                 onChange={(e) => setNewsletterBody(e.target.value)}
                                                 required
@@ -808,7 +808,7 @@ function AdminPage() {
                                     required 
                                     value={newBanner.bannerName}
                                     onChange={e => setNewBanner({...newBanner, bannerName: e.target.value})}
-                                    placeholder="e.g. Soweto Derby Special"
+                                    
                                 />
                             </div>
                             <div className="InputGroup">
@@ -823,7 +823,7 @@ function AdminPage() {
                                     required 
                                     value={newBanner.bannerUrl}
                                     onChange={e => setNewBanner({...newBanner, bannerUrl: e.target.value})}
-                                    placeholder="Or paste banner image URL directly"
+                                    placeholder=""
                                     style={{marginTop: '10px'}}
                                 />
                                 {newBanner.bannerUrl && (
@@ -868,7 +868,7 @@ function AdminPage() {
                                     rows="3" 
                                     value={newBanner.bannerDescription}
                                     onChange={e => setNewBanner({...newBanner, bannerDescription: e.target.value})}
-                                    placeholder="Optional caption or subtitle"
+                                    placeholder=""
                                 />
                             </div>
                             <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>

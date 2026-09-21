@@ -391,7 +391,7 @@ function ItemListerPage() {
                                         name="shirtName" 
                                         value={formData.shirtName} 
                                         onChange={handleFormChange} 
-                                        placeholder="e.g. Kaizer Chiefs Home" 
+                                         
                                         required 
                                     />
                                 </div>
@@ -402,7 +402,7 @@ function ItemListerPage() {
                                         name="shirtSeason" 
                                         value={formData.shirtSeason} 
                                         onChange={handleFormChange} 
-                                        placeholder="e.g. 2026/27" 
+                                         
                                         required 
                                     />
                                 </div>
@@ -417,7 +417,7 @@ function ItemListerPage() {
                                         name="shirtPrice" 
                                         value={formData.shirtPrice} 
                                         onChange={handleFormChange} 
-                                        placeholder="e.g. 1299.99" 
+                                         
                                         required 
                                     />
                                 </div>
@@ -428,7 +428,7 @@ function ItemListerPage() {
                                         name="teamId" 
                                         value={formData.teamId} 
                                         onChange={handleFormChange} 
-                                        placeholder="e.g. 1" 
+                                         
                                         required 
                                     />
                                 </div>
@@ -461,7 +461,7 @@ function ItemListerPage() {
                                     name="shirtAffiliate" 
                                     value={formData.shirtAffiliate} 
                                     onChange={handleFormChange} 
-                                    placeholder="e.g. Nike / Puma / Kappa" 
+                                     
                                 />
                             </div>
 
@@ -472,7 +472,7 @@ function ItemListerPage() {
                                     name="shirtDescription" 
                                     value={formData.shirtDescription} 
                                     onChange={handleFormChange} 
-                                    placeholder="Add fabric details, sizing advice, or product description..."
+                                    
                                 />
                             </div>
 
@@ -517,7 +517,7 @@ function ItemListerPage() {
                                     )}
                                     <input 
                                         type="text" 
-                                        placeholder="Or paste image URL"
+                                        
                                         value={url}
                                         onChange={(e) => {
                                             const newUrls = [...imageUrls];
@@ -563,7 +563,7 @@ function ItemListerPage() {
                                             </select>
                                             <input 
                                                 type="number" 
-                                                placeholder="e.g. 5 or -2"
+                                                
                                                 value={adj.amount} 
                                                 onChange={(e) => {
                                                     const newAdj = [...stockAdjustments];
@@ -604,7 +604,7 @@ function ItemListerPage() {
                                             </select>
                                             <input 
                                                 type="number" 
-                                                placeholder="Amount in Stock" 
+                                                 
                                                 value={sizeObj.amountAvailable} 
                                                 onChange={(e) => handleSizeChange(i, 'amountAvailable', e.target.value)} 
                                                 required 
