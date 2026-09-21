@@ -213,10 +213,7 @@ namespace Kitverse_backend_01.Controllers
         [HttpGet("emails/subscribers")]
         public async Task<IActionResult> GetSubscribers()
         {
-            var subs = await _context.NewsletterSubscribers
-                .Where(s => s.IsActive)
-                .Select(s => s.Email)
-                .ToListAsync();
+            var subs = await _adminService.GetSubscribers();
             return Ok(subs);
         }
 

@@ -1,4 +1,4 @@
-﻿using Kitverse_backend_01.Data;
+using Kitverse_backend_01.Data;
 using Kitverse_backend_01.DTOs;
 using Kitverse_backend_01.Models;
 using Microsoft.EntityFrameworkCore;
@@ -510,6 +510,14 @@ namespace Kitverse_backend_01.Services
                 }
             }
             return sentCount;
+        }
+
+        public async Task<List<string>> GetSubscribers()
+        {
+            return await _context.NewsletterSubscribers
+                .Where(s => s.IsActive)
+                .Select(s => s.Email)
+                .ToListAsync();
         }
     }
 }
