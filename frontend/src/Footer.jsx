@@ -72,21 +72,12 @@ function Footer() {
       <div className="FooterMain">
         <div className="FooterColumn">
           <h4 className="ColumnTitle">Customers</h4>
-          <a href="#" className="FooterLink">My Account</a>
-          <a href="#" className="FooterLink">About Us</a>
-          <a href="#" className="FooterLink">Sell Your Collection</a>
-          <a href="#" className="FooterLink">Help Center</a>
-          <a href="#" className="FooterLink">Track Your Orders</a>
-          <a href="#" className="FooterLink">Create Return</a>
+          <a href="/my-orders" className="FooterLink">My Orders</a>
         </div>
 
         <div className="FooterColumn">
-          <h4 className="ColumnTitle">Collections</h4>
-          <a href="#" className="FooterLink">New Arrivals</a>
-          <a href="#" className="FooterLink">Seasonal Drop</a>
-          <a href="#" className="FooterLink">Best Clubs</a>
-          <a href="#" className="FooterLink">National Teams</a>
-          <a href="#" className="FooterLink">Classic Kits</a>
+          <h4 className="ColumnTitle">Shop</h4>
+          <a href="/collections" className="FooterLink">All Collections</a>
         </div>
 
         <div className="FooterColumn">
