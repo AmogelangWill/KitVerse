@@ -753,7 +753,7 @@ function AdminPage() {
                                 <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '24px', maxWidth: '700px'}}>
                                     <h3 style={{marginTop: 0, marginBottom: '16px'}}>Create New Promo Code</h3>
                                     <form onSubmit={handleCreatePromo}>
-                                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+                                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 16px'}}>
                                             <div className="InputGroup">
                                                 <label>Code *</label>
                                                 <input 
@@ -761,7 +761,7 @@ function AdminPage() {
                                                     value={newPromo.code}
                                                     onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
                                                     required
-                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', textTransform: 'uppercase', fontWeight: 600}}
+                                                    style={{textTransform: 'uppercase', fontWeight: 600, letterSpacing: '1px'}}
                                                 />
                                             </div>
                                             <div className="InputGroup">
@@ -772,7 +772,6 @@ function AdminPage() {
                                                     value={newPromo.discountPercent}
                                                     onChange={(e) => setNewPromo({...newPromo, discountPercent: e.target.value})}
                                                     required
-                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
                                                 />
                                             </div>
                                             <div className="InputGroup">
@@ -781,7 +780,6 @@ function AdminPage() {
                                                     type="date" 
                                                     value={newPromo.expiryDate}
                                                     onChange={(e) => setNewPromo({...newPromo, expiryDate: e.target.value})}
-                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
                                                 />
                                             </div>
                                             <div className="InputGroup">
@@ -791,7 +789,6 @@ function AdminPage() {
                                                     min="1"
                                                     value={newPromo.maxUses}
                                                     onChange={(e) => setNewPromo({...newPromo, maxUses: e.target.value})}
-                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
                                                 />
                                             </div>
                                         </div>
