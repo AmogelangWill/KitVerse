@@ -452,14 +452,7 @@ function AdminPage() {
                                         <span className="DashboardCardTitle">Admins</span>
                                         <span className="DashboardCardValue">{dashboardData.totalAdmins}</span>
                                     </div>
-                                    <div className="DashboardCard">
-                                        <span className="DashboardCardTitle">Active Accounts</span>
-                                        <span className="DashboardCardValue">{dashboardData.activeUsers}</span>
-                                    </div>
-                                    <div className="DashboardCard">
-                                        <span className="DashboardCardTitle">Inactive Accounts</span>
-                                        <span className="DashboardCardValue">{dashboardData.inactiveUsers}</span>
-                                    </div>
+
                                     <div className="DashboardCard">
                                         <span className="DashboardCardTitle">Avg Monthly Users</span>
                                         <span className="DashboardCardValue">{dashboardData.avgmonthlyUsers ? dashboardData.avgmonthlyUsers.toFixed(1) : '0'}</span>
@@ -532,7 +525,6 @@ function AdminPage() {
                                                 <th>Name</th>
                                                 <th>Email</th>
                                                 <th>Role Controls</th>
-                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -553,11 +545,7 @@ function AdminPage() {
                                                             <option value="Admin">Admin</option>
                                                         </select>
                                                     </td>
-                                                    <td>
-                                                        <span className={`StatusBadge ${u.isActive ? 'active' : 'inactive'}`}>
-                                                            {u.isActive ? 'Active' : 'Inactive'}
-                                                        </span>
-                                                    </td>
+
                                                     <td>
                                                         <button 
                                                             className="AdminActionBtn danger"
