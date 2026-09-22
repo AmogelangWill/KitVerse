@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "./AuthContext.jsx";
-import { useCart } from "./CartContext.jsx";
+import { useCart } from "./CartContext";
+import { useAuth } from "./AuthContext";
+import CheckoutModal from "./CheckoutModal";
 import "./CartDrawer.css";
 
 // Side drawer component presenting items currently in user shopping bag
@@ -77,9 +78,9 @@ function CartDrawer() {
         }
     };
 
-    const [address, setAddress] = useState("");
     const [promoInput, setPromoInput] = useState("");
     const [promoError, setPromoError] = useState("");
+    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
     
     // Set initial address if available from user context, but it seems we don't store it there, so leave blank to type
     
@@ -132,7 +133,7 @@ function CartDrawer() {
     };
 
     // Initiates payment process with the backend and redirects to Paystack
-    const handleCheckout = async () => {
+    const handleCheckout = async (finalAddress) => {
         if (!cart || !user) return;
         
         setLoading(true);
@@ -146,7 +147,7 @@ function CartDrawer() {
                 body: JSON.stringify({
                     cartId: cart.cartId,
                     email: user.userEmail,
-                    address: address.trim()
+                    address: finalAddress || ""
                 })
             });
 
@@ -162,6 +163,7 @@ function CartDrawer() {
             alert("Network error during checkout.");
         } finally {
             setLoading(false);
+            setIsCheckoutModalOpen(false);
         }
     };
 
@@ -291,31 +293,25 @@ function CartDrawer() {
                             </div>
                         )}
                         {promoError && <p style={{color: 'red', fontSize: '12px', marginTop: '-12px', marginBottom: '12px'}}>{promoError}</p>}
-
-                        {/* Shipping Address Section */}
-                        <div style={{marginBottom: '16px'}}>
-                            <label style={{display: 'block', marginBottom: '4px', fontSize: '14px', color: '#4b5563'}}>Shipping Address (Leave blank to use saved address)</label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter your full street address..." 
-                                value={address} 
-                                onChange={(e) => setAddress(e.target.value)} 
-                                style={{width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px'}}
-                            />
-                        </div>
-
+                        
                         <div className="CartTotal" style={{borderTop: '1px solid #e5e7eb', paddingTop: '16px'}}>
                             <span>Total</span>
                             <span>R {cart.totalCost?.toFixed(2) || "0.00"}</span>
                         </div>
                         <p className="CartTaxNote">Includes 15% VAT calculation.</p>
-                        <button className="CartCheckoutBtn" onClick={handleCheckout} disabled={loading}>
+                        <button className="CartCheckoutBtn" onClick={() => setIsCheckoutModalOpen(true)} disabled={loading}>
                             {loading ? "PROCESSING..." : "PROCEED TO CHECKOUT"}
                         </button>
                         <button className="CartClearBtn" onClick={clearCart} disabled={loading}>Clear Cart</button>
                     </div>
                 )}
             </div>
+            <CheckoutModal 
+                isOpen={isCheckoutModalOpen}
+                onClose={() => setIsCheckoutModalOpen(false)}
+                onSubmit={handleCheckout}
+                loading={loading}
+            />
         </>
     );
 }
