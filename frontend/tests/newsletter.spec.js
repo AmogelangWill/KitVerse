@@ -4,7 +4,7 @@ test.describe('Footer Newsletter Subscribe Flow', () => {
   
   test('User can subscribe to the newsletter from the footer', async ({ page }) => {
     // 1. Visit the local dev server
-    await page.goto('http://localhost:5173');
+    await page.goto('');
     
     // 2. Scroll down to the footer
     await page.locator('.NewsletterForm').scrollIntoViewIfNeeded();

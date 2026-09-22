@@ -4,7 +4,7 @@ test.describe('Product Reviews Flow', () => {
   
   test('User can open reviews drawer and see auth prompt if logged out', async ({ page }) => {
     // 1. Visit a product page (assuming ID 3 exists)
-    await page.goto('http://localhost:5173/product/3');
+    await page.goto('/product/3');
     
     // Wait for loading to finish
     await page.waitForSelector('.PDP-Title', { timeout: 10000 });
