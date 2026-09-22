@@ -147,6 +147,43 @@ function OrderCard({ invoice }) {
                             </div>
                         ))}
                     </div>
+
+                    {/* Breakdown Section */}
+                    <div style={{ marginTop: '16px', borderTop: '1px solid #f3f4f6', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', color: '#4b5563' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Items Subtotal</span>
+                            <span>R {invoice.itemsTotal != null ? invoice.itemsTotal.toFixed(2) : invoice.subtotal.toFixed(2)}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Shipping</span>
+                            <span>{invoice.shippingFee === 0 ? "Free" : `R ${invoice.shippingFee?.toFixed(2) || '150.00'}`}</span>
+                        </div>
+                        
+                        {invoice.volumeDiscount > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a' }}>
+                                <span>Volume Discount (3+ items)</span>
+                                <span>-R {invoice.volumeDiscount.toFixed(2)}</span>
+                            </div>
+                        )}
+                        
+                        {invoice.promoDiscount > 0.01 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a' }}>
+                                <span>Promo Code Applied</span>
+                                <span>-R {invoice.promoDiscount.toFixed(2)}</span>
+                            </div>
+                        )}
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>VAT (Included)</span>
+                            <span>R {invoice.tax?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6', fontWeight: 'bold', fontSize: '16px', color: '#111' }}>
+                            <span>Total Paid</span>
+                            <span>R {invoice.total?.toFixed(2) || '0.00'}</span>
+                        </div>
+                    </div>
                 </div>
             )}
 

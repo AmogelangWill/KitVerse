@@ -177,11 +177,38 @@ namespace Kitverse_backend_01.Services
                             });
                         }
 
+                        // Calculate discounts and shipping based on rules
+                        decimal itemsTotal = 0;
+                        int totalQty = 0;
+                        if (order != null && order.OrderItems.Any())
+                        {
+                            itemsTotal = order.OrderItems.Sum(oi => oi.Price * oi.Quantity);
+                            totalQty = order.OrderItems.Sum(oi => oi.Quantity);
+                        }
+
+                        decimal shippingFee = itemsTotal >= 1500m ? 0m : 150m;
+                        decimal volumeDiscount = totalQty >= 3 ? Math.Round(itemsTotal * 0.10m, 2) : 0m;
+                        
+                        // Whatever difference remains between Expected and Actual Total must be Promo Code
+                        decimal expectedBeforePromo = itemsTotal + shippingFee - volumeDiscount;
+                        decimal promoDiscount = expectedBeforePromo - invoice.total;
+                        // Avoid floating point weirdness or negative promo if logic changes
+                        if (promoDiscount < 0) promoDiscount = 0;
+                        
                         column.Item().PaddingTop(15).LineHorizontal(1);
-                        column.Item().PaddingTop(10).Text($"Subtotal: {Money(invoice.subtotal)}");
-                        if (invoice.tax > 0)
-                            column.Item().Text($"VAT: {Money(invoice.tax)}");
-                        column.Item().Text($"Total: {Money(invoice.total)}").Bold().FontSize(16);
+                        
+                        column.Item().PaddingTop(10).Text($"Items Subtotal: {Money(itemsTotal)}");
+                        column.Item().Text($"Shipping: {(shippingFee == 0 ? "Free" : Money(shippingFee))}");
+                        
+                        if (volumeDiscount > 0)
+                            column.Item().Text($"Volume Discount (3+ items): -{Money(volumeDiscount)}");
+                            
+                        if (promoDiscount > 0.01m)
+                            column.Item().Text($"Promo Code Applied: -{Money(promoDiscount)}");
+                        
+                        column.Item().PaddingTop(10).Text($"VAT (Included): {Money(invoice.tax)}");
+                        column.Item().Text($"Total Paid: {Money(invoice.total)}").Bold().FontSize(16);
+                        
                         column.Item().PaddingTop(10).Text($"Status: {invoice.status}");
                     });
 
@@ -223,6 +250,8 @@ namespace Kitverse_backend_01.Services
 
                 var itemsList = new List<object>();
                 string mainImageUrl = "";
+                decimal itemsTotal = 0;
+                int totalQty = 0;
                 
                 if (order?.OrderItems != null)
                 {
@@ -246,8 +275,17 @@ namespace Kitverse_backend_01.Services
                             unitPrice = oi.Price,
                             imageUrl = imgUrl
                         });
+                        
+                        itemsTotal += oi.Price * oi.Quantity;
+                        totalQty += oi.Quantity;
                     }
                 }
+
+                decimal shippingFee = itemsTotal >= 1500m ? 0m : 150m;
+                decimal volumeDiscount = totalQty >= 3 ? Math.Round(itemsTotal * 0.10m, 2) : 0m;
+                decimal expectedBeforePromo = itemsTotal + shippingFee - volumeDiscount;
+                decimal promoDiscount = expectedBeforePromo - inv.total;
+                if (promoDiscount < 0) promoDiscount = 0;
 
                 result.Add(new
                 {
@@ -259,7 +297,11 @@ namespace Kitverse_backend_01.Services
                     total = inv.total,
                     status = inv.status,
                     imageUrl = mainImageUrl,
-                    items = itemsList
+                    items = itemsList,
+                    itemsTotal = itemsTotal,
+                    shippingFee = shippingFee,
+                    volumeDiscount = volumeDiscount,
+                    promoDiscount = promoDiscount
                 });
             }
 
