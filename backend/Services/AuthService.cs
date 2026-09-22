@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -295,15 +295,33 @@ namespace Kitverse_backend_01.Controllers
 
         public async Task<bool> ResetPassword(string token, string newPassword)
         {
-           using var hasher = SHA256.Create();
-            var hashBytes = hasher.ComputeHash(Encoding.UTF8.GetBytes(token));
+            // Base64 tokens from URLs often have their + characters accidentally replaced by spaces
+            // by browser URL decoding or email clients. Restore them.
+            if (token != null) 
+            {
+                token = token.Replace(" ", "+");
+            }
+
+            using var hasher = SHA256.Create();
+            var hashBytes = hasher.ComputeHash(Encoding.UTF8.GetBytes(token ?? ""));
             var tokenHash = Convert.ToBase64String(hashBytes);
             var resetTokenEntity =  await _context.PasswordResetTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash && t.isValid);
 
-            if(resetTokenEntity == null || resetTokenEntity.Expiration < DateTime.UtcNow)
+            if(resetTokenEntity == null)
             {
-                return false; // token is invalid or expired
+                return false; // token is invalid
             }
+            
+            // Convert to universal time safely to avoid Postgres DateTime Kind mismatches
+            var expirationUtc = resetTokenEntity.Expiration.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(resetTokenEntity.Expiration, DateTimeKind.Utc) 
+                : resetTokenEntity.Expiration.ToUniversalTime();
+
+            if (expirationUtc < DateTime.UtcNow)
+            {
+                return false; // token expired
+            }
+
             var user = await _context.Users.FirstOrDefaultAsync
                             (u => u.UserId == resetTokenEntity.UserId);
             if(user == null)
