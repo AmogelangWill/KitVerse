@@ -35,6 +35,27 @@ namespace Kitverse_backend_01.Controllers
                 throw new ArgumentException("Cart not found.");
             }
 
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == cart.UserId);
+            if (customer == null)
+            {
+                throw new ArgumentException("Customer record not found.");
+            }
+
+            // use the address they typed at checkout, or fall back to one already on file
+            var address = string.IsNullOrWhiteSpace(request.Address) ? customer.Address : request.Address.Trim();
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                throw new ArgumentException("A shipping address is required to check out.");
+            }
+
+            // save it for next time if it's new or changed
+            if (customer.Address != address)
+            {
+                customer.Address = address;
+                await _context.SaveChangesAsync();
+            }
+
             var secretKey = (_config["Paystack:SecretKey"] ?? "").Trim();
             // Guard: remove accidental "Bearer " prefix if the env var was set with it
             if (secretKey.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))

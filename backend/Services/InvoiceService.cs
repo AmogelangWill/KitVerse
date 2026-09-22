@@ -10,7 +10,6 @@ using QuestPDF.Infrastructure;
 
 namespace Kitverse_backend_01.Services
 {
-  }
     public class InvoiceService : IInvoiceService
     {
         // Set to 0.15m ONLY if you are VAT-registered and your shirt prices already include VAT.
@@ -90,8 +89,9 @@ namespace Kitverse_backend_01.Services
         private async Task SendAsync(Invoice invoice)
         {
             var user = await _context.Users.AsNoTracking().FirstAsync(u => u.UserId == invoice.user_id);
+            var customer = await _context.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.UserId == invoice.user_id);
             var order = await LoadOrderAsync(invoice.pay_id);
-            var pdf = GeneratePdf(invoice, user, order);
+            var pdf = GeneratePdf(invoice, user, order, customer);
             await _emailService.SendInvoiceEmail(user.UserEmail, user.UserName, pdf);
         }
 
@@ -103,27 +103,29 @@ namespace Kitverse_backend_01.Services
 
         private static string Money(decimal v) => "R" + v.ToString("F2", CultureInfo.InvariantCulture);
 
-        private static byte[] GeneratePdf(Invoice invoice, User user, Order? order)
+        private static byte[] GeneratePdf(Invoice invoice, User user, Order? order, Customer? customer)
         {
             QuestPDF.Settings.License = LicenseType.Community;
             QuestPDF.Settings.UseSystemFonts = true;
             QuestPDF.Settings.ThrowOnMissingFontFamilies = false;
             QuestPDF.Settings.ThrowOnMissingTextGlyphs = false;
-            
+
             // Register bundled fonts so Railway doesn't crash
             var basePath = AppContext.BaseDirectory;
-            var regPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Regular.ttf")) 
-                ? System.IO.Path.Combine(basePath, "Roboto-Regular.ttf") 
+            var regPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Regular.ttf"))
+                ? System.IO.Path.Combine(basePath, "Roboto-Regular.ttf")
                 : "Roboto-Regular.ttf";
-                
-            var boldPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Bold.ttf")) 
-                ? System.IO.Path.Combine(basePath, "Roboto-Bold.ttf") 
+
+            var boldPath = System.IO.File.Exists(System.IO.Path.Combine(basePath, "Roboto-Bold.ttf"))
+                ? System.IO.Path.Combine(basePath, "Roboto-Bold.ttf")
                 : "Roboto-Bold.ttf";
-            
-            if (System.IO.File.Exists(regPath)) {
+
+            if (System.IO.File.Exists(regPath))
+            {
                 QuestPDF.Drawing.FontManager.RegisterFontFromStream(System.IO.File.OpenRead(regPath));
             }
-            if (System.IO.File.Exists(boldPath)) {
+            if (System.IO.File.Exists(boldPath))
+            {
                 QuestPDF.Drawing.FontManager.RegisterFontFromStream(System.IO.File.OpenRead(boldPath));
             }
 
@@ -141,6 +143,8 @@ namespace Kitverse_backend_01.Services
                         column.Item().Text($"Invoice Date: {invoice.invoiceDate:yyyy-MM-dd}");
                         column.Item().Text($"Customer: {user.UserName} {user.UserSurname}");
                         column.Item().Text($"Email: {user.UserEmail}");
+                        if (!string.IsNullOrWhiteSpace(customer?.Address))
+                            column.Item().Text($"Shipping Address: {customer.Address}");
                         column.Item().PaddingTop(15).LineHorizontal(1);
 
                         if (order != null && order.OrderItems.Any())
@@ -192,8 +196,9 @@ namespace Kitverse_backend_01.Services
             if (invoice == null) return null;
 
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == invoice.user_id);
+            var customer = await _context.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.UserId == invoice.user_id);
             var order = await LoadOrderAsync(invoice.pay_id);
-            return GeneratePdf(invoice, user, order);
+            return GeneratePdf(invoice, user, order, customer);
         }
 
         public async Task<List<object>> GetUserInvoicesAsync(int userId)
@@ -213,11 +218,12 @@ namespace Kitverse_backend_01.Services
                     .ThenInclude(p => p.ShirtLinks)
                     .FirstOrDefaultAsync(o => o.PaymentId == inv.pay_id);
 
-                var imageUrl = order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault(l => l.IsMain)?.ShirtLinkUrl 
-                            ?? order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault()?.ShirtLinkUrl 
+                var imageUrl = order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault(l => l.IsMain)?.ShirtLinkUrl
+                            ?? order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault()?.ShirtLinkUrl
                             ?? "";
 
-                result.Add(new {
+                result.Add(new
+                {
                     id = inv.Id,
                     invoiceNumber = inv.invoiceNumber,
                     invoiceDate = inv.invoiceDate,
@@ -232,3 +238,4 @@ namespace Kitverse_backend_01.Services
             return result;
         }
     }
+}
