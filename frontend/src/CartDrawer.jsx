@@ -77,9 +77,64 @@ function CartDrawer() {
         }
     };
 
+    const [address, setAddress] = useState("");
+    const [promoInput, setPromoInput] = useState("");
+    const [promoError, setPromoError] = useState("");
+    
+    // Set initial address if available from user context, but it seems we don't store it there, so leave blank to type
+    
+    const applyPromo = async () => {
+        if (!promoInput.trim() || !user) return;
+        setPromoError("");
+        setLoading(true);
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/apply-promo`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ code: promoInput.trim() })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                fetchCart(); // refresh cart to show updated total and promo code
+                setPromoInput("");
+            } else {
+                setPromoError(data.message || "Invalid promo code");
+            }
+        } catch (error) {
+            console.error("Error applying promo:", error);
+            setPromoError("Network error applying promo.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const removePromo = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/Cart/${user.userId}/promo`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+            if (res.ok) {
+                fetchCart();
+            }
+        } catch (error) {
+            console.error("Error removing promo:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Initiates payment process with the backend and redirects to Paystack
     const handleCheckout = async () => {
         if (!cart || !user) return;
+        
         setLoading(true);
         try {
             const res = await fetch("https://kitverse-production.up.railway.app/api/Payment/initialize", {
@@ -90,7 +145,8 @@ function CartDrawer() {
                 },
                 body: JSON.stringify({
                     cartId: cart.cartId,
-                    email: user.userEmail
+                    email: user.userEmail,
+                    address: address.trim()
                 })
             });
 
@@ -116,6 +172,8 @@ function CartDrawer() {
     let shipping = 0;
     let discount = 0;
     let totalItems = 0;
+    let afterVolumeDiscount = 0;
+    let promoDiscountAmount = 0;
 
     if (cart && cart.itemLists) {
         rawSubtotal = cart.itemLists.reduce((sum, item) => sum + (item.unitPurchaseAtTime * item.quantity), 0);
@@ -124,6 +182,12 @@ function CartDrawer() {
         if (rawSubtotal > 0) {
             shipping = rawSubtotal >= 1500 ? 0 : 150;
             discount = totalItems >= 3 ? (rawSubtotal * 0.10) : 0;
+            
+            afterVolumeDiscount = rawSubtotal + shipping - discount;
+            
+            if (cart.promoDiscountPercent) {
+                promoDiscountAmount = afterVolumeDiscount * (cart.promoDiscountPercent / 100);
+            }
         }
     }
 
@@ -204,6 +268,40 @@ function CartDrawer() {
                         <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '14px', color: '#4b5563'}}>
                             <span>Shipping</span>
                             <span>{shipping === 0 ? "Free" : `R ${shipping.toFixed(2)}`}</span>
+                        </div>
+                        
+                        {/* Promo Code Section */}
+                        {cart.promoCode ? (
+                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#16a34a', fontWeight: 'bold'}}>
+                                <span>Promo: {cart.promoCode} ({cart.promoDiscountPercent}%) <button onClick={removePromo} style={{background:'none',border:'none',color:'red',cursor:'pointer',fontSize:'12px',marginLeft:'8px'}}>Remove</button></span>
+                                <span>- R {promoDiscountAmount.toFixed(2)}</span>
+                            </div>
+                        ) : (
+                            <div style={{display: 'flex', gap: '8px', marginBottom: '16px'}}>
+                                <input 
+                                    type="text" 
+                                    placeholder="Promo Code" 
+                                    value={promoInput} 
+                                    onChange={(e) => setPromoInput(e.target.value)} 
+                                    style={{flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px'}}
+                                />
+                                <button onClick={applyPromo} disabled={loading} style={{padding: '8px 12px', background: '#111', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                                    Apply
+                                </button>
+                            </div>
+                        )}
+                        {promoError && <p style={{color: 'red', fontSize: '12px', marginTop: '-12px', marginBottom: '12px'}}>{promoError}</p>}
+
+                        {/* Shipping Address Section */}
+                        <div style={{marginBottom: '16px'}}>
+                            <label style={{display: 'block', marginBottom: '4px', fontSize: '14px', color: '#4b5563'}}>Shipping Address (Leave blank to use saved address)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter your full street address..." 
+                                value={address} 
+                                onChange={(e) => setAddress(e.target.value)} 
+                                style={{width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px'}}
+                            />
                         </div>
 
                         <div className="CartTotal" style={{borderTop: '1px solid #e5e7eb', paddingTop: '16px'}}>
