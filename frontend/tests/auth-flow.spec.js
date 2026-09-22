@@ -4,7 +4,7 @@ test.describe('Forgot and Reset Password Flow', () => {
   
   test('Forgot Password Modal UI and Submission', async ({ page }) => {
     // 1. Visit the local dev server
-    await page.goto('http://localhost:5173');
+    await page.goto('');
     
     // 2. Open Auth Modal
     await page.click('button[aria-label="Account"]');
@@ -31,7 +31,7 @@ test.describe('Forgot and Reset Password Flow', () => {
 
   test('Reset Password Page UI and Submission', async ({ page }) => {
     // 1. Visit the Reset Password page with a fake token
-    await page.goto('http://localhost:5173/reset-password?token=fake-token-123');
+    await page.goto('/reset-password?token=fake-token-123');
     
     // 2. Verify UI loads
     await expect(page.locator('h2.AuthTitle')).toHaveText('Reset Password');

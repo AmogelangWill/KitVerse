@@ -7,7 +7,7 @@ test.describe('Admin Dashboard Reports & Metrics', () => {
 
   test('Dashboard loads the Sales Chart, Filters, and required Rubric Metrics', async ({ page }) => {
     // 1. Visit the homepage and open Auth Modal
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     
     // Click the account icon/button in the header to open AuthModal
     await page.click('button[aria-label="Account"]');
@@ -21,7 +21,7 @@ test.describe('Admin Dashboard Reports & Metrics', () => {
     await page.waitForTimeout(5000); // Give it enough time for Railway to log us in
 
     // Now go to admin dashboard
-    await page.goto('http://localhost:5173/admin');
+    await page.goto('/admin');
     
     // Wait for the Admin Dashboard Overview to load
     await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });
