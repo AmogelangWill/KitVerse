@@ -42,7 +42,7 @@ namespace Kitverse_backend_01.Services
                     .CountAsync(u => u.Role == "Customer"),
 
                 TotalItemListers = await _context.Users
-                    .CountAsync(u => u.Role == "ItemLister"),
+                    .CountAsync(u => u.Role == "Item Lister"),
 
                 TotalAdmins = await _context.Users
                     .CountAsync(u => u.Role == "Admin"),
@@ -90,7 +90,7 @@ namespace Kitverse_backend_01.Services
                 .FirstOrDefaultAsync();
         }
         //update user
-        private static readonly string[] ValidRoles = { "Customer", "ItemLister", "Admin" };
+        private static readonly string[] ValidRoles = { "Customer", "Item Lister", "Admin" };
 
         // Stages the role change (subtype rows + Role column) WITHOUT saving,
         // so callers can save everything in one atomic SaveChangesAsync.
@@ -120,7 +120,7 @@ namespace Kitverse_backend_01.Services
                     if (await _context.Admins.FindAsync(userId) == null)
                         _context.Admins.Add(new Admin { UserId = userId, LastEditDate = DateTime.UtcNow });
                     break;
-                case "ItemLister":
+                case "Item Lister":
                     if (await _context.ItemListers.FindAsync(userId) == null)
                         _context.ItemListers.Add(new ItemLister { UserId = userId, LastEditDate = DateTime.UtcNow });
                     break;
@@ -141,7 +141,7 @@ namespace Kitverse_backend_01.Services
                         if (admin != null) _context.Admins.Remove(admin);
                         break;
                     }
-                case "ItemLister":
+                case "Item Lister":
                     {
                         var lister = await _context.ItemListers.FindAsync(userId);
                         if (lister != null) _context.ItemListers.Remove(lister);
