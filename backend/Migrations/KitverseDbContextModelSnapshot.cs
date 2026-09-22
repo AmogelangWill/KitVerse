@@ -380,6 +380,55 @@ namespace Kitverse_backend_01.Migrations
                     b.ToTable("payments", (string)null);
                 });
 
+            modelBuilder.Entity("Kitverse_backend_01.Models.PromoCode", b =>
+                {
+                    b.Property<int>("PromoCodeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("promo_code_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PromoCodeId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("DateAdded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_added")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int>("DiscountPercent")
+                        .HasColumnType("integer")
+                        .HasColumnName("discount_percent");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<int?>("MaxUses")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_uses");
+
+                    b.Property<int>("TimesUsed")
+                        .HasColumnType("integer")
+                        .HasColumnName("times_used");
+
+                    b.HasKey("PromoCodeId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("promo_codes", (string)null);
+                });
+
             modelBuilder.Entity("Kitverse_backend_01.Models.Review", b =>
                 {
                     b.Property<int>("ReviewId")
@@ -467,6 +516,14 @@ namespace Kitverse_backend_01.Migrations
                     b.Property<string>("CartStatus")
                         .HasColumnType("text")
                         .HasColumnName("cart_status");
+
+                    b.Property<string>("PromoCode")
+                        .HasColumnType("text")
+                        .HasColumnName("promo_code");
+
+                    b.Property<int?>("PromoDiscountPercent")
+                        .HasColumnType("integer")
+                        .HasColumnName("promo_discount_percent");
 
                     b.Property<int>("TotalCost")
                         .HasColumnType("integer")

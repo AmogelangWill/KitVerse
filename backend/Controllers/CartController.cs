@@ -1,4 +1,5 @@
-﻿using Kitverse_backend_01.Models;
+﻿using Kitverse_backend_01.DTOs;
+using Kitverse_backend_01.Models;
 using Kitverse_backend_01.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -80,6 +81,28 @@ namespace Kitverse_backend_01.Controllers
                 return BadRequest(new { message = "Could Not Add to wishlist" });
             }
             
+        }
+
+
+
+
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost("{userId}/apply-promo")]
+        public async Task<IActionResult> ApplyPromoCode(int userId, [FromBody] ApplyPromoCode request)
+        {
+            var result = await _cartService.ApplyPromoCode(userId, request.Code);
+            if (!result.Valid)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpDelete("{userId}/promo")]
+        public async Task<IActionResult> RemovePromoCode(int userId)
+        {
+            await _cartService.RemovePromoCode(userId);
+            return Ok(new { message = "Promo code removed." });
         }
 
         [Authorize(Roles = "Customer")]

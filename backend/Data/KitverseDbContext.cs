@@ -30,6 +30,7 @@ namespace Kitverse_backend_01.Data
         public DbSet<Competition> Competitions { get; set; }
         public DbSet<TShirtCompetition> TShirtCompetitions { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<PromoCode> PromoCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -121,6 +122,8 @@ namespace Kitverse_backend_01.Data
                 entity.Property(s => s.TotalCost).HasColumnName("total_cost");
                 entity.Property(s => s.CartStatus).HasColumnName("cart_status");
                 entity.Property(s => s.UserId).HasColumnName("user_id");
+                entity.Property(s => s.PromoCode).HasColumnName("promo_code");
+                entity.Property(s => s.PromoDiscountPercent).HasColumnName("promo_discount_percent");
                 entity.HasOne(s => s.Customer).WithMany().HasForeignKey(s => s.UserId);
             });
 
@@ -306,6 +309,23 @@ namespace Kitverse_backend_01.Data
                 entity.HasIndex(n => n.Email).IsUnique();
                 entity.HasIndex(n => n.UnsubscribeToken).IsUnique();
             });
+
+            modelBuilder.Entity<PromoCode>(entity =>
+            {
+                entity.ToTable("promo_codes");
+                entity.HasKey(p => p.PromoCodeId);
+                entity.Property(p => p.PromoCodeId).HasColumnName("promo_code_id");
+                entity.Property(p => p.Code).HasColumnName("code").IsRequired();
+                entity.Property(p => p.DiscountPercent).HasColumnName("discount_percent");
+                entity.Property(p => p.DateAdded).HasColumnName("date_added").HasDefaultValueSql("now()");
+                entity.Property(p => p.ExpiryDate).HasColumnName("expiry_date");
+                entity.Property(p => p.MaxUses).HasColumnName("max_uses");
+                entity.Property(p => p.TimesUsed).HasColumnName("times_used");
+                entity.Property(p => p.IsActive).HasColumnName("is_active");
+                entity.HasIndex(p => p.Code).IsUnique();
+            });
+
+           
         }
     }
 }

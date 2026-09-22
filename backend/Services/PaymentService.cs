@@ -15,14 +15,15 @@ namespace Kitverse_backend_01.Controllers
         private readonly IConfiguration _config;
         private readonly IInvoiceService _invoiceService;
 
-        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config,IInvoiceService invoiceService)
+        private readonly IPromoCodeService _promoCodeService;
+
+        public PaymentService(KitverseDbContext context, HttpClient httpClient, IConfiguration config,IInvoiceService invoiceService, IPromoCodeService promoCodeService)
         {
             _context = context;
             _httpClient = httpClient;
             _config = config;
             _invoiceService = invoiceService;
-
-
+            _promoCodeService = promoCodeService;
         }
 
         // Step 1: ask Paystack to create a transaction, get back a checkout URL
@@ -32,6 +33,27 @@ namespace Kitverse_backend_01.Controllers
             if (cart == null)
             {
                 throw new ArgumentException("Cart not found.");
+            }
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == cart.UserId);
+            if (customer == null)
+            {
+                throw new ArgumentException("Customer record not found.");
+            }
+
+            // use the address they typed at checkout, or fall back to one already on file
+            var address = string.IsNullOrWhiteSpace(request.Address) ? customer.Address : request.Address.Trim();
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                throw new ArgumentException("A shipping address is required to check out.");
+            }
+
+            // save it for next time if it's new or changed
+            if (customer.Address != address)
+            {
+                customer.Address = address;
+                await _context.SaveChangesAsync();
             }
 
             var secretKey = (_config["Paystack:SecretKey"] ?? "").Trim();
@@ -136,12 +158,18 @@ namespace Kitverse_backend_01.Controllers
             cart.CartStatus = "Paid";
 
             if (!await _context.Orders.AnyAsync(o => o.PaymentId == payment.PaymentId))
-                await CreateOrderFromCart(cart, payment.PaymentId);   // this also saves the cart status
+                await CreateOrderFromCart(cart, payment.PaymentId);
             else
                 await _context.SaveChangesAsync();
 
-            // idempotent; a failed email is logged inside and never fails the payment
             await _invoiceService.IssueInvoiceForPaymentAsync(payment.PaymentId);
+
+            if (!string.IsNullOrEmpty(cart.PromoCode))
+            {
+                await _promoCodeService.RecordUsage(cart.PromoCode);
+                cart.PromoCode = null;
+                await _context.SaveChangesAsync();
+            }
         }
 
         // reads the cart_id that InitializeTransaction put in Paystack's metadata

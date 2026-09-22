@@ -1,4 +1,5 @@
-﻿using Kitverse_backend_01.Models;
+﻿using Kitverse_backend_01.DTOs;
+using Kitverse_backend_01.Models;
 
 namespace Kitverse_backend_01.Services
 {
@@ -24,6 +25,9 @@ namespace Kitverse_backend_01.Services
         Task<bool> RemoveFromWishList(int userId, int t_shirtId);
 
         Task<List<TShirt>> GetWishlist(int userId);
+
+        Task<PromoCodeResult> ApplyPromoCode(int userId, string code);
+        Task<bool> RemovePromoCode(int userId);
 
     }
 }
