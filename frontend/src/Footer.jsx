@@ -91,8 +91,8 @@ function Footer() {
           <h4 className="ColumnTitle">Policies</h4>
           <a href="#" className="FooterLink">Refund Policy</a>
           <a href="#" className="FooterLink">Shipping Info</a>
-          <a href="#" className="FooterLink">Privacy Policy</a>
-          <a href="#" className="FooterLink">Terms of Service</a>
+          <a href="/privacy" className="FooterLink">Privacy Policy</a>
+          <a href="/terms" className="FooterLink">Terms of Service</a>
         </div>
 
         <div className="FooterColumn">

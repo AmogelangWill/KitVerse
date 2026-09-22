@@ -14,6 +14,8 @@ import CollectionPage from "./CollectionPage.jsx";
 import ResetPasswordPage from "./ResetPasswordPage.jsx";
 import MyOrdersPage from "./MyOrdersPage.jsx";
 import PaymentSuccessPage from "./PaymentSuccessPage.jsx";
+import TermsPage from "./TermsPage.jsx";
+import PrivacyPage from "./PrivacyPage.jsx";
 
 // Root application component configuring global providers and page routes
 function App() {
@@ -33,6 +35,8 @@ function App() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/my-orders" element={<MyOrdersPage />} />
                 <Route path="/payment-success" element={<PaymentSuccessPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
 
                 {/* Management and administration routes */}
                 <Route path="/admin" element={<AdminPage />} />
