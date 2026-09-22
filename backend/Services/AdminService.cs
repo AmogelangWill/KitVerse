@@ -214,15 +214,32 @@ namespace Kitverse_backend_01.Services
             if (user.Role == "Admin" && await _context.Users.CountAsync(u => u.Role == "Admin") <= 1)
                 throw new InvalidOperationException("Cannot delete the last remaining admin.");
 
+            // Manually delete restrictive historical records to fully free the test accounts for reuse
+            
+            // 1. Delete Invoices (Restricts User and Payment)
+            var invoices = await _context.Invoices.Where(i => i.user_id == userId).ToListAsync();
+            if (invoices.Any()) _context.Invoices.RemoveRange(invoices);
+
+            // 2. Delete Orders (Restricts User and Payment)
+            var orders = await _context.Orders.Where(o => o.CustomerId == userId).ToListAsync();
+            if (orders.Any()) _context.Orders.RemoveRange(orders);
+
+            // 3. Delete Payments (Restricts ShoppingCart)
+            var carts = await _context.ShoppingCarts.Where(c => c.UserId == userId).Select(c => c.CartId).ToListAsync();
+            var payments = await _context.Payments.Where(p => carts.Contains(p.CartId)).ToListAsync();
+            if (payments.Any()) _context.Payments.RemoveRange(payments);
+
+            // 4. Finally, remove the user (this cascades to ShoppingCart, Wishlist, Reviews, Tokens, and Roles)
+            _context.Users.Remove(user);
+
             try
             {
-                _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateException)
             {
-                return false; // user has orders/invoices that must be kept
+                return false; 
             }
         }
 
