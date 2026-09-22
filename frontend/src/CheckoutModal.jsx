@@ -56,7 +56,6 @@ function CheckoutModal({ isOpen, onClose, onSubmit, loading, initialAddress }) {
                         <input 
                             type="text" 
                             name="street"
-                            placeholder="e.g. 140 West Street, Sandton"
                             value={addressDetails.street}
                             onChange={handleChange}
                             required 
@@ -68,7 +67,6 @@ function CheckoutModal({ isOpen, onClose, onSubmit, loading, initialAddress }) {
                         <input 
                             type="text" 
                             name="city"
-                            placeholder="e.g. Johannesburg"
                             value={addressDetails.city}
                             onChange={handleChange}
                             required 
@@ -109,7 +107,6 @@ function CheckoutModal({ isOpen, onClose, onSubmit, loading, initialAddress }) {
                             <input 
                                 type="text" 
                                 name="postalCode"
-                                placeholder="e.g. 2196"
                                 value={addressDetails.postalCode}
                                 onChange={handleChange}
                                 required 
@@ -120,26 +117,6 @@ function CheckoutModal({ isOpen, onClose, onSubmit, loading, initialAddress }) {
                     <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button type="submit" className="AuthSubmitBtn" disabled={loading}>
                             {loading ? "Processing..." : "Proceed to Payment"}
-                        </button>
-                        <button 
-                            type="button" 
-                            onClick={() => onSubmit("")} 
-                            disabled={loading}
-                            style={{
-                                background: 'none',
-                                border: '1px solid #111',
-                                color: '#111',
-                                padding: '10px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '14px',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => { e.target.style.background = '#f3f4f6'; }}
-                            onMouseOut={(e) => { e.target.style.background = 'none'; }}
-                        >
-                            Use Saved Address (If Applicable)
                         </button>
                     </div>
                 </form>
