@@ -22,6 +22,8 @@ function AdminPage() {
     const [banners, setBanners] = useState([]);
     const [competitions, setCompetitions] = useState([]);
     const [invoices, setInvoices] = useState([]);
+    const [promoCodes, setPromoCodes] = useState([]);
+    const [newPromo, setNewPromo] = useState({ code: "", discountPercent: "", expiryDate: "", maxUses: "" });
     const [newCompetitionName, setNewCompetitionName] = useState("");
     const [tshirts, setTshirts] = useState([]);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
@@ -114,6 +116,18 @@ function AdminPage() {
                     logout();
                 } else {
                     throw new Error("Failed to load invoices data");
+                }
+            } else if (activeTab === "promocodes") {
+                const res = await fetch("https://kitverse-production.up.railway.app/api/PromoCode", {
+                    headers: { "Authorization": `Bearer ${user?.token}` }
+                });
+                if (res.ok) {
+                    setPromoCodes(await res.json());
+                } else if (res.status === 401 || res.status === 403) {
+                    showToast("Your admin session has expired. Please sign in again.", "error");
+                    logout();
+                } else {
+                    throw new Error("Failed to load promo codes");
                 }
             } else if (activeTab === "banners") {
                 const res = await fetch("https://kitverse-production.up.railway.app/api/admin/banners");
@@ -360,6 +374,63 @@ function AdminPage() {
         }
     };
 
+    // Creates a new promo code
+    const handleCreatePromo = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = {
+                code: newPromo.code,
+                discountPercent: parseInt(newPromo.discountPercent),
+                expiryDate: newPromo.expiryDate ? new Date(newPromo.expiryDate).toISOString() : null,
+                maxUses: newPromo.maxUses ? parseInt(newPromo.maxUses) : null
+            };
+            const res = await fetch("https://kitverse-production.up.railway.app/api/PromoCode", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user?.token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showToast("Promo code created successfully!", "success");
+                setNewPromo({ code: "", discountPercent: "", expiryDate: "", maxUses: "" });
+                fetchData();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showToast(data.message || "Failed to create promo code.", "error");
+            }
+        } catch (err) {
+            console.error("Create promo error:", err);
+            showToast("Network error while creating promo code.", "error");
+        }
+    };
+
+    // Deletes a promo code after confirmation
+    const handleDeletePromo = async (promoId) => {
+        const isConfirmed = await confirm({
+            title: "Delete Promo Code",
+            message: "Are you sure you want to delete this promo code? Customers will no longer be able to use it.",
+            confirmText: "Delete Code",
+            danger: true
+        });
+        if (!isConfirmed) return;
+        try {
+            const res = await fetch(`https://kitverse-production.up.railway.app/api/PromoCode/${promoId}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${user?.token}` }
+            });
+            if (res.ok) {
+                showToast("Promo code deleted.", "success");
+                fetchData();
+            } else {
+                showToast("Failed to delete promo code.", "error");
+            }
+        } catch (err) {
+            console.error("Delete promo error:", err);
+        }
+    };
+
     if (authLoading) return <div className="AdminLoading">Verifying access...</div>;
 
     if (!user || user.role !== "Admin") {
@@ -401,6 +472,12 @@ function AdminPage() {
                         onClick={() => setActiveTab('competitions')}
                     >
                         Competitions
+                    </button>
+                    <button 
+                        className={`AdminNavBtn ${activeTab === 'promocodes' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('promocodes')}
+                    >
+                        Promo Codes
                     </button>
                     <button 
                         className={`AdminNavBtn ${activeTab === 'invoices' ? 'active' : ''}`}
@@ -657,6 +734,115 @@ function AdminPage() {
                                                     <td><strong>{c.competitionName}</strong></td>
                                                 </tr>
                                             ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Promo Codes Management Tab */}
+                        {activeTab === 'promocodes' && (
+                            <div>
+                                <div className="SectionHeader">
+                                    <div className="AdminHeader" style={{marginBottom: 0}}>
+                                        <h1>Promo Codes</h1>
+                                        <p>Create and manage discount codes for customers to use at checkout.</p>
+                                    </div>
+                                </div>
+
+                                <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '24px', maxWidth: '700px'}}>
+                                    <h3 style={{marginTop: 0, marginBottom: '16px'}}>Create New Promo Code</h3>
+                                    <form onSubmit={handleCreatePromo}>
+                                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+                                            <div className="InputGroup">
+                                                <label>Code *</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={newPromo.code}
+                                                    onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
+                                                    required
+                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', textTransform: 'uppercase', fontWeight: 600}}
+                                                />
+                                            </div>
+                                            <div className="InputGroup">
+                                                <label>Discount % *</label>
+                                                <input 
+                                                    type="number" 
+                                                    min="1" max="100"
+                                                    value={newPromo.discountPercent}
+                                                    onChange={(e) => setNewPromo({...newPromo, discountPercent: e.target.value})}
+                                                    required
+                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
+                                                />
+                                            </div>
+                                            <div className="InputGroup">
+                                                <label>Expiry Date (optional)</label>
+                                                <input 
+                                                    type="date" 
+                                                    value={newPromo.expiryDate}
+                                                    onChange={(e) => setNewPromo({...newPromo, expiryDate: e.target.value})}
+                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
+                                                />
+                                            </div>
+                                            <div className="InputGroup">
+                                                <label>Max Uses (optional)</label>
+                                                <input 
+                                                    type="number" 
+                                                    min="1"
+                                                    value={newPromo.maxUses}
+                                                    onChange={(e) => setNewPromo({...newPromo, maxUses: e.target.value})}
+                                                    style={{width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px'}}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div style={{marginTop: '16px', display: 'flex', justifyContent: 'flex-end'}}>
+                                            <button type="submit" className="AdminPrimaryBtn">
+                                                Create Promo Code
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div className="AdminTableWrapper" style={{maxWidth: '700px'}}>
+                                    <table className="AdminTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Discount</th>
+                                                <th>Uses</th>
+                                                <th>Expires</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {promoCodes.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>No promo codes yet.</td>
+                                                </tr>
+                                            ) : (
+                                                promoCodes.map(p => (
+                                                    <tr key={p.promoCodeId}>
+                                                        <td><strong style={{fontFamily: 'monospace', letterSpacing: '1px'}}>{p.code}</strong></td>
+                                                        <td>{p.discountPercent}%</td>
+                                                        <td>{p.timesUsed}{p.maxUses ? ` / ${p.maxUses}` : ' / ∞'}</td>
+                                                        <td>{p.expiryDate ? new Date(p.expiryDate).toLocaleDateString() : 'Never'}</td>
+                                                        <td>
+                                                            <span className={`StatusBadge ${p.isActive ? 'active' : 'inactive'}`}>
+                                                                {p.isActive ? 'Active' : 'Expired'}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button 
+                                                                className="AdminActionBtn danger"
+                                                                onClick={() => handleDeletePromo(p.promoCodeId)}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
