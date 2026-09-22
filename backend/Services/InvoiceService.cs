@@ -216,11 +216,38 @@ namespace Kitverse_backend_01.Services
                     .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                     .ThenInclude(p => p.ShirtLinks)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Team)
                     .FirstOrDefaultAsync(o => o.PaymentId == inv.pay_id);
 
-                var imageUrl = order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault(l => l.IsMain)?.ShirtLinkUrl
-                            ?? order?.OrderItems?.FirstOrDefault()?.Product?.ShirtLinks?.FirstOrDefault()?.ShirtLinkUrl
-                            ?? "";
+                var itemsList = new List<object>();
+                string mainImageUrl = "";
+                
+                if (order?.OrderItems != null)
+                {
+                    bool isFirst = true;
+                    foreach (var oi in order.OrderItems)
+                    {
+                        var imgUrl = oi.Product?.ShirtLinks?.FirstOrDefault(l => l.IsMain)?.ShirtLinkUrl
+                                  ?? oi.Product?.ShirtLinks?.FirstOrDefault()?.ShirtLinkUrl
+                                  ?? "";
+                        
+                        if (isFirst) {
+                            mainImageUrl = imgUrl;
+                            isFirst = false;
+                        }
+
+                        itemsList.Add(new 
+                        {
+                            productId = oi.ProductId,
+                            productName = $"{oi.Product?.Team?.TeamName} {oi.Product?.ShirtSeason}",
+                            quantity = oi.Quantity,
+                            unitPrice = oi.Price,
+                            imageUrl = imgUrl
+                        });
+                    }
+                }
 
                 result.Add(new
                 {
@@ -231,7 +258,8 @@ namespace Kitverse_backend_01.Services
                     tax = inv.tax,
                     total = inv.total,
                     status = inv.status,
-                    imageUrl = imageUrl
+                    imageUrl = mainImageUrl,
+                    items = itemsList
                 });
             }
 

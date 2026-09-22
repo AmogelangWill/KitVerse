@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { Link } from 'react-router-dom';
+import OrderCard from './OrderCard';
 
 function MyOrdersPage() {
     const { user, loading: authLoading } = useAuth();
@@ -38,25 +39,37 @@ function MyOrdersPage() {
         }
     };
 
-    if (authLoading) return <div style={{padding: '100px', textAlign: 'center'}}>Loading...</div>;
+    if (authLoading || loading) {
+        return (
+            <div style={{minHeight: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <p>Loading orders...</p>
+            </div>
+        );
+    }
 
     if (!user) {
         return (
-            <div style={{padding: '100px', textAlign: 'center'}}>
-                <h2>Please sign in to view your orders.</h2>
+            <div style={{minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                <h2>Please sign in</h2>
+                <p>You need to be logged in to view your orders.</p>
             </div>
         );
     }
 
     return (
-        <div style={{maxWidth: '1000px', margin: '40px auto', padding: '0 20px'}}>
-            <h1 style={{fontSize: '28px', marginBottom: '8px', borderBottom: '2px solid #040404', paddingBottom: '16px'}}>My Orders & Invoices</h1>
-            
-            {loading ? (
-                <div style={{padding: '50px', textAlign: 'center'}}>Loading orders...</div>
-            ) : invoices.length === 0 ? (
-                <div style={{padding: '50px', textAlign: 'center', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px', marginTop: '32px'}}>
-                    <h3 style={{fontSize: '20px', marginBottom: '16px'}}>You haven't placed any orders yet.</h3>
+        <div style={{maxWidth: '800px', margin: '40px auto', padding: '0 20px', minHeight: '60vh'}}>
+            <h1 style={{fontSize: '28px', marginBottom: '8px'}}>Order History</h1>
+            <p style={{color: '#6b7280', marginBottom: '32px'}}>View and manage your recent purchases</p>
+
+            {invoices.length === 0 ? (
+                <div style={{textAlign: 'center', padding: '64px 0', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db'}}>
+                    <svg style={{margin: '0 auto 16px', color: '#9ca3af'}} xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <h3 style={{margin: '0 0 8px 0', fontSize: '18px'}}>No orders found</h3>
+                    <p style={{color: '#6b7280', marginBottom: '24px'}}>Looks like you haven't made any purchases yet.</p>
                     <Link to="/collection" style={{display: 'inline-block', background: '#040404', color: 'white', padding: '12px 24px', textDecoration: 'none', fontWeight: 'bold'}}>
                         Start Shopping
                     </Link>
@@ -64,110 +77,7 @@ function MyOrdersPage() {
             ) : (
                 <div style={{marginTop: '32px'}}>
                     {invoices.map((invoice, index) => (
-                        <div key={invoice.id || index} style={{
-                            border: '1px solid #e5e7eb', 
-                            borderRadius: '8px', 
-                            padding: '24px', 
-                            marginBottom: '24px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '16px',
-                            background: 'white',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                        }}>
-                            <div style={{display: 'flex', gap: '20px', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '16px'}}>
-                                {invoice.imageUrl ? (
-                                    <img src={invoice.imageUrl} alt="Product" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
-                                ) : (
-                                    <div style={{ width: '80px', height: '80px', background: '#f3f4f6', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a8 8 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l1.42 10.3A2 2 0 0 0 5.67 17H18.33a2 2 0 0 0 1.97-1.01l1.42-10.3a2 2 0 0 0-1.34-2.23z"></path></svg>
-                                    </div>
-                                )}
-                                <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <p style={{margin: '0 0 4px 0', fontSize: '14px', color: '#6b7280'}}>Order Number</p>
-                                        <p style={{margin: 0, fontWeight: 'bold', fontSize: '16px'}}>{invoice.invoiceNumber || 'Pending'}</p>
-                                    </div>
-                                    <div style={{textAlign: 'right'}}>
-                                        <p style={{margin: '0 0 4px 0', fontSize: '14px', color: '#6b7280'}}>Date Placed</p>
-                                        <p style={{margin: 0, fontWeight: 'bold', fontSize: '16px'}}>
-                                            {new Date(invoice.invoiceDate).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                <div>
-                                    <p style={{margin: '0 0 4px 0', fontSize: '14px', color: '#6b7280'}}>Total Amount</p>
-                                    <p style={{margin: 0, fontWeight: 'bold', fontSize: '20px'}}>R {invoice.total ? invoice.total.toFixed(2) : '0.00'}</p>
-                                </div>
-                                <div>
-                                    <span style={{
-                                        display: 'inline-block',
-                                        padding: '6px 12px',
-                                        borderRadius: '999px',
-                                        fontSize: '14px',
-                                        fontWeight: 'bold',
-                                        backgroundColor: invoice.status === 'Paid' ? '#dcfce3' : '#fef3c7',
-                                        color: invoice.status === 'Paid' ? '#166534' : '#92400e'
-                                    }}>
-                                        {invoice.status || 'Processing'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div style={{marginTop: '16px'}}>
-                                <button 
-                                    onClick={async () => {
-                                        try {
-                                            console.log("Downloading invoice ID:", invoice.id);
-                                            const res = await fetch(`https://kitverse-production.up.railway.app/api/Payment/invoice/${invoice.id}/download`, {
-                                                headers: { "Authorization": `Bearer ${user.token}` }
-                                            });
-                                            if (!res.ok) {
-                                                const text = await res.text();
-                                                console.error("Download failed:", res.status, text);
-                                                throw new Error(`Download failed: ${res.status} ${text}`);
-                                            }
-                                            const blob = await res.blob();
-                                            const url = window.URL.createObjectURL(blob);
-                                            const a = document.createElement('a');
-                                            a.href = url;
-                                            a.download = `KitVerse_Invoice_${invoice.invoiceNumber}.pdf`;
-                                            document.body.appendChild(a);
-                                            a.click();
-                                            window.URL.revokeObjectURL(url);
-                                            a.remove();
-                                            showToast("Invoice downloaded successfully!", "success");
-                                        } catch (err) {
-                                            console.error(err);
-                                            showToast(err.message || "Failed to download invoice.", "error");
-                                        }
-                                    }}
-                                    style={{
-                                        background: '#040404', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        padding: '10px 20px', 
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        width: '100%',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        gap: '8px'
-                                    }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="7 10 12 15 17 10"></polyline>
-                                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                                    </svg>
-                                    Download Invoice PDF
-                                </button>
-                            </div>
-                        </div>
+                        <OrderCard key={invoice.id || index} invoice={invoice} />
                     ))}
                 </div>
             )}
