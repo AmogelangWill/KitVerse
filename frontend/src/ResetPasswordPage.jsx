@@ -39,7 +39,8 @@ function ResetPasswordPage() {
     setSuccessMsg("");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/Auth/reset-password`, {
+      const apiUrl = import.meta.env.VITE_API_URL || "https://kitverse-production.up.railway.app";
+      const response = await fetch(`${apiUrl}/api/Auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: password }),
